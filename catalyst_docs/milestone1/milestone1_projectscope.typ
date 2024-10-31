@@ -97,10 +97,86 @@
 
 #set text(15pt, font: "Barlow")
 
-= Signed Project Scope Document
+= Project Goal
+
+The primary goal of the OpShin audit project is to enhance the reliability and
+security of smart contracts developed using the OpShin language within the
+Cardano ecosystem. This is achieved through a comprehensive audit that
+identifies vulnerabilities, addresses edge cases, and optimizes the language's
+efficiency. By emphasizing transparency and collaboration, the project aims to
+support developers with detailed documentation and best practices, ultimately
+elevating the quality of smart contracts. The anticipated outcomes include a
+significant reduction in reported vulnerabilities and the establishment of a
+robust foundation for safe and trustworthy smart contract development on
+Cardano.
+
+#pagebreak()
+= Project Deliverables
 #v(20pt)
-== Project Objectives
-== Project Deliverables
+== OpShin Language Analysis
+#v(5pt)
+- *Deliverable*: *Detailed Analysis Report*
+  - *Description*: The audit team will produce a comprehensive report that
+    identifies vulnerabilities and areas for improvement within the OpShin language
+    codebase.
+  - *Key Activities*:
+    - Utilize automated analysis tools to support findings.
+    - Conduct unit tests to evaluate the functionality of the code.
+    - Perform manual assessments to complement automated analyses.
+  - *Outcome*: This report will serve as a foundational document for understanding
+    the current state of the OpShin language and guiding future enhancements.
+
+== Edge Case Identification
+#v(5pt)
+- *Deliverable*: *Documented List of Edge Cases*
+  - *Description*: The audit team will compile a thorough list of edge cases
+    relevant to the development of smart contracts using OpShin.
+  - *Key Activities*:
+    - Identify and document edge cases through extensive manual analysis.
+    - Propose strategies for addressing these edge cases that can be applied in future
+      iterations of the language.
+    - Utilize tailored analysis tools to support the identification process.
+  - *Outcome*: This documentation will provide valuable insights into potential
+    pitfalls in smart contract development, helping developers avoid common errors.
+
+#pagebreak()
+#v(20pt)
+== Draft Audit Report Preparation and Feedback Integration
+#v(5pt)
+- *Deliverable*: *Comprehensive Audit Report*
+  - *Description*: The audit team will compile a detailed audit report that outlines
+    identified vulnerabilities, recommended fixes, and best practices for the
+    development of OpShin.
+  - *Key Activities*:
+    - Document vulnerabilities and provide actionable recommendations.
+    - Collaborate with the OpShin team to integrate feedback and address reported
+      issues in the codebase.
+    - Ensure that the audit report reflects the most current state of the code
+      following these integrations.
+  - *Outcome*: This report will serve as a crucial resource for developers, guiding
+    them in improving the reliability and security of smart contracts written in
+    OpShin.
+
+== Public Dissemination and Resolution of Remaining Issues
+#v(5pt)
+- *Deliverable*: *Finalized Audit Report and Presentation*
+  - *Description*: The finalized audit report will be publicly shared, and the
+    findings will be presented to the Cardano community.
+  - *Key Activities*:
+    - Disseminate the audit report through appropriate channels to ensure community
+      access.
+    - Present findings and recommendations in a format that encourages discussion and
+      further inquiry.
+    - Address remaining medium and low-priority findings from the report, ensuring all
+      issues are resolved.
+    - Produce a final close-out report summarizing the project outcomes and lessons
+      learned.
+    - Create a final close-out video to visually represent the project’s achievements
+      and key takeaways.
+  - *Outcome*: This will enhance community trust and engagement, providing
+    transparency into the auditing process and supporting ongoing improvements in
+    the OpShin language.
+
 == Project Timelines
 == Signatures
 
