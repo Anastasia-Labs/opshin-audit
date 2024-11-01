@@ -82,7 +82,7 @@
 //   footer: [
 //     #set text(11pt)
 //     #line(length: 100%) // Add a line above the footer
-//     #align(center)[*Anastasia Labs* \Opshin Audit - Milestone 1]
+//     #align(center)[*Anastasia Labs* \OpShin Audit - Milestone 1]
 //     #place(right, dy:-7pt)[#counter(page).display("1/1", both: true)]
 //   ]
 // )
@@ -102,13 +102,13 @@
 The primary goal of the OpShin audit project is to enhance the reliability and
 security of smart contracts developed using the OpShin language within the
 Cardano ecosystem. This is achieved through a comprehensive audit that
-identifies vulnerabilities, addresses edge cases, and optimizes the language's
-efficiency. By emphasizing transparency and collaboration, the project aims to
+identifies vulnerabilities, addresses edge cases, and optimizes the language's efficiency. 
+By emphasizing transparency and collaboration, the project aims to
 support developers with detailed documentation and best practices, ultimately
 elevating the quality of smart contracts. The anticipated outcomes include a
 significant reduction in reported vulnerabilities and the establishment of a
 robust foundation for safe and trustworthy smart contract development on
-Cardano.
+Cardano using OpShin.
 
 #pagebreak()
 = Project Deliverables
@@ -183,37 +183,89 @@ Cardano.
 #pagebreak()
 
 #v(25pt)
-= Approved Audit Objectives
+= Audit Objectives
 #v(25pt)
-== Purpose of Audit
-== Audit Objectives
-=== Manual Revision
 
+1. Comprehensive Audit of OpShin Language: Conduct a thorough audit of the OpShin language used for smart contract development, ensuring meticulous scrutiny of the codebase to identify vulnerabilities and inefficiencies.
+
+2. Address Edge Cases and Optimize Efficiency: Identify and address edge cases within the OpShin language to enhance the efficiency and reliability of smart contracts, thereby safeguarding user assets in the Cardano ecosystem.
+
+3. Engagement of Experienced Professionals: Collaborate with developers and auditors who have expertise in smart contract development to ensure a robust and informed auditing process.
+
+4. Facilitate the Auditing Process: Provide detailed documentation that supports the auditing process, ensuring comprehensive coverage of potential edge cases and vulnerabilities.
+
+5. Promote Transparency and Collaboration: Emphasize transparency and collaboration throughout the audit, leveraging the open-source nature of OpShin to foster trust and community involvement.
+
+6. Enhance Quality and Security: Elevate the quality of smart contracts written in OpShin, reinforcing Cardano's reputation as a secure and trustworthy blockchain platform.
+
+#pagebreak()
+#v(20pt)
+
+== Specific Area of Focus
+#v(10pt)
 Our manual code auditing is focused on a wide range of attack vectors, including
 but not limited to:
 
-- UTXO Value Size Spam (Token Dust Attack)
-- Large Datum or Unbounded Protocol Datum
-- EUTXO Concurrency DoS
-- Unauthorized Data Modification
-- Multisig PK Attack
-- Infinite Mint
-- Incorrect Parameterized Scripts
-- Other Redeemer
-- Other Token Name
-- Arbitrary UTXO Datum
-- Unbounded Protocol Value
-- Foreign UTXO Tokens
-- Double or Multiple Satisfaction
-- Locked Ada
-- Locked Non-Ada Values
-- Missing UTXO Authentication
-- UTXO Contention
-== Approvals
+1. Language Structure and Syntax
+  - Evaluate the basic syntax and structure of the language
+  - Check for consistency and clarity in language design
+#v(10pt)
+2. Security Features
+  - Assess built-in security mechanisms
+  - Identify potential vulnerabilities in the language design
+#v(10pt)
+3. Performance and Efficiency
+  - Analyze the language's runtime performance
+  - Evaluate memory management and resource utilization
+#v(10pt)
+4. Compatibility and Interoperability
+  - Check compatibility with other languages and systems  
+  - Assess ease of integration with existing codebases
+#v(10pt)
+5. Standard Library and Ecosystem
+  - Evaluate the completeness and quality of the standard library
+  - Assess the availability and quality of third-party libraries
+
+#pagebreak()
+#v(20pt)
+
+6. Error Handling and Debugging
+  - Review error handling mechanisms
+  - Assess debugging tools and capabilities
+#v(10pt)
+7. Scalability
+  - Evaluate the language's ability to handle large-scale projects
+  - Assess support for concurrent and parallel programming
+#v(10pt)
+8. Documentation and Learning Resources
+  - Review the quality and completeness of official documentation
+  - Assess the availability of learning resources and community support
+#v(10pt)
+9. Testing and Quality Assurance
+  - Evaluate built-in testing frameworks
+  - Assess tools for code quality and static analysis
+#v(10pt)
+10. Compliance and Standards
+  - Verify adherence to relevant industry standards
+  - Check compliance with regulatory requirements, if applicable
+#v(10pt)
+11. Vulnerabilities and Threat Modeling
+  - Identify potential security threats specific to the language
+  - Assess the language's resilience against common attack vectors
+
 
 #pagebreak()
 #v(25pt)
 = Audit Timeline
+
+- *Weeks 1-2*: Discovery and Planning
+  - Familiarization with the codebase and project specifications.
+- *Weeks 3-8*: Manual Review
+  - Perform an in-depth review of the code to identify vulnerabilities.
+  - Publish the initial findings report.
+  - Collaborate with the Client to implement suggested fixes.
+  - Produce a finalized audit report.
+
 == Approvals
 
 #pagebreak()
