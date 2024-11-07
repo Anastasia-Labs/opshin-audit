@@ -102,13 +102,13 @@
 The primary goal of the OpShin audit project is to enhance the reliability and
 security of smart contracts developed using the OpShin language within the
 Cardano ecosystem. This is achieved through a comprehensive audit that
-identifies vulnerabilities, addresses edge cases, and optimizes the language's efficiency. 
-By emphasizing transparency and collaboration, the project aims to
+identifies vulnerabilities, addresses edge cases, and optimizes the language's
+efficiency. By emphasizing transparency and collaboration, the project aims to
 support developers with detailed documentation and best practices, ultimately
 elevating the quality of smart contracts. The anticipated outcomes include a
 significant reduction in reported vulnerabilities and the establishment of a
-robust foundation for safe and trustworthy smart contract development on
-Cardano using OpShin.
+robust foundation for safe and trustworthy smart contract development on Cardano
+using OpShin.
 
 #pagebreak()
 = Project Deliverables
@@ -186,23 +186,41 @@ Cardano using OpShin.
 = Audit Objectives
 #v(25pt)
 
-1. Comprehensive Audit of OpShin Language: Conduct a thorough audit of the OpShin language used for smart contract development, ensuring meticulous scrutiny of the codebase to identify vulnerabilities and inefficiencies.
+1. *Comprehensive Audit of OpShin Language*: Conduct a thorough audit of the OpShin
+  language used for smart contract development, ensuring meticulous scrutiny of
+  the codebase to identify vulnerabilities and inefficiencies.
 
-2. Address Edge Cases and Optimize Efficiency: Identify and address edge cases within the OpShin language to enhance the efficiency and reliability of smart contracts, thereby safeguarding user assets in the Cardano ecosystem.
+2. *Address Edge Cases and Optimize Efficiency*: Identify and address edge cases
+  within the OpShin language to enhance the efficiency and reliability of smart
+  contracts, thereby safeguarding user assets in the Cardano ecosystem.
 
-3. Engagement of Experienced Professionals: Collaborate with developers and auditors who have expertise in smart contract development to ensure a robust and informed auditing process.
+3. *Engagement of Experienced Professionals*: Collaborate with developers and
+  auditors who have expertise in smart contract development to ensure a robust and
+  informed auditing process.
 
-4. Facilitate the Auditing Process: Provide detailed documentation that supports the auditing process, ensuring comprehensive coverage of potential edge cases and vulnerabilities.
+4. *Facilitate the Auditing Process*: Provide detailed documentation that supports
+  the auditing process, ensuring comprehensive coverage of potential edge cases
+  and vulnerabilities.
 
-5. Promote Transparency and Collaboration: Emphasize transparency and collaboration throughout the audit, leveraging the open-source nature of OpShin to foster trust and community involvement.
+5. *Promote Transparency and Collaboration*: Emphasize transparency and collaboration
+  throughout the audit, leveraging the open-source nature of OpShin to foster
+  trust and community involvement.
 
-6. Enhance Quality and Security: Elevate the quality of smart contracts written in OpShin, reinforcing Cardano's reputation as a secure and trustworthy blockchain platform.
+6. *Enhance Quality and Security*: Elevate the quality of smart contracts written in
+  OpShin, reinforcing Cardano's reputation as a secure and trustworthy blockchain
+  platform.
 
 #pagebreak()
 #v(20pt)
 
 == Specific Area of Focus
 #v(10pt)
+As part of our auditing process, we will focus on ensuring that the outputs of the smart contract 
+compiler align precisely with the expected behavior defined in the project specifications. 
+The goal is to guarantee that the compiled smart contracts, written in Python, execute exactly as 
+they would in a standard Python environment. This is critical, as the behavior of the compiled 
+contract must match the expectations set by the programmer.
+
 Our manual code auditing is focused on a wide range of attack vectors, including
 but not limited to:
 
@@ -218,8 +236,9 @@ but not limited to:
   - Analyze the language's runtime performance
   - Evaluate memory management and resource utilization
 #v(10pt)
+// when we are auditing only the on chain point, should this point be included?
 4. Compatibility and Interoperability
-  - Check compatibility with other languages and systems  
+  - Check compatibility with other languages and systems
   - Assess ease of integration with existing codebases
 #v(10pt)
 5. Standard Library and Ecosystem
@@ -245,34 +264,58 @@ but not limited to:
   - Evaluate built-in testing frameworks
   - Assess tools for code quality and static analysis
 #v(10pt)
+// check for relevancy
 10. Compliance and Standards
   - Verify adherence to relevant industry standards
   - Check compliance with regulatory requirements, if applicable
 #v(10pt)
+// check for relevancy
 11. Vulnerabilities and Threat Modeling
   - Identify potential security threats specific to the language
   - Assess the language's resilience against common attack vectors
 
-
 #pagebreak()
 #v(25pt)
 = Audit Timeline
-
-- *Weeks 1-2*: Discovery and Planning
+#v(10pt)
+- *Weeks 2-3*: Discovery and Planning
   - Familiarization with the codebase and project specifications.
-- *Weeks 3-8*: Manual Review
+- *Weeks 4-10*: Manual Review
   - Perform an in-depth review of the code to identify vulnerabilities.
   - Publish the initial findings report.
   - Collaborate with the Client to implement suggested fixes.
   - Produce a finalized audit report.
 
-== Approvals
 
 #pagebreak()
 #v(25pt)
 = Operational Communication Channels
-== Communication Channels
-== Participation Evidence
+#v(10pt)
+Effective communication is crucial for the smooth progression of the project and ensures that all stakeholders are aligned throughout the development process. 
+For this project, we have established *Discord* as the primary operational communication channel with the client. Discord provides a flexible, real-time platform for ongoing discussions, quick resolution of queries, and coordination between teams and clients.
+
+The key features of Discord that are being leveraged for this project include:
+
+*Real-time Messaging*: Enables instant communication between project members and the client, facilitating quick decisions and clarifications.
+
+*Voice and Video Calls*: For more complex discussions, we conduct calls via Google meet, which allows for immediate feedback and collaborative problem-solving.
+
+*Direct Client Involvement*: The client is included in dedicated channels for real-time updates, feedback, and discussions. This fosters transparency and ensures that the client is involved at every step of the project.
+
+*File Sharing*: Discord's ability to easily share files, documents, and screenshots allows for seamless exchange of project assets, updates, and deliverables.
+
+== Screenshots of Communication and Active Participation
+#v(10pt)
+To ensure transparency and provide evidence of active communication, we have included screenshots of Discord conversations and interactions that demonstrate active participation from both the client and the development team. These screenshots capture:
+
+*Client Queries and Feedback*: Active involvement from the client in discussing project milestones, providing feedback, and addressing concerns.
+
+*Team Collaboration*: Regular discussions among team members regarding technical issues, updates, and progress reports.
+
+*Milestone and Task Updates*: Key discussions surrounding project milestones, timelines, and deliverable updates.
+
+These communication logs serve as documentation for the effective use of Discord as the operational communication tool for this project.
+
 
 #pagebreak()
 #v(25pt)
