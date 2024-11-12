@@ -64,6 +64,7 @@
     #align(center)[*Anastasia Labs* \ OpShin Audit - Milestone 1]
   ],
   footer-descent: 20%,
+  
 )
 
 #v(25pt)
@@ -78,14 +79,14 @@
 // Initialize page counter
 #counter(page).update(0)
 
-// #set page(
-//   footer: [
-//     #set text(11pt)
-//     #line(length: 100%) // Add a line above the footer
-//     #align(center)[*Anastasia Labs* \OpShin Audit - Milestone 1]
-//     #place(right, dy:-7pt)[#counter(page).display("1/1", both: true)]
-//   ]
-// )
+#set page(
+  footer: [
+    #set text(11pt)
+    #line(length: 100%) // Add a line above the footer
+    #align(center)[*Anastasia Labs* \ OpShin Audit - Milestone 1]
+    #place(right, dy:-7pt)[#counter(page).display("1/1", both: true)]
+  ]
+)
 #pagebreak()
 
 #set terms(separator: [: ], hanging-indent: 40pt)
@@ -103,19 +104,20 @@ The primary goal of the OpShin audit project is to enhance the reliability and
 security of smart contracts developed using the OpShin language within the
 Cardano ecosystem. This is achieved through a comprehensive audit that
 identifies vulnerabilities, addresses edge cases, and optimizes the language's
-efficiency. By emphasizing transparency and collaboration, the project aims to
+efficiency. The project aims to
 support developers with detailed documentation and best practices, ultimately
-elevating the quality of smart contracts. The anticipated outcomes include a
+elevating the quality of smart contracts. The outcomes include a
 significant reduction in reported vulnerabilities and the establishment of a
 robust foundation for safe and trustworthy smart contract development on Cardano
 using OpShin.
 
 #pagebreak()
+#v(20pt)
 = Project Deliverables
 #v(20pt)
 == OpShin Language Analysis
 #v(5pt)
-- *Deliverable*: *Milestone 2 - Detailed Analysis Report*
+- *Deliverable*: *Detailed Analysis Report*
   - *Description*: The audit team will prepare a comprehensive report that
     identifies vulnerabilities and areas for improvement within the OpShin language
     codebase.
@@ -127,7 +129,7 @@ using OpShin.
 
 == Edge Case Identification
 #v(5pt)
-- *Deliverable*: *Milestone 3 - Edge Case Identification*
+- *Deliverable*: *Edge Case Identification*
   - *Description*: The audit team will compile a thorough list of edge cases
     relevant to the development of smart contracts using OpShin.
   - *Key Activities*:
@@ -235,21 +237,19 @@ not limited to:
 = Audit Timeline
 #v(10pt)
 
-*Phase 1* :
-- Establishing communication channels and identifying time points where both teams
-  can allocate more time will support a healthier audit process and this has taken
-  us extra time, offering multiple timeslots for auditor-developer meetings. The
-  official audit process began at the end of October, instead of the originally
-  estimated September deadline for Milestone 1 submission.
+*Phase 1*:
+Establishing communication channels and identifying time points where both teams
+can allocate more time will support a healthier audit process and this has taken
+us extra time, offering multiple timeslots for auditor-developer meetings. The
+official audit process began at the end of October, instead of the originally
+estimated September deadline for Milestone 1 submission.
 
-*Phase 2* :
-
+*Phase 2*:
 In the weeks 2-3, the audit team will have the Discovery and Planning phase
 where they will get familiarized with the codebase and project specifications
 which will cover milestone 2.
 
-*Phase 3* :
-
+*Phase 3*:
 Between the weeks 4-10, the auditors will conduct manual review and will perform
 the following activities which will cover Milestone 3 and Milestone 4
 
@@ -258,8 +258,7 @@ the following activities which will cover Milestone 3 and Milestone 4
 - Collaborate with the opshin team to gather feedback.
 - Integrate the feedback and produce a finalized audit report.
 
-*Phase 4* :
-
+*Phase 4*:
 The completion of final milestone will take around 1 week wherein the closeout
 report and final audit report will be published.
 
@@ -287,7 +286,7 @@ hassle.
 
 #v(25pt)
 == Screenshots of Communication and Active Participation
-#v(10pt)
+#v(20pt)
 To provide evidence of active communication, we have included screenshots of
 Discord conversations that demonstrate active participation from both the OpShin
 team and the audit team.
@@ -299,3 +298,17 @@ team and the audit team.
 
 #align(left)[#box(width: 75%, image("../images/opshin_screenshot3.png"))]
 
+#pagebreak()
+#v(20pt)
+= Signatures
+#v(20pt)
+This Project Scope Document has been reviewed and agreed upon by both parties. 
+#v(50pt)
+#align(left)[*OpShin*]
+#align(left)[Name:]
+#align(left)[Signature:]
+
+#v(40pt)
+#align(left)[*Anastasia Labs*]
+#align(left)[Name:]
+#align(left)[Signature:]
