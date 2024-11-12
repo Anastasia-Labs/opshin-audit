@@ -140,7 +140,7 @@ using OpShin.
     opshin project.
 
 #pagebreak()
-#v(20pt)
+#v(10pt)
 == Draft Audit Report and Integration of Feedback from Opshin Team
 #v(5pt)
 - *Deliverable*: *Comprehensive Audit Report*
@@ -149,8 +149,9 @@ using OpShin.
     development of OpShin.
   - *Key Activities*:
     - Document vulnerabilities and provide actionable recommendations.
-    - Collaborate with the OpShin team to get their feedback and address reported
-      issues in the codebase.
+    - Collaborate with the OpShin team to get their feedback.
+    - OpShin Team will address major issues in the codebase 
+      by demonstrating commits, pull requests, or updated documentation.
     - Ensure that the audit report reflects the most current state of the code
       following these integrations.
   - *Outcome*: This report will serve as a crucial resource for the OpShin team,
@@ -164,8 +165,8 @@ using OpShin.
   - *Key Activities*:
     - Publish the final audit report on the official Cardano forum, GitHub, and
       Medium.
-    - Address remaining medium and low-priority findings from the report, ensuring all
-      issues are marked.
+    - OpShin Team will address remaining medium and low-priority findings from the report
+      through pull requests, ensuring all issues are marked.
     - Produce a final close-out report summarizing the project outcomes and lessons
       learned.
     - Create a final close-out video to visually represent the project’s achievements
@@ -256,7 +257,8 @@ the following activities which will cover Milestone 3 and Milestone 4
 - Perform an in-depth review of the code to identify vulnerabilities.
 - Publish the initial findings report.
 - Collaborate with the opshin team to gather feedback.
-- Integrate the feedback and produce a finalized audit report.
+- OpShin team works on described issues and integrates feedback on them into the codebase.
+- Integrate the feedback from the OpShin Team and produce a finalized audit report.
 
 *Phase 4*:
 The completion of final milestone will take around 1 week wherein the closeout
