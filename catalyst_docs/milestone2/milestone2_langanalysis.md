@@ -2,7 +2,7 @@
 
 ## Table of Contents
 
-1. [Introduction to OpShin](#introduction-to-opshin)
+1. [Quantitative Metrics](#quantitative-metrics)
 2. [Syntax Analysis](#syntax-analysis)
 3. [Type System](#type-system)
 4. [Code Coverage Percentage](#code-coverage-percentage)
@@ -33,13 +33,28 @@ Currently, OpShin supports only Lists and Dicts. It does not support tuples and 
 # Code Coverage Percentage
 
 Currently, the unit tests primarily focuses on the builtins,hash library, operations,keywords,ledger functionalities and standar library functions.
-The Unit tests that is available covers 80% of the codebase.
+The Unit tests that is available covers 80% of the codebase.(Check if 80% of codebase can be used)
 
 OpShin's codebase includes two additional modules, `opshin.rewrite` and `opshin.optimize`, which play crucial roles in enhancing the smart contract compiling process. The `opshin.rewrite` module performs various rewriting steps that remove complexity from Python source code. Meanwhile, the `opshin.optimize` module ensures better performance through targeted optimizations. Given the importance of these modules in the OpShin ecosystem, we strongly recommend expanding the unit test coverage to include them.
 
 # Manual Review Findings
 
-## Finding01 - Improving Error Clarity
+The document herein is provided as an interim update detailing the findings of our
+ongoing audit process on the opshin repository. It is crucial to understand that this
+document does not constitute the final audit report. The contents are meant to offer a
+preliminary insight into our findings up to this point and are subject to change as our
+audit progresses.
+
+## Summary of Findings Across Categories
+
+1. Security -
+2. Performance -
+3. Maintainability -
+4. Others -
+
+# Recommendations for Improvements
+
+## Finding01 - Improving Error Clarity -- minor or information?
 
 While the `opshin eval` command provides a valuable tool for evaluating scripts in Python, its error reporting can be enhanced to provide more user-friendly and informative feedback. Currently, when incorrect arguments or mismatched types are provided, the error messages may not clearly indicate the source or nature of the problem. We recommend implementing more specific error messages that pinpoint the problematic argument, indicate its position, and clearly state the expected type. Additionally, echoing the provided input, and suggesting corrections, for detailed debugging information could significantly improve the user experience and reduce troubleshooting time. These enhancements would make the tool more accessible, especially for developers new to OpShin or smart contract development on Cardano.
 
@@ -58,10 +73,18 @@ When this command is executed in the CLI
 
 This error is encountered: `ValueError: non-hexadecimal number found in fromhex() arg at position 0`. The actual issue is caused at the second argument, where None has been passed instead of a Plutus data object for Nothing.
 
+### Recommendation
+
 ## Finding02 - Lack of Tests for Static Type Inferencer Module
 
-Since the module `opshin.type_inference` plays a crucial role in transforming and assigning types to every variable, we strongly recommend implementing unit tests for the class `AggressiveTypeInferencer` under opshin.type_inference module to ensure its functionality and reliability.
+### Recommendation
+
+Since the module `opshin.type_inference` plays a crucial role in transforming and assigning types to every variable, we strongly recommend implementing unit tests for the class `AggressiveTypeInferencer` under `opshin.type_inference` module to ensure its functionality and reliability.
 
 ## Finding03 - Missing name of the validator function
 
-At present, the `opshin build` command compiles the validator and writes the artifacts to the build folder under the name of the validator. The `blueprint.json` file is created, containing the compiled code, datum, and redeemer details. Although it is a client-side file, including the name of the validator as a title would be helpful for debugging and referencing during off-chain validation.
+At present, the `opshin build` command compiles the validator and writes the artifacts to the build folder under the name of the validator. The `blueprint.json` file is created, containing the compiled code, datum, and redeemer details.The title of the validator is missing in the `blueprint.json` file.
+
+### Recommendation
+
+Although the file `blueprint.json` lies at the client-side, including the name of the validator as a `title` would be helpful for debugging and referencing during off-chain validation.
