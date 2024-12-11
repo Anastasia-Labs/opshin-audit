@@ -28,7 +28,15 @@ One of the limitations of using Python as-is for smart contract development is t
 
 Currently, OpShin supports only Lists and Dicts. It does not support tuples and generic types, which we see as a limitation, as these can be really valuable when writing smart contracts. This might require workarounds to achieve the desired functionality.
 
+## Compilation and Execution
+
+OpShin provides a toolkit to evaluate the script in Python,compile the script to UPLC, and compiel the script to `pluto`, an intermediate language for debugging purposes.
+
+It offers a straightforward API to compile, load, apply parameters and evaluate smart contracts locally. The build process creates all required files for integration with off-chain libraries like pycardano and LucidEvolution. Key features include the ability to build validators from Python files, apply parameters during or after compilation, store and load compilation artifacts, and access important contract information such as addresses and blueprints.
+
 ## Metrics using Gastronomy
+
+create a sample example of adding 1 to an input and evaluate the uplc generated for aiken and opshin
 
 # Code Coverage Percentage
 
@@ -76,6 +84,8 @@ This error is encountered: `ValueError: non-hexadecimal number found in fromhex(
 ### Recommendation
 
 ## Finding02 - Lack of Tests for Static Type Inferencer Module
+
+OpShin parses the Python code into an Abstract Syntax Tree (AST), which serves as the foundation for subsequent analysis. The compiler then performs static type inference on the AST nodes, inferring types for variables, functions, and expressions without requiring explicit type annotations. This step is crucial for ensuring type safety and catching potential errors early in the development process.
 
 ### Recommendation
 
