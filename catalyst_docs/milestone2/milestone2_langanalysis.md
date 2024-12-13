@@ -2,17 +2,20 @@
 
 ## Table of Contents
 
-1. [Quantitative Metrics](#quantitative-metrics)
+1. [Introduction to OpShin](#introduction-to-opshin)
 2. [Syntax Analysis](#syntax-analysis)
 3. [Type System](#type-system)
-4. [Code Coverage Percentage](#code-coverage-percentage)
-5. [Manual Review Findings](#manual-review-findings)
-
-# Quantitative Metrics
+4. [Compilation and Execution](#compilation-and-execution)
+5. [Quantitative Metrics](#quantitative-metrics)
+6. [Metrics using Gastronomy](#metrics-using-gastronomy)
+7. [Code Coverage Percentage](#code-coverage-percentage)
+8. [Manual Review Findings](#manual-review-findings)
+9. [Summary of Findings Across Categories](#summary-of-findings-across-categories)
+10. [Recommendations for Improvements](#recommendations-for-improvements)
 
 ## Introduction to OpShin
 
-OpShin is a programming language for developing smart contracts on the Cardano blockchain.Its syntax is 100% valid Python code and it aims to lower the barrier to entry for Cardano smart contract development. This approach allows developers to write smart contracts using familiar Python constructs while still benefiting from Cardano's robust and secure execution environment.
+OpShin is a programming language for developing smart contracts on the Cardano blockchain.It's syntax is 100% valid Python code and it aims to lower the barrier to entry for Cardano smart contract development. This approach allows developers to write smart contracts using familiar Python constructs while still benefiting from Cardano's robust and secure execution environment.
 
 OpShin ensures that contracts evaluate on-chain exactly as their Python counterpart. This allows unit tests and verification of the Python code using standard tooling available for Python development. The type system of opshin is much stricter than the type system of Python, so that many optimizations can be implemented and an elevated level of security is provided.
 
@@ -20,28 +23,97 @@ OpShin ensures that contracts evaluate on-chain exactly as their Python counterp
 
 OpShin presents itself as a restricted version of Python, written specifically for smart contract development on the Cardano blockchain. While it encourages developers to write code as they would in standard Python programs, it's important to note that not all Python features are available in OpShin.
 
-OpShin's approach ensures that if a program successfully compiles, it meets two crucial criteria. Firstly, the compiled code is guaranteed to be a valid Python program.Secondly, OpShin ensures that the output of running the compiled program with Python is identical to its execution on-chain.
+OpShin's approach ensures that if a program successfully compiles, it meets two crucial criteria. Firstly, the source code is guaranteed to be a valid Python program.Secondly, OpShin ensures that the output of running the compiled program with Python is identical to its execution on-chain.
 
 ## Type System
 
-One of the limitations of using Python as-is for smart contract development is that it is dynamically typed. Opshin addresses this concern by introducing a strict type system on top of Python. What Opshin does is have an independent component called the 'aggressive static type inferencer', which can infer all types of the Python AST nodes for a well chosen subset of Python.So in simple terms every variable in OpShin has a type. There are no opaque type sin OpShin,everything can be deconstructed.
+One of the limitations of using Python as-is for smart contract development is that it is dynamically typed. Opshin addresses this concern by introducing a strict type system on top of Python. What Opshin does is have an independent component called the 'aggressive static type inferencer', which can infer all types of the Python AST nodes for a well chosen subset of Python.So in simple terms every variable in OpShin has a type. There are no opaque types in OpShin, everything can be deconstructed.
 
-Currently, OpShin supports only Lists and Dicts. It does not support tuples and generic types, which we see as a limitation, as these can be really valuable when writing smart contracts. This might require workarounds to achieve the desired functionality.
+Currently, OpShin supports only Lists and Dicts. It does not support tuples and generic types, which we see as a limitation, as these can be really valuable when writing smart contracts. This limitation of not supporting tuples and generic types might require workarounds to achieve the desired functionality.
 
 ## Compilation and Execution
 
-OpShin provides a toolkit to evaluate the script in Python,compile the script to UPLC, and compiel the script to `pluto`, an intermediate language for debugging purposes.
+OpShin provides a toolkit to evaluate the script in Python,compile the script to UPLC, and compile the script to `pluto`, an intermediate language for debugging purposes.
 
 It offers a straightforward API to compile, load, apply parameters and evaluate smart contracts locally. The build process creates all required files for integration with off-chain libraries like pycardano and LucidEvolution. Key features include the ability to build validators from Python files, apply parameters during or after compilation, store and load compilation artifacts, and access important contract information such as addresses and blueprints.
 
+# Quantitative Metrics
+
 ## Metrics using Gastronomy
 
-create a sample example of adding 1 to an input and evaluate the uplc generated for aiken and opshin
+We analysed the UPLC code generated by OpShin for a sample validator which adds number 1 to the input that is passed, using `Gastronomy` as the UPLC debugger.
+
+```python
+def validator(m : int)-> int:
+    return m + 1
+```
+
+```uplc
+(program
+  1.0.0
+  (lam
+    i_0
+    [
+      (lam
+        i_1
+        [
+          (lam
+            i_2
+            [
+              (lam
+                i_3
+                [
+                  (builtin iData)
+                  [
+                    (lam i_4 [ (force i_3) (delay i_4) ])
+                    [ (builtin unIData) i_0 ]
+                  ]
+                ]
+              )
+              (delay
+                (lam
+                  i_5
+                  [
+                    [
+                      (lam i_6 (lam i_7 [ [ (builtin addInteger) i_6 ] i_7 ]))
+                      (force i_5)
+                    ]
+                    (con integer 1)
+                  ]
+                )
+              )
+            ]
+          )
+          (delay
+            [
+              (lam i_8 (error ))
+              [
+                [ (force (builtin trace)) (con string "NameError: validator") ]
+                (con unit ())
+              ]
+            ]
+          )
+        ]
+      )
+      (delay
+        [
+          (lam i_9 (error ))
+          [
+            [ (force (builtin trace)) (con string "NameError: n") ]
+            (con unit ())
+          ]
+        ]
+      )
+    ]
+  )
+)
+```
+
+The two lambda functions with parameter names `i_1` and `i_2` correspond to the variables named `n` and `validator`, respectively. These variables, however, are not being used. This behavior is expected by the OpShin code, which assumes that it will always be able to access these variables without generating invalid UPLC."
 
 # Code Coverage Percentage
 
-Currently, the unit tests primarily focuses on the builtins,hash library, operations,keywords,ledger functionalities and standar library functions.
-The Unit tests that is available covers 80% of the codebase.(Check if 80% of codebase can be used)
+Currently, the unit tests primarily focuses on the builtins,hash library, operations,keywords,ledger functionalities and standar library functions.The Unit tests that is available covers majority of the codebase.
 
 OpShin's codebase includes two additional modules, `opshin.rewrite` and `opshin.optimize`, which play crucial roles in enhancing the smart contract compiling process. The `opshin.rewrite` module performs various rewriting steps that remove complexity from Python source code. Meanwhile, the `opshin.optimize` module ensures better performance through targeted optimizations. Given the importance of these modules in the OpShin ecosystem, we strongly recommend expanding the unit test coverage to include them.
 
@@ -62,9 +134,11 @@ audit progresses.
 
 # Recommendations for Improvements
 
-## Finding01 - Improving Error Clarity -- minor or information?
+## Finding01 - Improving Error Clarity
 
 While the `opshin eval` command provides a valuable tool for evaluating scripts in Python, its error reporting can be enhanced to provide more user-friendly and informative feedback. Currently, when incorrect arguments or mismatched types are provided, the error messages may not clearly indicate the source or nature of the problem. We recommend implementing more specific error messages that pinpoint the problematic argument, indicate its position, and clearly state the expected type. Additionally, echoing the provided input, and suggesting corrections, for detailed debugging information could significantly improve the user experience and reduce troubleshooting time. These enhancements would make the tool more accessible, especially for developers new to OpShin or smart contract development on Cardano.
+
+## Recommendation
 
 ```py
 def validator(datum: WithdrawDatum, redeemer: None, context: ScriptContext) -> None:
@@ -77,17 +151,19 @@ def validator(datum: WithdrawDatum, redeemer: None, context: ScriptContext) -> N
 When this command is executed in the CLI
 
         `opshin eval spending examples/smart_contracts/gift.py "{\"constructor\": 0,\"fields\":[
-        {\"bytes\": \"1e51fcdc14be9a148bb0aaec9197eb47c83776fb\"}]}" None d8799fd8799f9fd8799fd8799fd8799f582055d353acacaab6460b37ed0f0e3a1a0aabf056df4a7fa1e265d21149ccacc527ff01ffd8799fd8799fd87a9f581cdbe769758f26efb21f008dc097bb194cffc622acc37fcefc5372eee3ffd87a80ffa140a1401a00989680d87a9f5820dfab81872ce2bbe6ee5af9bbfee4047f91c1f57db5e30da727d5fef1e7f02f4dffd87a80ffffff809fd8799fd8799fd8799f581cdc315c289fee4484eda07038393f21dc4e572aff292d7926018725c2ffd87a80ffa140a14000d87980d87a80ffffa140a14000a140a1400080a0d8799fd8799fd87980d87a80ffd8799fd87b80d87a80ffff80a1d87a9fd8799fd8799f582055d353acacaab6460b37ed0f0e3a1a0aabf056df4a7fa1e265d21149ccacc527ff01ffffd87980a15820dfab81872ce2bbe6ee5af9bbfee4047f91c1f57db5e30da727d5fef1e7f02f4dd8799f581cdc315c289fee4484eda07038393f21dc4e572aff292d7926018725c2ffd8799f5820746957f0eb57f2b11119684e611a98f373afea93473fefbb7632d579af2f6259ffffd87a9fd8799fd8799f582055d353acacaab6460b37ed0f0e3a1a0aabf056df4a7fa1e265d21149ccacc527ff01ffffff`
+        {\"bytes\": \"1e51fcdc14be9a148bb0aaec9197eb47c83776fb\"}]}" "None" d8799fd8799f9fd8799fd8799fd8799f582055d353acacaab6460b37ed0f0e3a1a0aabf056df4a7fa1e265d21149ccacc527ff01ffd8799fd8799fd87a9f581cdbe769758f26efb21f008dc097bb194cffc622acc37fcefc5372eee3ffd87a80ffa140a1401a00989680d87a9f5820dfab81872ce2bbe6ee5af9bbfee4047f91c1f57db5e30da727d5fef1e7f02f4dffd87a80ffffff809fd8799fd8799fd8799f581cdc315c289fee4484eda07038393f21dc4e572aff292d7926018725c2ffd87a80ffa140a14000d87980d87a80ffffa140a14000a140a1400080a0d8799fd8799fd87980d87a80ffd8799fd87b80d87a80ffff80a1d87a9fd8799fd8799f582055d353acacaab6460b37ed0f0e3a1a0aabf056df4a7fa1e265d21149ccacc527ff01ffffd87980a15820dfab81872ce2bbe6ee5af9bbfee4047f91c1f57db5e30da727d5fef1e7f02f4dd8799f581cdc315c289fee4484eda07038393f21dc4e572aff292d7926018725c2ffd8799f5820746957f0eb57f2b11119684e611a98f373afea93473fefbb7632d579af2f6259ffffd87a9fd8799fd8799f582055d353acacaab6460b37ed0f0e3a1a0aabf056df4a7fa1e265d21149ccacc527ff01ffffff`
 
-This error is encountered: `ValueError: non-hexadecimal number found in fromhex() arg at position 0`. The actual issue is caused at the second argument, where None has been passed instead of a Plutus data object for Nothing.
+Error Encountered:
 
-### Recommendation
+        `ValueError: Expected hexadecimal CBOR representation of plutus datum but could not transform hex string to bytes`.
+
+The error is caused by the second argument, where "None" is passed instead of a valid Plutus data object for Nothing.The error message could be improved by providing a clear example of how to pass parameters correctly in JSON format.
 
 ## Finding02 - Lack of Tests for Static Type Inferencer Module
 
 OpShin parses the Python code into an Abstract Syntax Tree (AST), which serves as the foundation for subsequent analysis. The compiler then performs static type inference on the AST nodes, inferring types for variables, functions, and expressions without requiring explicit type annotations. This step is crucial for ensuring type safety and catching potential errors early in the development process.
 
-### Recommendation
+## Recommendation
 
 Since the module `opshin.type_inference` plays a crucial role in transforming and assigning types to every variable, we strongly recommend implementing unit tests for the class `AggressiveTypeInferencer` under `opshin.type_inference` module to ensure its functionality and reliability.
 
@@ -95,6 +171,14 @@ Since the module `opshin.type_inference` plays a crucial role in transforming an
 
 At present, the `opshin build` command compiles the validator and writes the artifacts to the build folder under the name of the validator. The `blueprint.json` file is created, containing the compiled code, datum, and redeemer details.The title of the validator is missing in the `blueprint.json` file.
 
-### Recommendation
+## Recommendation
 
 Although the file `blueprint.json` lies at the client-side, including the name of the validator as a `title` would be helpful for debugging and referencing during off-chain validation.
+
+## Finding04 - Pretty Print generated UPLC
+
+When the OpShin code is compiled to UPLC using the `opshin eval_uplc` or `opshin compile` commands, the generated UPLC code is not formatted in a 'pretty-printed' form. Instead, it is output directly to the terminal in a compact, unformatted style. This lack of formatting can make it more challenging to analyze or debug the resulting UPLC code, as the structure and readability of the code are compromised, which can hinder efficient examination and optimization.
+
+## Recommendation
+
+To facilitate a better development experience, it would be beneficial to implement a method or tool that formats the UPLC output for easier interpretation and review.
