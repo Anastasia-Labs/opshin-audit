@@ -63,67 +63,66 @@ def validator(m : int)-> int:
 ```
 
 ```uplc
-(program
-  1.0.0
-  (lam
-    i_0
-    [
-      (lam
-        i_1
-        [
-          (lam
-            i_2
-            [
-              (lam
-                i_3
+(lam
+  1val_param0
+  [
+    (lam
+      n_1
+      [
+        (lam
+          validator_0
+          [
+            (lam
+              validator_0
+              [
+                (builtin iData)
                 [
-                  (builtin iData)
+                  (lam 1p0 [ (force validator_0) (delay 1p0) ])
+                  [ (builtin unIData) 1val_param0 ]
+                ]
+              ]
+            )
+            (delay
+              (lam
+                n_1
+                [
                   [
-                    (lam i_4 [ (force i_3) (delay i_4) ])
-                    [ (builtin unIData) i_0 ]
+                    (lam
+                      1self
+                      (lam 1other [ [ (builtin addInteger) 1self ] 1other ])
+                    )
+                    (force n_1)
                   ]
+                  (con integer 1)
                 ]
               )
-              (delay
-                (lam
-                  i_5
-                  [
-                    [
-                      (lam i_6 (lam i_7 [ [ (builtin addInteger) i_6 ] i_7 ]))
-                      (force i_5)
-                    ]
-                    (con integer 1)
-                  ]
-                )
-              )
-            ]
-          )
-          (delay
-            [
-              (lam i_8 (error ))
-              [
-                [ (force (builtin trace)) (con string "NameError: validator") ]
-                (con unit ())
-              ]
-            ]
-          )
-        ]
-      )
-      (delay
-        [
-          (lam i_9 (error ))
-          [
-            [ (force (builtin trace)) (con string "NameError: n") ]
-            (con unit ())
+            )
           ]
+        )
+        (delay
+          [
+            (lam _ (error ))
+            [
+              [ (force (builtin trace)) (con string "NameError: validator") ]
+              (con unit ())
+            ]
+          ]
+        )
+      ]
+    )
+    (delay
+      [
+        (lam _ (error ))
+        [
+          [ (force (builtin trace)) (con string "NameError: n") ] (con unit ())
         ]
-      )
-    ]
-  )
+      ]
+    )
+  ]
 )
 ```
 
-The two lambda functions with parameter names `i_1` and `i_2` correspond to the variables named `n` and `validator`, respectively.
+The two lambda functions with parameter names `n_1` and `validator_0` correspond to the variables named `n` and `validator`, respectively.
 These variables, however, are not being used.
 This behavior is expected by the OpShin code, which assumes that it will always be able to access these variables without generating invalid UPLC.
 
