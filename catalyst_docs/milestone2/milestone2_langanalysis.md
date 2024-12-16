@@ -125,11 +125,11 @@ def validator(m : int)-> int:
 
 The two lambda functions with parameter names `i_1` and `i_2` correspond to the variables named `n` and `validator`, respectively.
 These variables, however, are not being used.
-This behavior is expected by the OpShin code, which assumes that it will always be able to access these variables without generating invalid UPLC."
+This behavior is expected by the OpShin code, which assumes that it will always be able to access these variables without generating invalid UPLC.
 
 # Code Coverage Percentage
 
-Currently, the unit tests primarily focuses on the builtins,hash library, operations,keywords,ledger functionalities and standar library functions.
+Currently, the unit tests primarily focuses on the builtins, hash library, operations, keywords, ledger functionalities and standard library functions.
 The Unit tests that is available covers majority of the codebase.
 
 OpShin's codebase includes two additional modules, `opshin.rewrite` and `opshin.optimize`, which play crucial roles in enhancing the smart contract compiling process.
@@ -149,7 +149,7 @@ audit progresses.
 1. Security - Nil
 2. Performance - Nil
 3. Maintainability - 4
-4. Others -
+4. Others - Nil
 
 # Recommendations for Improvements
 
@@ -212,4 +212,4 @@ This lack of formatting can make it more challenging to analyze or debug the res
 
 ## Recommendation
 
-To facilitate a better development experience, it would be beneficial to implement a method or tool that formats the UPLC output for easier interpretation and review.
+To improve the development experience, it would be beneficial to implement a method or tool that formats the UPLC output and saves it in a folder for easier interpretation and review.
