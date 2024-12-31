@@ -35,11 +35,28 @@ The type system of OpShin is much stricter than the type system of Python.
 OpShin addresses this by introducing a strict type system on top of Python.
 What OpShin does is have an independent component called the 'aggressive static type inferencer', which can infer all types of the Python AST nodes for a well chosen subset of Python.
 
-Once all the types are resolved , then there are a bunch of additional rewrites, and some optimizations, and finally the compiler step which gets the simplified type annotated AST, and then translates it to Pluto, which is the intermediate language
-and then compiled again to UPLC.
+As part of the compilation pipeline, there are a bunch of additional rewrites all the types are resolved and some optimizations are performed, and finally the compiler gets the simplified type annotated AST, and then translates it to Pluto, which is the intermediate language and then compiled again to UPLC.
 
 So in simple terms every variable in OpShin has a type.
 There are no opaque types in OpShin, everything can be deconstructed.
+
+The `AggressiveTypeInferencer` employs a set of conditions to infer types throughout the Python code.
+These rules form the backbone of the type inference system, enabling type checking for each of the variables involved.
+
+| Rule Category                   | Description                                                                              |
+| ------------------------------- | ---------------------------------------------------------------------------------------- |
+| Class Type Inference            | Classes must have a CONSTR_ID attribute defined as an integer to uniquely identify them. |
+| Function Type Inference         | Functions are typed based on their input parameters and return annotations.              |
+| Literal Type Inference          | Literal values (integers, strings, booleans) are assigned their corresponding types.     |
+| Operator Type Inference         | Binary operations are typed based on their operands.                                     |
+| Comparison Type Inference       | Comparison operations always result in a boolean type.                                   |
+| List Type Inference             | Lists are typed based on their elements.                                                 |
+| Dictionary Type Inference       | Dictionaries are typed based on their key and value types.                               |
+| Attribute Access Type Inference | Attribute access is typed based on the object's type and the attribute being accessed.   |
+| Function Call Type Inference    | Function calls are typed based on the function's return type.                            |
+| Type Annotation Respect         | Explicit type annotations are respected and used as the definitive type.                 |
+| Control Flow Type Inference     | The type of a variable after an if-else block is a merge of types from both branches.    |
+| Loop Type Inference             | Variables in loops are typed based on the inferred iterable element type.                |
 
 Currently, OpShin supports only Lists and Dicts.
 It does not support tuples and generic types, which we see as a limitation, as these can be really valuable when writing smart contracts.
@@ -135,11 +152,64 @@ It is designed to ensure that these variables are always accessible.
 We conducted a code coverage analysis for the OpShin project using the `pytest-cov` tool.
 Code coverage is a metric that helps to understand which parts of the codebase are exercised by the test suite, allowing us to identify untested areas.
 
-The following screenshot shows the results of the code coverage assessment:
+The following details shows the results of the code coverage assessment:
 
-![Code Coverage through Python Pytest](../images/code_coverage_opshin.png)
+````
+---------- coverage: platform linux, python 3.10.12-final-0 ----------
+Name                                               Stmts   Miss Branch BrPart  Cover
+------------------------------------------------------------------------------------
+opshin/__init__.py                                    12      2      0      0    83%
+opshin/__main__.py                                   284    178    122     12    32%
+opshin/bridge.py                                      32     11     22      3    52%
+opshin/builder.py                                    226     36     92      8    83%
+opshin/compiler.py                                   367     13    171      9    96%
+opshin/compiler_config.py                             19      0      4      0   100%
+opshin/fun_impls.py                                   78      1     28      1    98%
+opshin/ledger/__init__.py                              0      0      0      0   100%
+opshin/ledger/api_v2.py                              189      0     76      0   100%
+opshin/ledger/interval.py                             55      0     18      1    99%
+opshin/optimize/__init__.py                            0      0      0      0   100%
+opshin/optimize/optimize_const_folding.py            191     15     53      5    90%
+opshin/optimize/optimize_remove_comments.py            9      0      2      0   100%
+opshin/optimize/optimize_remove_deadvars.py          128      2     44      1    98%
+opshin/optimize/optimize_remove_pass.py                7      0      0      0   100%
+opshin/prelude.py                                     46     26     26      0    33%
+opshin/rewrite/__init__.py                             0      0      0      0   100%
+opshin/rewrite/rewrite_augassign.py                   11      0      0      0   100%
+opshin/rewrite/rewrite_cast_condition.py              30      0      2      0   100%
+opshin/rewrite/rewrite_comparison_chaining.py         15      0      4      0   100%
+opshin/rewrite/rewrite_empty_dicts.py                 17      1      4      1    90%
+opshin/rewrite/rewrite_empty_lists.py                 17      1      4      1    90%
+opshin/rewrite/rewrite_forbidden_overwrites.py        12      0      2      0   100%
+opshin/rewrite/rewrite_forbidden_return.py             9      0      0      0   100%
+opshin/rewrite/rewrite_import.py                      71      3     20      6    90%
+opshin/rewrite/rewrite_import_dataclasses.py          27      1      8      1    94%
+opshin/rewrite/rewrite_import_hashlib.py              39      1     10      0    98%
+opshin/rewrite/rewrite_import_integrity_check.py      30      0      6      1    97%
+opshin/rewrite/rewrite_import_plutusdata.py           25      0      2      0   100%
+opshin/rewrite/rewrite_import_typing.py               37      3     24      1    87%
+opshin/rewrite/rewrite_import_uplc_builtins.py        32      2     14      3    89%
+opshin/rewrite/rewrite_inject_builtin_constr.py       16      1      4      1    90%
+opshin/rewrite/rewrite_inject_builtins.py             17      0      4      0   100%
+opshin/rewrite/rewrite_orig_name.py                   30      0      8      0   100%
+opshin/rewrite/rewrite_remove_type_stuff.py           20      0      4      0   100%
+opshin/rewrite/rewrite_scoping.py                    113      0     32      0   100%
+opshin/rewrite/rewrite_subscript38.py                  8      1      0      0    88%
+opshin/rewrite/rewrite_tuple_assign.py                31      0     10      0   100%
+opshin/std/__init__.py                                 0      0      0      0   100%
+opshin/std/bitmap.py                                  41      0      8      0   100%
+opshin/std/builtins.py                                96     31      0      0    68%
+opshin/std/fractions.py                               89      0     38      0   100%
+opshin/std/hashlib.py                                  1      1      0      0     0%
+opshin/std/integrity.py                                3      3      0      0     0%
+opshin/std/math.py                                    24      0      8      0   100%
+opshin/type_impls.py                                 754     83    495     75    84%
+opshin/type_inference.py                             811     35    373     20    94%
+opshin/typed_ast.py                                  113      1      0      0    99%
+opshin/util.py                                       192     19     60      2    87%
+------------------------------------------------------------------------------------
+TOTAL                                               4374    471   1802    152    87%
 
--- may be text
 Note --> The major untouched part of the code is data from json, is it noteworthy to add tests for this?
 
 # Manual Review Findings
@@ -174,7 +244,7 @@ def validator(datum: WithdrawDatum, redeemer: None, context: ScriptContext) -> N
     assert (
         sig_present
     ), f"Required signature missing, expected {datum.pubkeyhash.hex()} but got {[s.hex() for s in context.tx_info.signatories]}"
-```
+````
 
 When this command is executed in the CLI
 
