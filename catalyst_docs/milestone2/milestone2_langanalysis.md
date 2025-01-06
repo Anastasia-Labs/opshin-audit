@@ -26,25 +26,24 @@ Second, It ensures the output running it with python is the same as running it o
 
 ## Type System
 
--- Type inference --> example
-
---static type inferencer , how it is implemented in opshin
-
 One of the limitations of using Python as-is for smart contract development is that it is dynamically typed.
 The type system of OpShin is much stricter than the type system of Python.
 OpShin addresses this by introducing a strict type system on top of Python.
 What OpShin does is have an independent component called the 'aggressive static type inferencer', which can infer all types of the Python AST nodes for a well chosen subset of Python.
 
-As part of the compilation pipeline, there are a bunch of additional rewrites all the types are resolved and some optimizations are performed, and finally the compiler gets the simplified type annotated AST, and then translates it to Pluto, which is the intermediate language and then compiled again to UPLC.
+The class `AggressiveTypeInferencer` employs a set of conditions to infer types throughout the Python code.
+These rules form the backbone of the type inference system, enabling type checking for each of the variables involved.
+As per ATI, types are resolved by flow-insensitivity and type consistency.
+Flow-insensitivity ignores control flow, allowing variables to retain the same type across different points in a scope.
+Type consistency ensures that variables maintain the same type throughout their scope, even when conflicting information appears.
+When inconsistencies arise, ATI resolves them by considering the broader context and applying a consistent type across the scope.
 
 So in simple terms every variable in OpShin has a type.
 There are no opaque types in OpShin, everything can be deconstructed.
 
-The `AggressiveTypeInferencer` employs a set of conditions to infer types throughout the Python code.
-These rules form the backbone of the type inference system, enabling type checking for each of the variables involved.
-
 | Rule Category                   | Description                                                                              |
 | ------------------------------- | ---------------------------------------------------------------------------------------- |
+| Annotated Types                 | Explicit type annotations are respected and used as the definitive type.                 |
 | Class Type Inference            | Classes must have a CONSTR_ID attribute defined as an integer to uniquely identify them. |
 | Function Type Inference         | Functions are typed based on their input parameters and return annotations.              |
 | Literal Type Inference          | Literal values (integers, strings, booleans) are assigned their corresponding types.     |
@@ -54,9 +53,9 @@ These rules form the backbone of the type inference system, enabling type checki
 | Dictionary Type Inference       | Dictionaries are typed based on their key and value types.                               |
 | Attribute Access Type Inference | Attribute access is typed based on the object's type and the attribute being accessed.   |
 | Function Call Type Inference    | Function calls are typed based on the function's return type.                            |
-| Type Annotation Respect         | Explicit type annotations are respected and used as the definitive type.                 |
-| Control Flow Type Inference     | The type of a variable after an if-else block is a merge of types from both branches.    |
+| Control Flow Type Inference     | The type of a variable after an if-else block is a union of types from both branches.    |
 | Loop Type Inference             | Variables in loops are typed based on the inferred iterable element type.                |
+| Conflicting Types               | TypeInferenceError is raised if there are conflicting types                              |
 
 Currently, OpShin supports only Lists and Dicts.
 It does not support tuples and generic types, which we see as a limitation, as these can be really valuable when writing smart contracts.
@@ -64,7 +63,9 @@ This limitation of not supporting tuples and generic types might require workaro
 
 ## Compilation and Execution
 
-OpShin provides a toolkit to evaluate the script in Python, compile the script to UPLC, and compile the script to `pluto`, an intermediate language for debugging purposes.
+As part of the compilation pipeline, there are a bunch of additional rewrites, all the types are resolved throught aggressive types inference and some optimizations are performed, and finally the compiler gets the simplified type annotated AST, and then translates it to `pluto`, which is the intermediate language and then compiled again to `UPLC`.
+
+OpShin provides a toolkit to evaluate the script in Python, compile the script to `UPLC`, and compile the script to `pluto`, an intermediate language for debugging purposes and to build artifacts.
 
 It offers a straightforward API to compile, load, apply parameters and evaluate smart contracts locally.
 The build process creates all required files for integration with off-chain libraries like pycardano and LucidEvolution.
@@ -74,7 +75,7 @@ Key features include the ability to build validators from Python files, apply pa
 
 ## Metrics using Gastronomy
 
-We analysed the UPLC code generated by OpShin for a sample validator which adds number 1 to the input that is passed, using `Gastronomy` as the UPLC debugger.
+We analysed the `UPLC` code generated by OpShin for a sample validator which adds number 1 to the input that is passed, using `Gastronomy` as the `UPLC` debugger.
 
 ```python
 def validator(n : int)-> int:
@@ -154,7 +155,7 @@ Code coverage is a metric that helps to understand which parts of the codebase a
 
 The following details shows the results of the code coverage assessment:
 
-````
+```
 ---------- coverage: platform linux, python 3.10.12-final-0 ----------
 Name                                               Stmts   Miss Branch BrPart  Cover
 ------------------------------------------------------------------------------------
@@ -210,7 +211,7 @@ opshin/util.py                                       192     19     60      2   
 ------------------------------------------------------------------------------------
 TOTAL                                               4374    471   1802    152    87%
 
-Note --> The major untouched part of the code is data from json, is it noteworthy to add tests for this?
+```
 
 # Manual Review Findings
 
@@ -244,7 +245,7 @@ def validator(datum: WithdrawDatum, redeemer: None, context: ScriptContext) -> N
     assert (
         sig_present
     ), f"Required signature missing, expected {datum.pubkeyhash.hex()} but got {[s.hex() for s in context.tx_info.signatories]}"
-````
+```
 
 When this command is executed in the CLI
 
@@ -270,17 +271,19 @@ Although the file `blueprint.json` is primarily used for off-chain coding purpos
 
 ## Finding03 - Pretty Print generated UPLC
 
-When the OpShin code is compiled to UPLC using the `opshin eval_uplc` or `opshin compile` commands, the generated UPLC code is not formatted in a 'pretty-printed' form.
+When the OpShin code is compiled to `UPLC` using the `opshin eval_uplc` or `opshin compile` commands, the generated `UPLC` code is not formatted in a 'pretty-printed' form.
 Instead, it is output directly to the terminal in a compact, unformatted style.
-This lack of formatting makes it more challenging to analyze or debug the resulting UPLC code, as the structure and readability of the code are compromised, which can hinder examination.
+This lack of formatting makes it more challenging to analyze or debug the resulting `UPLC` code, as the structure and readability of the code are compromised, which can hinder examination.
 
 ## Recommendation
 
-To improve the development experience, it would be beneficial to implement a method or tool that formats the UPLC output and dumps it into a folder for each validator for easier interpretation and review.
+To improve the development experience, it would be beneficial to implement a method or tool that formats the `UPLC` output and dumps it into a folder for each validator for easier interpretation and review.
 
 ## Finding04 - OpShin build lib does not build the artifacts
 
-The command `opshin build lib examples/smart_contracts/assert_sum.py -fno-remove-dead-code` is suggested by the cli to build artifacts for a smart contract with a different validator name other than "validator". However, this command did not work as expected. As per the OpShin code, at [Line 386](https://github.com/OpShin/opshin/blob/d657a227f02670e6b6eed9cac77c0f8a25d51423/opshin/__main__.py#L386) when the purpose is `lib` the artifacts are built but not dumped into target directory.
+The command `opshin build lib examples/smart_contracts/assert_sum.py -fno-remove-dead-code` is suggested by the cli to build artifacts for a smart contract with a different validator name other than "validator".
+However, this command did not work as expected.
+As per the OpShin code, at [Line 386](https://github.com/OpShin/opshin/blob/d657a227f02670e6b6eed9cac77c0f8a25d51423/opshin/__main__.py#L386) when the purpose is `lib` the artifacts are built but not dumped into target directory.
 
 ## Recommendation
 
@@ -290,7 +293,7 @@ We suggest to add the dumps into the artifacts folder.
 
 ## Finding05 - Improve Documentation on optimization level
 
-The idea of Optimization level and how the UPLC differs with each optimization level can be clearly documented with simple examples.
+The idea of Optimization level and how the `UPLC` differs with each optimization level can be clearly documented with simple examples.
 
 ## Recommendation
 
