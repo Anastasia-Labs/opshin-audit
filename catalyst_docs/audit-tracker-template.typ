@@ -140,4 +140,35 @@ the OpShin Language.
 5. Tried to replicate aiken acceptance tests in opshin(only first 20 test cases)
    - Challenge - opshin supports only a limited language constructs, its a challenge to replicate most of the aiken acceptance tests.
 
+== Hunting Critical Security vulnerabilities
+The compiler pipeline consists of the following steps:
 
+Tokenization -> AST building -> Type checking and type inference -> Code generation (Pluto)
+
+(Pluto-to-UPLC is out of scope)
+
+Each of these steps can potentially introduce Critical errors into the final validator output. The step which is most likely to contain such vulnerabities is the Pluto-to-UPLC conversion step, but that step isnt in this audits scope.
+
+=== Tokenization step
+
+- Not throwing an error when a bytearray literal has odd length
+- Not throwing an error when mixing tabs and spaces for the indentation
+- Not throwing an error when encountering inconsistent indentation
+
+=== AST building
+
+- Collecting build errors but not throwing them at the end
+- Incorrect grouping of tokens, leading to unexpected behavior
+
+=== Type checking
+
+- Not throwing an error when a type is wrong
+
+=== Type inference
+
+- Infering the wrong type, leading to the wrong Pluto code being generated
+
+=== Code generation
+
+- Code omitted
+- If the generated code is textual: missing tokens (e.g. missing quotes for literal strings)
