@@ -33,7 +33,6 @@
 // Set text style for project details
 #set text(13pt, fill: white)
 
-
 // Reset text style to default
 #set text(fill: luma(0%))
 
@@ -55,7 +54,6 @@
     #align(center)[*Anastasia Labs* \ Audit Tracker Template]
   ],
   footer-descent: 20%,
-  
 )
 
 #v(25pt)
@@ -70,14 +68,12 @@
 // Initialize page counter
 #counter(page).update(0)
 
-#set page(
-  footer: [
-    #set text(11pt)
-    #line(length: 100%) // Add a line above the footer
-    #align(center)[*Anastasia Labs* \ Audit Tracker ]
-    #place(right, dy:-7pt)[#counter(page).display("1/1", both: true)]
-  ]
-)
+#set page(footer: [
+  #set text(11pt)
+  #line(length: 100%) // Add a line above the footer
+  #align(center)[*Anastasia Labs* \ Audit Tracker ]
+  #place(right, dy: -7pt)[#counter(page).display("1/1", both: true)]
+])
 #pagebreak()
 
 #set terms(separator: [: ], hanging-indent: 40pt)
@@ -105,20 +101,43 @@
 )
 
 #pagebreak()
-
+= Milestone1 - Project Kickoff and Planning
 #v(25pt)
 
+The milestone1 was approved in November 2024.
 
+#v(20pt)
+= Milestone2 - Language Analysis Report
+
+As part of Milestone2 we are required to submit a detailed analysis report on
+the OpShin Language.
+
+== Topics to cover
+
+1. UPLC debugging Architectural Decisions 
+  -  How types are mapped to UPLC types
+  -  Static type Inferencer-> How ATI is implemented within OpShin 
+  -  Mapping of Python -> Pluto -> UPLC
+  -  Storage of variables in statemonads
+
+2. Opshin compiler pipeline 
+  - rewrites - how effective it is written and area of improvement 
+  - optimization - how effective it is written and area of improvement 
+  - conversion -> pluto
+3. Performance and script size testing
+4. Overall language constructs
 #pagebreak()
 #v(20pt)
+== Areas Covered
+1. UPLC debugger through Gastronomy
+
+2. Tested Language constructs -- output of opshin eval, eval_uplc,
+
+3. Code Coverage - using Pytest -cov tool
+
+4. Checked build artifacts
+
+5. Tried to replicate aiken acceptance tests in opshin(only first 20 test cases)
+   - Challenge - opshin supports only a limited language constructs, its a challenge to replicate most of the aiken acceptance tests.
 
 
-
-
-#pagebreak()
-#v(20pt)
-
-
-
-
-#pagebreak()

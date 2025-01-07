@@ -31,10 +31,10 @@ The type system of OpShin is much stricter than the type system of Python.
 OpShin addresses this by introducing a strict type system on top of Python.
 What OpShin does is have an independent component called the 'aggressive static type inferencer', which can infer all types of the Python AST nodes for a well chosen subset of Python.
 
-The class `AggressiveTypeInferencer` employs a set of conditions to infer types throughout the Python code.
+The class `AggressiveTypeInferencer` in the file `type_inference.py` employs a set of conditions to infer types throughout the Python code.
 These rules form the backbone of the type inference system, enabling type checking for each of the variables involved.
 As per ATI, types are resolved by flow-insensitivity and type consistency.
-Flow-insensitivity ignores control flow, allowing variables to retain the same type across different points in a scope.
+Flow-insensitivity ignores control flow, allowing variables to retain a union of types across different points in a scope.
 Type consistency ensures that variables maintain the same type throughout their scope, even when conflicting information appears.
 When inconsistencies arise, ATI resolves them by considering the broader context and applying a consistent type across the scope.
 
@@ -63,7 +63,7 @@ This limitation of not supporting tuples and generic types might require workaro
 
 ## Compilation and Execution
 
-As part of the compilation pipeline, there are a bunch of additional rewrites, all the types are resolved throught aggressive types inference and some optimizations are performed, and finally the compiler gets the simplified type annotated AST, and then translates it to `pluto`, which is the intermediate language and then compiled again to `UPLC`.
+As part of the compilation pipeline, there are a bunch of additional rewrites, all the types are resolved through aggressive types inference and some optimizations are performed, and finally the compiler gets the simplified type annotated AST, and then translates it to `pluto`, which is the intermediate language and then compiled again to `UPLC`.
 
 OpShin provides a toolkit to evaluate the script in Python, compile the script to `UPLC`, and compile the script to `pluto`, an intermediate language for debugging purposes and to build artifacts.
 
@@ -269,7 +269,7 @@ However, the field `title` in the blueprint.json file will always remain as "val
 
 Although the file `blueprint.json` is primarily used for off-chain coding purposes, adding the validator file name along with the keyword 'Validator' as a title (e.g., Validator/assert_sum) would be helpful for debugging and referencing during off-chain validation.
 
-## Finding03 - Pretty Print generated UPLC
+## Finding03 - Pretty Print generated UPLC and Pluto//add content explain
 
 When the OpShin code is compiled to `UPLC` using the `opshin eval_uplc` or `opshin compile` commands, the generated `UPLC` code is not formatted in a 'pretty-printed' form.
 Instead, it is output directly to the terminal in a compact, unformatted style.
