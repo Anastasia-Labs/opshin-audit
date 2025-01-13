@@ -9,37 +9,49 @@
 5. [Metrics using Gastronomy](#metrics-using-gastronomy)
 6. [Code Coverage Percentage](#code-coverage-percentage)
 7. [Manual Review Findings](#manual-review-findings)
-8. [Summary of Current Findings Across Categories](#summary-of-findings-across-categories)
-9. [Recommendations for Improvements](#recommendations-for-improvements)
+8. [Summary of Current Findings Across
+   Categories](#summary-of-findings-across-categories)
+9. [Findings and Recommendations for Improvements](#findings-and-recommendations-for-improvements)
+10. [General Recommendations](#general-recommendations)
 
 ## Introduction to OpShin
 
-OpShin is a programming language for developing smart contracts on the Cardano blockchain.
-It's syntax is 100% valid Python code and it aims to lower the barrier to entry for Cardano smart contract development.
-OpShin presents itself as a restricted version of Python, written specifically for smart contract development on the Cardano blockchain.
-While it encourages developers to write code as they would in standard Python programs, it's important to note that not all Python features are available in OpShin.
+OpShin is a programming language for developing smart contracts on the Cardano
+blockchain. It's syntax is 100% valid Python code and it aims to lower the
+barrier to entry for Cardano smart contract development. OpShin presents itself
+as a restricted version of Python, written specifically for smart contract
+development on the Cardano blockchain. While it encourages developers to write
+code as they would in standard Python programs, it's important to note that not
+all Python features are available in OpShin.
 
-OpShin ensures that contracts evaluate on-chain exactly as their Python counterpart.
-OpShin's compiler ensures that if a program successfully compiles, it meets two criterias.
-First, the source code is guaranteed to be a valid Python program.
-Second, It ensures the output running it with python is the same as running it on-chain.
+OpShin ensures that contracts evaluate on-chain exactly as their Python
+counterpart. OpShin's compiler ensures that if a program successfully compiles,
+it meets two criterias. First, the source code is guaranteed to be a valid
+Python program. Second, It ensures the output running it with python is the same
+as running it on-chain.
 
 ## Type System
 
-One of the limitations of using Python as-is for smart contract development is that it is dynamically typed.
-The type system of OpShin is much stricter than the type system of Python.
-OpShin addresses this by introducing a strict type system on top of Python.
-What OpShin does is have an independent component called the 'aggressive static type inferencer', which can infer all types of the Python AST nodes for a well chosen subset of Python.
+One of the limitations of using Python as-is for smart contract development is
+that it is dynamically typed. The type system of OpShin is much stricter than
+the type system of Python. OpShin addresses this by introducing a strict type
+system on top of Python. What OpShin does is have an independent component
+called the 'aggressive static type inferencer', which can infer all types of the
+Python AST nodes for a well chosen subset of Python.
 
-The class `AggressiveTypeInferencer` in the file `type_inference.py` employs a set of conditions to infer types throughout the Python code.
-These rules form the backbone of the type inference system, enabling type checking for each of the variables involved.
-As per ATI, types are resolved by flow-insensitivity and type consistency.
-Flow-insensitivity ignores control flow, allowing variables to retain a union of types across different points in a scope.
-Type consistency ensures that variables maintain the same type throughout their scope, even when conflicting information appears.
-When inconsistencies arise, ATI resolves them by considering the broader context and applying a consistent type across the scope.
+The class `AggressiveTypeInferencer` in the file `type_inference.py` employs a
+set of conditions to infer types throughout the Python code. These rules form
+the backbone of the type inference system, enabling type checking for each of
+the variables involved. As per ATI, types are resolved by flow-insensitivity and
+type consistency. Flow-insensitivity ignores control flow, allowing variables to
+retain a union of types across different points in a scope. Type consistency
+ensures that variables maintain the same type throughout their scope, even when
+conflicting information appears. When inconsistencies arise, ATI resolves them
+by considering the broader context and applying a consistent type across the
+scope.
 
-So in simple terms every variable in OpShin has a type.
-There are no opaque types in OpShin, everything can be deconstructed.
+So in simple terms every variable in OpShin has a type. There are no opaque
+types in OpShin, everything can be deconstructed.
 
 | Rule Category                   | Description                                                                              |
 | ------------------------------- | ---------------------------------------------------------------------------------------- |
@@ -57,25 +69,37 @@ There are no opaque types in OpShin, everything can be deconstructed.
 | Loop Type Inference             | Variables in loops are typed based on the inferred iterable element type.                |
 | Conflicting Types               | TypeInferenceError is raised if there are conflicting types                              |
 
-Currently, OpShin supports only Lists and Dicts.
-It does not support tuples and generic types, which we see as a limitation, as these can be really valuable when writing smart contracts.
-This limitation of not supporting tuples and generic types might require workarounds to achieve the desired functionality.
+Currently, OpShin supports only Lists and Dicts. It does not support tuples and
+generic types, which we see as a limitation, as these can be really valuable
+when writing smart contracts. This limitation of not supporting tuples and
+generic types might require workarounds to achieve the desired functionality.
 
 ## Compilation and Execution
 
-As part of the compilation pipeline, there are a bunch of additional rewrites, all the types are resolved through aggressive types inference and some optimizations are performed, and finally the compiler gets the simplified type annotated AST, and then translates it to `pluto`, which is the intermediate language and then compiled again to `UPLC`.
+As part of the compilation pipeline, there are a bunch of additional rewrites,
+all the types are resolved through aggressive types inference and some
+optimizations are performed, and finally the compiler gets the simplified type
+annotated AST, and then translates it to `pluto`, which is the intermediate
+language and then compiled again to `UPLC`.
 
-OpShin provides a toolkit to evaluate the script in Python, compile the script to `UPLC`, and compile the script to `pluto`, an intermediate language for debugging purposes and to build artifacts.
+OpShin provides a toolkit to evaluate the script in Python, compile the script
+to `UPLC`, and compile the script to `pluto`, an intermediate language for
+debugging purposes and to build artifacts.
 
-It offers a straightforward API to compile, load, apply parameters and evaluate smart contracts locally.
-The build process creates all required files for integration with off-chain libraries like pycardano and LucidEvolution.
-Key features include the ability to build validators from Python files, apply parameters during or after compilation, store and load compilation artifacts, and access important contract information such as addresses and blueprints.
+It offers a straightforward API to compile, load, apply parameters and evaluate
+smart contracts locally. The build process creates all required files for
+integration with off-chain libraries like pycardano and LucidEvolution. Key
+features include the ability to build validators from Python files, apply
+parameters during or after compilation, store and load compilation artifacts,
+and access important contract information such as addresses and blueprints.
 
 # Quantitative Metrics
 
 ## Metrics using Gastronomy
 
-We analysed the `UPLC` code generated by OpShin for a sample validator which adds number 1 to the input that is passed, using `Gastronomy` as the `UPLC` debugger.We also examined the intermediate language, Pluto, during the process.
+We analysed the `UPLC` code generated by OpShin for a sample validator which
+adds number 1 to the input that is passed, using `Gastronomy` as the `UPLC`
+debugger.We also examined the intermediate language, Pluto, during the process.
 
 ```python
 def validator(n : int)-> int:
@@ -107,7 +131,9 @@ Below is the Pluto output for the validator function:
 )
 ```
 
-The two variables `n_1` and `validator_0` represents the variable `n` and validator name `validator` in the function respectively and are not removed as part of the optimizations.
+The two variables `n_1` and `validator_0` represents the variable `n` and
+validator name `validator` in the function respectively and are not removed as
+part of the optimizations.
 
 Below is the UPLC output for the validator function:
 
@@ -171,15 +197,19 @@ Below is the UPLC output for the validator function:
 )
 ```
 
-The two lambda functions, `n_1` and `validator_0`, correspond to the variables named `n` and `validator`, respectively.
-However, these variables are not being used.
-While OpShin supports various levels of optimization, which typically removes dead variables and constants, these particular variables are not removed due to the way OpShin is designed.
-This behavior ensures that these variables remain accessible, but it may also lead to larger script sizes than necessary.
+The two lambda functions, `n_1` and `validator_0`, correspond to the variables
+named `n` and `validator`, respectively. However, these variables are not being
+used. While OpShin supports various levels of optimization, which typically
+removes dead variables and constants, these particular variables are not removed
+due to the way OpShin is designed. This behavior ensures that these variables
+remain accessible, but it may also lead to larger script sizes than necessary.
 
 # Code Coverage Percentage
 
-We conducted a code coverage analysis for the OpShin project using the `pytest-cov` tool.
-Code coverage is a metric that helps to understand which parts of the codebase are exercised by the test suite, allowing us to identify untested areas.
+We conducted a code coverage analysis for the OpShin project using the
+`pytest-cov` tool. Code coverage is a metric that helps to understand which
+parts of the codebase are exercised by the test suite, allowing us to identify
+untested areas.
 
 The following details shows the results of the code coverage assessment:
 
@@ -243,27 +273,34 @@ TOTAL                                               4374    471   1802    152   
 
 # Manual Review Findings
 
-The document herein is provided as an interim update detailing the findings of our ongoing audit process on the OpShin repository.
-It is crucial to understand that this document does not constitute the final audit report.
-The contents are meant to offer a preliminary insight into our findings up to this point and are subject to change as our
-audit progresses.
+The document herein is provided as an interim update detailing the findings of
+our ongoing audit process on the OpShin repository. It is crucial to understand
+that this document does not constitute the final audit report. The contents are
+meant to offer a preliminary insight into our findings up to this point and are
+subject to change as our audit progresses.
 
 ## Summary of Current Findings Across Categories
 
 1. Security - 0
-2. Performance - 2
-3. Maintainability - 3
+2. Performance - 2 (Finding01,05)
+3. Maintainability - 3 (Finding02,03,04)
 4. Others - 0
 
-# Recommendations for Improvements
+# Findings and Recommendations for Improvements
 
 ## Finding01 - Improving Error Clarity
 
-While the `opshin eval` command provides a valuable tool for evaluating scripts in Python, its error reporting can be enhanced to provide more user-friendly and informative feedback.
-Currently, when incorrect arguments or mismatched types are provided, the error messages may not clearly indicate the source or nature of the problem.
-We recommend implementing more specific error messages that pinpoint the problematic argument, indicate its position, and clearly state the expected type.
-Additionally, echoing the provided input, and suggesting corrections, for detailed debugging information could significantly improve the user experience and reduce troubleshooting time.
-These enhancements would make the tool more accessible, especially for developers new to OpShin or smart contract development on Cardano.
+While the `opshin eval` command provides a valuable tool for evaluating scripts
+in Python, its error reporting can be enhanced to provide more user-friendly and
+informative feedback. Currently, when incorrect arguments or mismatched types
+are provided, the error messages may not clearly indicate the source or nature
+of the problem. We recommend implementing more specific error messages that
+pinpoint the problematic argument, indicate its position, and clearly state the
+expected type. Additionally, echoing the provided input, and suggesting
+corrections, for detailed debugging information could significantly improve the
+user experience and reduce troubleshooting time. These enhancements would make
+the tool more accessible, especially for developers new to OpShin or smart
+contract development on Cardano.
 
 ## Recommendation
 
@@ -284,46 +321,89 @@ Error Encountered:
 
         `ValueError: Expected hexadecimal CBOR representation of plutus datum but could not transform hex string to bytes`.
 
-The error is caused by the second argument, where "None" is passed instead of a valid Plutus data object for Nothing.
-The error message could be improved by providing a clear example of how to pass parameters correctly in JSON format.
+The error is caused by the second argument, where "None" is passed instead of a
+valid Plutus data object for Nothing. The error message could be improved by
+providing a clear example of how to pass parameters correctly in JSON format.
 
 ## Finding02 - Attaching file name to title in '.json' file
 
-At present, the `opshin build` command compiles the validator, creates a target "build" directory and writes the artifacts to the build folder under the file name.
-The `blueprint.json` file is created, containing the compiled code, datum, and redeemer details.
-However, the field `title` in the blueprint.json file will always remain as "validator" as being assigned in the code.
-Suppose there is a function with name other than "validator", and when it is compiled using `opshin build lib` as expected by the OpShin language, the build artifacts will still have the title as "Validator" instead of the function name.
+At present, the `opshin build` command compiles the validator, creates a target
+"build" directory and writes the artifacts to the build folder under the file
+name. The `blueprint.json` file is created, containing the compiled code, datum,
+and redeemer details. However, the field `title` in the blueprint.json file will
+always remain as "validator" as being assigned in the code. Suppose there is a
+function with name other than "validator", and when it is compiled using `opshin
+build lib` as expected by the OpShin language, the build artifacts will still
+have the title as "Validator" instead of the function name.
 
 ## Recommendation
 
-Although the file `blueprint.json` is primarily used for off-chain coding purposes, adding the validator's file name or function name along with the keyword 'Validator' as a title (e.g., Validator/assert_sum) would be helpful for debugging and referencing during off-chain validation.
+Although the file `blueprint.json` is primarily used for off-chain coding
+purposes, adding the validator's file name or function name along with the
+keyword 'Validator' as a title (e.g., Validator/assert_sum) would be helpful for
+debugging and referencing during off-chain validation.
 
 ## Finding03 - Pretty Print generated UPLC and Pluto
 
-When the OpShin code is compiled to `UPLC` using the `opshin eval_uplc` or `opshin compile` commands, the generated `UPLC` code is not formatted in a 'pretty-printed' form.
-Similarly, when compiled to `Pluto` using the `opshin compile_pluto` command, the resulting code is also not presented in a 'pretty-printed' format.
-Instead, it is output directly to the terminal in a compact, unformatted style.
-This lack of formatting makes it more challenging to analyze or debug the resulting `UPLC` code, as the structure and readability of the code are compromised, which can hinder examination.
+When the OpShin code is compiled to `UPLC` using the `opshin eval_uplc` or
+`opshin compile` commands, the generated `UPLC` code is not formatted in a
+'pretty-printed' form. Similarly, when compiled to `Pluto` using the `opshin
+compile_pluto` command, the resulting code is also not presented in a
+'pretty-printed' format. Instead, it is output directly to the terminal in a
+compact, unformatted style. This lack of formatting makes it more challenging to
+analyze or debug the resulting `UPLC` code, as the structure and readability of
+the code are compromised, which can hinder examination.
 
 ## Recommendation
 
-To improve the development experience, it would be beneficial to implement a method or tool that formats the `UPLC` output and `Pluto` output and dumps it into a folder for each validator for easier interpretation and review.
+To improve the development experience, it would be beneficial to implement a
+method or tool that formats the `UPLC` output and `Pluto` output and dumps it
+into a folder for each validator for easier interpretation and review.
 
 ## Finding04 - Improve Documentation on optimization level
 
-Currently, there is no clear documentation detailing the different optimization levels and the specific constraints that are enabled with each level.
-Providing this information would benefit users of OpShin, as it would give them a better understanding of which optimization configuration to choose based on their requirement.
+Currently, there is no clear documentation detailing the different optimization
+levels and the specific constraints that are enabled with each level.  
+Providing
+this information would benefit users of OpShin, as it would give them a better
+understanding of which optimization configuration to choose based on their
+requirement.
 
 ## Recommendation
 
-The idea behind different Optimization levels(O1,O2,O3) and how the `UPLC` differs with each optimization level can be clearly documented with simple examples.
+The idea behind different Optimization levels(O1,O2,O3) and how the `UPLC`
+differs with each optimization level can be clearly documented with simple
+examples.
 
 ## Finding05 - Effect of optimization level on build output
 
-When building compiled code, OpShin creates the artifacts based on the default optimization level O1, where the conditions set are `constant_folding=False` and `remove_dead_code=True`. As a result, the output UPLC contains more information than necessary, and therefore, the generated CBOR will also be larger. This might increase the script size and make debugging harder when used in off-chain transactions.
+When building compiled code, OpShin creates the artifacts based on the default
+optimization level O1, where the conditions set are `constant_folding=False` and
+`remove_dead_code=True`.
+
+As a result, the output UPLC contains more information
+than necessary, and therefore, the generated CBOR will also be larger.
+This might increase the script size and makes debugging harder when used in off-chain
+transactions.
 
 ## Recommendation
 
-1. When building compiled code, OpShin could use the most aggressive optimizer, O3, as the default optimization configuration. This would allow users to directly utilize the optimized code without needing to specify any optimization levels during the build process.
+When building compiled code, OpShin could use the most aggressive optimizer,
+O3, as the default optimization configuration.
+This would allow users to directly utilize the optimized code without needing to specify any
+optimization levels during the build process.
 
-2. Another option is to have a build output that contains unoptimized and optimized CBOR seperately, which would be much more useful when debugging production contracts.
+# General Recommendations
+
+1. Currently, there are several optimizations levels and optimization-related flags.
+   We suggest reducing this to a single optimization flag, which would make builds much easier to reproduce.
+   If you want to keep the various options for debugging reasons, then we suggest an additional
+   `-optimize` flag which acts as a sane default for optimization.
+
+2. A build output that contains both unoptimized and optimized UPLC CBOR is much more useful when debugging production contracts.
+   Though there is currently no standard format for such an output, and developers can simply generate both by running the build command twice,
+   a single high-level command that creates a Python or TS/JS artifacts directly could improve the developer experience a lot as that is what most developers will want.
+
+3. The conversion process to Pluto/Untyped Plutus Core (UPLC) is a complex and crucial step that could potentially contain vulnerabilities.
+   Given its significance in the overall system, we strongly recommend prioritizing a comprehensive audit of this specific conversion process.
+   This proactive measure would provide an additional layer of assurance.
