@@ -33,20 +33,21 @@ as running it on-chain.
 ### Limitations
 
 The OpShin language is a subset of python, having the following limitations:
- * User-defined symbols can only be imported using `from <pkg> import *`. `import <pkg>` isn't supported.
- * Importing some builtins 
- * Mutual recursion isn't supported
- * Classes can't inherit
- * Tuples can't contain heterogenous types
- * Containers can't contain function values
- * Compiler errors are throw immediately when encountered instead of being collected 
- * ...
+
+   - User-defined symbols can only be imported using `from <pkg> import *`. `import <pkg>` isn't supported.
+   - Mutual recursion isn't supported
+   - Classes can't inherit
+   - Tuples can't contain heterogenous types
+   - Containers can't contain function values
+   - Compiler errors are throw immediately when encountered instead of being collected 
+   - ...
 
 ### Deviations from python
 
 The limitations of OpShin don't invalidate the claim that it is a subset of python. OpShin however deviates slightly from python, making it not strictly a subset of python:
 
- * ... 
+   - ... 
+   
 ## Type System
 
 One of the limitations of using Python as-is for smart contract development is
