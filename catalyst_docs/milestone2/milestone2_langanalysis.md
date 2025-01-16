@@ -340,13 +340,13 @@ subject to change as our audit progresses.
 ## Summary of Current Findings Across Categories
 
 1. Security - 0
-2. Performance - 2 (Finding01,05)
-3. Maintainability - 3 (Finding02,03,04)
+2. Performance - 2 (01, 05)
+3. Maintainability - 3 (02, 03, 04)
 4. Others - 0
 
 # Findings and Recommendations for Improvements
 
-## Finding01 - Improving Error Clarity
+## Finding 01 - Improving Error Clarity
 
 While the `opshin eval` command provides a valuable tool for evaluating scripts
 in Python, its error reporting can be enhanced to provide more user-friendly and
@@ -360,7 +360,7 @@ user experience and reduce troubleshooting time. These enhancements would make
 the tool more accessible, especially for developers new to OpShin or smart
 contract development on Cardano.
 
-## Recommendation
+### Recommendation
 
 ```py
 def validator(datum: WithdrawDatum, redeemer: None, context: ScriptContext) -> None:
@@ -383,7 +383,7 @@ The error is caused by the second argument, where "None" is passed instead of a
 valid Plutus data object for Nothing. The error message could be improved by
 providing a clear example of how to pass parameters correctly in JSON format.
 
-## Finding02 - Attaching file name to title in '.json' file
+## Finding 02 - Attaching file name to title in '.json' file
 
 At present, the `opshin build` command compiles the validator, creates a target
 "build" directory and writes the artifacts to the build folder under the file
@@ -394,14 +394,14 @@ function with name other than "validator", and when it is compiled using `opshin
 build lib` as expected by the OpShin language, the build artifacts will still
 have the title as "Validator" instead of the function name.
 
-## Recommendation
+### Recommendation
 
 Although the file `blueprint.json` is primarily used for off-chain coding
 purposes, adding the validator's file name or function name along with the
 keyword 'Validator' as a title (e.g., Validator/assert_sum) would be helpful for
 debugging and referencing during off-chain validation.
 
-## Finding03 - Pretty Print generated UPLC and Pluto
+## Finding 03 - Pretty Print generated UPLC and Pluto
 
 When the OpShin code is compiled to `UPLC` using the `opshin eval_uplc` or
 `opshin compile` commands, the generated `UPLC` code is not formatted in a
@@ -414,7 +414,7 @@ the code are compromised, which can hinder examination.
 
 Also all builtins seem to be injected regardless of use. This makes inspecting the generated output more difficult without dead var elimination turned on. Dead var elimination might have however remove parts of code that the user actually expects to be present.
 
-## Recommendation
+### Recommendation
 
 To improve the development experience, it would be beneficial to implement a
 method or tool that formats the `UPLC` output and `Pluto` output and dumps it
@@ -422,7 +422,7 @@ into a folder for each validator for easier interpretation and review.
 
 Variable names should be improved, and only the used builtins should be injected.
 
-## Finding04 - Improve Documentation on optimization level
+## Finding 04 - Improve Documentation on optimization level
 
 Currently, there is no clear documentation detailing the different optimization
 levels and the specific constraints that are enabled with each level.  
@@ -431,13 +431,13 @@ this information would benefit users of OpShin, as it would give them a better
 understanding of which optimization configuration to choose based on their
 requirement.
 
-## Recommendation
+### Recommendation
 
 The idea behind different Optimization levels(O1,O2,O3) and how the `UPLC`
 differs with each optimization level can be clearly documented with simple
 examples.
 
-## Finding05 - Effect of optimization level on build output
+## Finding 05 - Effect of optimization level on build output
 
 When building compiled code, OpShin creates the artifacts based on the default
 optimization level O1, where the conditions set are `constant_folding=False` and
@@ -448,7 +448,7 @@ than necessary, and therefore, the generated CBOR will also be larger.
 This might increase the script size and makes debugging harder when used in off-chain
 transactions.
 
-## Recommendation
+### Recommendation
 
 When building compiled code, OpShin could use the most aggressive optimizer,
 O3, as the default optimization configuration.
@@ -457,8 +457,7 @@ optimization levels during the build process.
 
 ## Finding 06 - Lack of namespaced imports
 
-Usability/Critical
-Performance/Critical
+Categories: *Usability/Critical* and *Performance/Critical*
 
 User defined symbols can only be imported using `from <pkg> import *`, and every time such a statement is encountered the complete list of imported module statements is inlined. This can lead to a lot of duplicate statements, and quickly pollutes the global namespace with every symbol defined in every (imported) package.
 
@@ -475,26 +474,28 @@ The codebase defines a variable with the same name and type multiple times, but 
 ### Recommendation
 
 The current OpShin import mechanism is generally poorly implemented, also for builtins:
- * The `hashlib` functions are handled differently from `opshin.std`, yet there is no obvious reason why they should be treated differently
- * The `check_integrity` macro is added to the global scope with its alias name, meaning it suddenly pollutes the namespace of upstream packages.
- * Some of the builtin imports suffer from the same issue as imports of user defined symbols: duplication.
- * `Dict, List, Union` must be imported in that order from `typing`
- * The `Datum as Anything` import from `pycardano` seems to only exist to help define `Anything` for eg. IDEs, but `Anything` is actually defined elsewhere.
+
+   - The `hashlib` functions are handled differently from `opshin.std`, yet there is no obvious reason why they should be treated differently
+   - The `check_integrity` macro is added to the global scope with its alias name, meaning it suddenly pollutes the namespace of upstream packages.
+   - Some of the builtin imports suffer from the same issue as imports of user defined symbols: duplication.
+   - `Dict, List, Union` must be imported in that order from `typing`
+   - The `Datum as Anything` import from `pycardano` seems to only exist to help define `Anything` for eg. IDEs, but `Anything` is actually defined elsewhere.
 
 Though the import of builtins will be hidden behind `opshin.prelude` for most users, it is still not implemented in a maintainable way.
 
 I recommend a complete overhaul, that allows the OpShin AST to have multiple Module nodes, each with their own scope, and to implement to `import <pkg>` syntax.
 
 Nice to have: 
- * Use `.pyi` files for builtin packages, and define the actual builtin package implementation in code in importable scopes
- * OpShin specific builtins should importable in any pythonic way, even with aliases. Name resolution should be able to figure out the original builtin symbol id/name.
- * Detect which python builtins and OpShin builtins are being used, and only inject those.
- * Don't expose `@wraps_builtin` decorator
- * Builtin scope entries have "forbid override" flag, instead of having to maintain a list of forbidden overrides in `rewrite/rewrite_forbidden_overwrites.py`
+
+   - Use `.pyi` files for builtin packages, and define the actual builtin package implementation in code in importable scopes
+   - OpShin specific builtins should importable in any pythonic way, even with aliases. Name resolution should be able to figure out the original builtin symbol id/name.
+   - Detect which python builtins and OpShin builtins are being used, and only inject those.
+   - Don't expose `@wraps_builtin` decorator
+   - Builtin scope entries have "forbid override" flag, instead of having to maintain a list of forbidden overrides in `rewrite/rewrite_forbidden_overwrites.py`
 
 ## Finding 07 - Compiler version inconsistency
 
-Maintainability/Minor
+Category: *Maintainability/Minor*
 
 The compiler version is defined explicitly in both `pyproject.toml` and `opshin/__init__.py`, which can lead to accidently mismatch if the maintainers of OpShin forget to update either.
 
@@ -509,19 +510,19 @@ __version__ = importlib.metadata.version("opshin")
 
 ## Finding 08 - Migrate some utility functions
 
-Maintainability/Minor
+*Maintainability/Minor*
 
 Some utility functions defined in the `opshin` library would make more sense as part of the `uplc` or `pluthon` packages.
 
-### Recommendation
+### Recommendations
 
-Move `rec_constant_map_data()` and `rec_constant_map()` (defined in `opshin/compiler.py`) to the `uplc` package.
-Move `to_uplc_builtin()` and `to_python()` (defined in `opshin/bridge.py`) to the `uplc` package.
-Move `OVar()`, `OLambda()`, `OLet()`, `SafeLambda()`, `SafeOLambda()` and `SafeApply()` (defined in `opshin/util.py`) to the `pluthon` package.
+  - Move `rec_constant_map_data()` and `rec_constant_map()` (defined in `opshin/compiler.py`) to the `uplc` package.
+  - Move `to_uplc_builtin()` and `to_python()` (defined in `opshin/bridge.py`) to the `uplc` package.
+  - Move `OVar()`, `OLambda()`, `OLet()`, `SafeLambda()`, `SafeOLambda()` and `SafeApply()` (defined in `opshin/util.py`) to the `pluthon` package.
 
 ## Finding 09 - PlutoCompiler.visit_Pass is redundant
 
-Maintainability/Minor
+Category: *Maintainability/Minor*
 
 Compiler step 26 removes the Pass AST node, but step 27 (the *pluthon* code generation step) defines a `visit_Pass` method that seems to return the identity function.
 
@@ -531,8 +532,7 @@ Remove the `visit_Pass` method. If step 26 fails to remove all Pass AST nodes, t
 
 ## Finding 10 - Rewriting chained comparisons doesn't create copies of middle expressions
 
-Maintainability/Major
-Performance/Minor
+Categories: *Maintainability/Major* and *Performance/Minor*
 
 When rewriting `<expr-a> < <expr-b> < <expr-c>` to `(<expr-a> < <expr-b>) and (<expr-b> < <expr-c>)` in `rewrite/rewrite_comparison_chaining.py`, no copies of `<expr-b>` seem to be created, leading to the same AST node instance appearing twice in the AST.
 
@@ -546,8 +546,7 @@ This approach avoids the issue described and also avoids the recalculation of th
 
 ## Finding 11 - Simplify class boilerplate 
 
-Usability/Major
-Maintainability/Minor
+Categories: *Usability/Major* and *Maintainability/Minor*
 
 Requiring that class use the `@dataclass` decorator *and* inherit from `PlutusData` is redundant.
 
@@ -559,7 +558,7 @@ Get rid of the `@dataclass` decorator.
 
 ## Finding 12 - Compiler step 22 doesn't do anything
 
-Maintainability/Major
+Category: *Maintainability/Major*
 
 Compiler step 22 is supposed to inject `bool()`, `bytes()`, `int()`, and `str()` builtins as RawPlutExprs, but the internal types (i.e. `.constr_type()`) of those functions is `PolymorphicFunctionType`, which is immediately skipped.
 
@@ -569,7 +568,7 @@ Get rid of compiler step 22, thus getting rid of `rewrite/rewrite_inject_builtin
 
 ## Finding 13 - Type safe tuple unpacking
 
-Usability/Major
+Category: *Usability/Major*
 
 Tuple unpacking (step 7) is currently being rewritten before the ATI (aggressive type inference) step. This allows writing unpacking assignments with a mismatched number of tuple entries.
 
@@ -583,7 +582,7 @@ Perform this step after type inference. Check tuple types during the type infere
 
 ## Finding 14 - Non-friendly error message in AggressiveTypeInferencer.visit_comprehension
 
-Usability/Minor
+Category: *Usability/Minor*
 
 Error message on line 1185 of `opshin/type_inference.py` claims "Type deconstruction in for loops is not supported yet". But such for-loop specific deconstructions should be ok as they were rewritten in compiler step 7.
 
@@ -593,7 +592,7 @@ Change error message to "Type deconstruction in comprehensions is not supported 
 
 ## Finding 15 - Non-friendly error message when defining associated method on class
 
-Usability/Minor
+Category: *Usability/Minor*
 
 Writing the following OpShin code:
 ```python
@@ -611,7 +610,7 @@ Detect that the class method has zero arguments, or that the first argument isn'
 
 ## Finding 16 - Incorrect hint when using Dict[int, int] inside Union
 
-Usability/Minor
+Category: *Usability/Minor*
 
 When using `Dict[int, int]` inside a `Union` the following error is thrown: "Only Dict[Anything, Anything] or Dict is supported in Unions. Received Dict[int, int]".
 
@@ -625,7 +624,7 @@ Remove the `Dict` and `List` from the hints. Also: improve the error message whe
 
 ##  Finding 17 - Incorrect hints when using opshin eval incorrectly
 
-Usability/Minor
+Category: *Usability/Minor*
 
 When trying to evaluate a simple OpShin expression (e.g. `1 + 1`) defined in a file `example.py` using `opshin eval`, the following error is thrown: "Contract has no function called 'validator'. Make sure the compiled contract contains one function called 'validator' or eval using `opshin eval lib example.py`".
 
@@ -641,7 +640,9 @@ Remove the "or eval using `opshin eval lib example.py`" part of the first hint.
 
 ## Finding 18 - Non-friendly error message when using wrong import syntax
 
-Using `import <pkg>` or `import <pkg> as <aname>` isn’t supported and throws a non-user friendly error: "free variable '<pkg-root>' referenced before assignment in enclosing scope".
+Category: *Usability/Major*
+
+Using `import <pkg>` or `import <pkg> as <aname>` isn’t supported and throws a non-user friendly error: "free variable '\<pkg-root\>' referenced before assignment in enclosing scope".
 
 ### Recommendation
 
@@ -649,11 +650,14 @@ Improve the error message to say that the syntax is wrong and hinting at the cor
 
 ## Finding 19 - Implicit import of plt in compiler.py
 
+Category: *Maintainability/Minor*
+
 In `compiler.py`: 
-  * `plt` is made available by import all from `type_inference`
-  * and inside `type_inference.py` importing all from `typed_ast`
-  * and inside `typed_ast.py` importing all from `type_impls`
-  * and finally inside `type_impls.py` importing all from `util`. 
+
+  - `plt` is made available by import all from `type_inference`
+  - and inside `type_inference.py` importing all from `typed_ast`
+  - and inside `typed_ast.py` importing all from `type_impls`
+  - and finally inside `type_impls.py` importing all from `util`. 
 
 At the same time `CompilingNodeTransformer` and `NoOp` are imported directly from `util`. 
 
