@@ -354,6 +354,8 @@ compact, unformatted style. This lack of formatting makes it more challenging to
 analyze or debug the resulting `UPLC` code, as the structure and readability of
 the code are compromised, which can hinder examination.
 
+variables names in uplc function(adhocpattern- can be done smaller)
+
 ## Recommendation
 
 To improve the development experience, it would be beneficial to implement a
@@ -392,6 +394,101 @@ When building compiled code, OpShin could use the most aggressive optimizer,
 O3, as the default optimization configuration.
 This would allow users to directly utilize the optimized code without needing to specify any
 optimization levels during the build process.
+
+## Finding 06 - To be included
+
+Scenario : 3
+
+```python
+@dataclass()
+class Address(PlutusData):
+    street: bytes
+    city: bytes
+    zip_code: int
+
+@dataclass()
+class Employee(PlutusData):
+    name: bytes
+    age: int
+    address: Address
+```
+
+This code defines a custom class named `Address`, which shadows the built-in Address type from the Cardano ecosystem.
+It throws a type inference error. However, it should show a warning indicating that the name is shadowed.
+
+## Recommendation
+
+Implementing a warning for shadowing instead of a type inference error would help developers catch potential issues early without halting compilation.
+
+## Findings 20 - Irrelevant UPLC builtins in output
+
+Scenario 1 :
+
+```python
+def validator(n:int)-> str:
+   return str(n)
+```
+
+Compiling this Opshin code using both the default settings and the -O3 optimization flag resulted in the same output. It also includes built-in functions such as addInteger, modInteger, divideInteger, lessThanInteger, and subtractInteger, which seem irrelevant for this simple code, as it only involves casting an integer to a string.
+
+Scenario 2:
+
+```python
+def validator(datum: bytes, redeemer: None, context: ScriptContext) -> None:
+    assert datum[0] == 0, "Datum must start with null byte"
+```
+
+The UPLC of the above code includes built-in functions like addInteger, lessThanInteger, and lengthOfByteString, which seems irrelevant.
+
+## Findings 21 - Determinisim of Constructor Ids
+
+```python
+@dataclass
+class DatumOne(PlutusData):
+    CONSTR_ID = 0
+    inttype: int
+
+@dataclass
+class DatumTwo(PlutusData):
+    CONSTR_ID = 1
+    inttype: bytes
+```
+
+If the constructor ids are not mentioned , the constructor ids are randomly generated in the uplc like this
+
+```uplc
+(lam 1inttype [[(builtin constrData) (con integer 714956115)] [[(force (builtin mkCons)) [(builtin iData) (force 1inttype)]] [(builtin mkNilData) (con unit ())]]])])
+```
+
+## Findings 22 - CBOR of a custom class looks different
+
+```python
+@dataclass()
+class Address(PlutusData):
+    street: bytes
+    city: bytes
+    zip_code: int
+
+@dataclass()
+class Employee(PlutusData):
+    name: bytes
+    age: int
+    address: Address
+
+home_address = Address(b"Main St", b"Toronto", 12345)
+employee = Employee(b"Alice", 30, home_address)
+
+def validator():
+    print(employee.address.city)
+    print(employee.to_cbor().hex())
+```
+
+While deserializing the CBOR output of this code "d866821a73ce0cd79f45416c696365181ed866821ae2431e9b9f474d61696e20537447546f726f6e746f193039ffff"
+the output has ids "102" which needs to be further analysed.
+
+## Findings 23 - Function `to_cbor_hex()` not working
+
+Though `to_cbor_hex()` is defined in the file `serialisation.py`, usage of the same throws an TypeInferenceError.
 
 # General Recommendations
 
