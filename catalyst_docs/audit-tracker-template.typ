@@ -135,6 +135,7 @@ the OpShin Language.
     - [CS] `type_inference.py`: can a top-down visitor pattern be considered aggressive? (function arg types must always be defined, so this is simple upstream to downstream type propagation)
   - optimization - how effective it is written and area of improvement 
     - [CS] `optimize/optimize_const_folding.py`: some expressions might be valid python at this point, without actually passing the OpShin type checker (eg. `int(0.5)`). This leads to inconsistent behavior.
+    - [CS] `optimize/optimize_const_folding.py`: is the evaluated math consistent with the on-chain math?
     - [CS] `optimize/optimize_const_folding.py/DefinedTimesVisitor.visit_ImportFrom()`: is incrementing the number of writes of "\*" spurious?
     - [CS] `optimize/optimize_const_folding.py`: can print be assigned to a variable (thus circumventing the “print(“ in unparse output condition)? Are there other statements that shouldn’t be optimized out?
     - [CS] `optimize/optimize_remove_comments.py`: the name is confusing. Are only comments being removed, or are all constants that are statements being removed? Are comments treated as constants internally?

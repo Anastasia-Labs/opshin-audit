@@ -466,11 +466,11 @@ The following two scenarios explain why this is a critical problem.
 
 ### Scenario 1
 
-Imagine both a singular name (eg. `asset`) and a plural name (eg. `assets`) are defined somewhere in the OpShin smart contract codebase or external libraries. The programmer makes a typo and unknowingly uses the wrong variable (e.g. `asset` instead of `assets`). Due to type inference the value of the wrongly used variable might actually have a type that passes the type check (eg. both `asset` and `assets` allow calling `len()`). The program compiles and seems to work even though it doesn’t match the programmers intent.
+Imagine both a singular name (eg. `asset`) and a plural name (eg. `assets`) are defined somewhere in the OpShin smart contract codebase or external libraries. The programmer makes a typo and unknowingly uses the wrong variable (e.g. `asset` instead of `assets`). Due to type inference the value of the wrongly used variable might actually have a type that passes the type check (eg. both `asset` and `assets` allow calling `len()`). The program compiles and seems to work even though it doesn’t match the programmer's intent.
 
 ### Scenario 2
 
-The codebase defines a variable with the same name and type multiple times, but each time assigns another value. For the programmer it is ambiguous which value will actually be used when referencing the variable. The programmer doesn’t know enough about the library code being imported to intuitively figure out which variable shadows all the others.
+The codebase defines a variable with the same name and type multiple times, but each time another value is assigned. For the programmer it is ambiguous which value will actually be used when referencing the variable. The programmer doesn’t know enough about the library code being imported to intuitively figure out which variable shadows all the others.
 
 ### Recommendation
 
@@ -484,19 +484,19 @@ The current OpShin import mechanism is generally poorly implemented, also for bu
 
 Though the import of builtins will be hidden behind `opshin.prelude` for most users, it is still not implemented in a maintainable way.
 
-I recommend a complete overhaul, that allows the OpShin AST to have multiple Module nodes, each with their own scope, and to implement to `import <pkg>` syntax.
+A complete overhaul of the import mechanism is recommended, including the implementation of the `import <pkg>` syntax. The OpShin AST should be able to have multiple Module nodes, each with their own scope.
 
 Nice to have: 
 
    - Use `.pyi` files for builtin packages, and define the actual builtin package implementation in code in importable scopes
-   - OpShin specific builtins should importable in any pythonic way, even with aliases. Name resolution should be able to figure out the original builtin symbol id/name.
+   - OpShin specific builtins should be importable in any pythonic way, even with aliases. Name resolution should be able to figure out the original builtin symbol id/name.
    - Detect which python builtins and OpShin builtins are being used, and only inject those.
    - Don't expose `@wraps_builtin` decorator
-   - Builtin scope entries have "forbid override" flag, instead of having to maintain a list of forbidden overrides in `rewrite/rewrite_forbidden_overwrites.py`
+   - Builtin scope entries can be given a "forbid override" flag, instead of having to maintain a list of forbidden overrides in `rewrite/rewrite_forbidden_overwrites.py`
 
 ## Finding 07 - Compiler version inconsistency
 
-Category: *Maintainability/Minor*
+Category: *Maintainability/Minor* 
 
 The compiler version is defined explicitly in both `pyproject.toml` and `opshin/__init__.py`, which can lead to accidently mismatch if the maintainers of OpShin forget to update either.
 
@@ -511,25 +511,23 @@ __version__ = importlib.metadata.version("opshin")
 
 ## Finding 08 - Migrate some utility functions
 
-*Maintainability/Minor*
+*Maintainability/Informational*
 
 Some utility functions defined in the `opshin` library would make more sense as part of the `uplc` or `pluthon` packages.
 
-### Recommendations
-
-  - Move `rec_constant_map_data()` and `rec_constant_map()` (defined in `opshin/compiler.py`) to the `uplc` package.
-  - Move `to_uplc_builtin()` and `to_python()` (defined in `opshin/bridge.py`) to the `uplc` package.
-  - Move `OVar()`, `OLambda()`, `OLet()`, `SafeLambda()`, `SafeOLambda()` and `SafeApply()` (defined in `opshin/util.py`) to the `pluthon` package.
+  - `rec_constant_map_data()` and `rec_constant_map()` (defined in `opshin/compiler.py`) can be moved to the `uplc` package.
+  - `to_uplc_builtin()` and `to_python()` (defined in `opshin/bridge.py`) can also be moved to the `uplc` package.
+  - `OVar()`, `OLambda()`, `OLet()`, `SafeLambda()`, `SafeOLambda()` and `SafeApply()` (defined in `opshin/util.py`) can be moved to the `pluthon` package.
 
 ## Finding 09 - PlutoCompiler.visit_Pass is redundant
 
-Category: *Maintainability/Minor*
+Category: *Maintainability/Informational*
 
 Compiler step 26 removes the Pass AST node, but step 27 (the *pluthon* code generation step) defines a `visit_Pass` method that seems to return the identity function.
 
 ### Recommendation
 
-Remove the `visit_Pass` method. If step 26 fails to remove all Pass AST nodes, then the `PlutoCompiler` will throw a "Can not compile Pass" error instead of masking the improper implementation of step 26.
+Remove the `visit_Pass` method. If step 26 fails to remove all Pass AST nodes, then the `PlutoCompiler` will throw a "Can not compile Pass" error, instead of masking the improper implementation of step 26.
 
 ## Finding 10 - Rewriting chained comparisons doesn't create copies of middle expressions
 
@@ -545,19 +543,7 @@ Similar to `rewrite/rewrite_tuple_assign.py`, create temporary variables for eac
 
 This approach avoids the issue described and also avoids the recalculation of the same expression (potentially expensive).
 
-## Finding 11 - Simplify class boilerplate 
-
-Categories: *Usability/Major* and *Maintainability/Minor*
-
-Requiring that class use the `@dataclass` decorator *and* inherit from `PlutusData` is redundant.
-
-Related: both `RewriteImportPlutusData.visit_ClassDef` and `RewriteImportDataclasses.visit_ClassDef` ensure that each class is decorated with `@dataclass`, which is redundant.
-
-### Recommendation
-
-Get rid of the `@dataclass` decorator.
-
-## Finding 12 - Compiler step 22 doesn't do anything
+## Finding 11 - Compiler step 22 doesn't do anything
 
 Category: *Maintainability/Major*
 
@@ -567,7 +553,7 @@ Compiler step 22 is supposed to inject `bool()`, `bytes()`, `int()`, and `str()`
 
 Get rid of compiler step 22, thus getting rid of `rewrite/rewrite_inject_builtin_constr.py`.
 
-## Finding 13 - Type safe tuple unpacking
+## Finding 12 - Type safe tuple unpacking
 
 Category: *Usability/Major*
 
@@ -581,7 +567,7 @@ There are probably other ways this can be abused to get inconsistent behavior.
 
 Perform this step after type inference. Check tuple types during the type inference.
 
-## Finding 14 - Non-friendly error message in AggressiveTypeInferencer.visit_comprehension
+## Finding 13 - Non-friendly error message in AggressiveTypeInferencer.visit_comprehension
 
 Category: *Usability/Minor*
 
@@ -591,7 +577,7 @@ Error message on line 1185 of `opshin/type_inference.py` claims "Type deconstruc
 
 Change error message to "Type deconstruction in comprehensions is not supported yet".
 
-## Finding 15 - Non-friendly error message when defining associated method on class
+## Finding 14 - Non-friendly error message when defining associated method on class
 
 Category: *Usability/Minor*
 
@@ -609,7 +595,7 @@ leads to the following error message: "list index out of range"
 
 Detect that the class method has zero arguments, or that the first argument isn't `self`, and throw a better error message.
 
-## Finding 16 - Incorrect hint when using Dict[int, int] inside Union
+## Finding 15 - Incorrect hint when using Dict[int, int] inside Union
 
 Category: *Usability/Minor*
 
@@ -623,7 +609,7 @@ When using `List` in a similar way, a similarly incorrect hint is given.
 
 Remove the `Dict` and `List` from the hints. Also: improve the error message when using `Dict` and `List` inside `Union`.
 
-##  Finding 17 - Incorrect hints when using opshin eval incorrectly
+##  Finding 16 - Incorrect hints when using opshin eval incorrectly
 
 Category: *Usability/Minor*
 
@@ -639,7 +625,7 @@ So why is `opshin eval lib` even proposed in the first place?
 
 Remove the "or eval using `opshin eval lib example.py`" part of the first hint.
 
-## Finding 18 - Non-friendly error message when using wrong import syntax
+## Finding 17 - Non-friendly error message when using wrong import syntax
 
 Category: *Usability/Major*
 
@@ -649,7 +635,7 @@ Using `import <pkg>` or `import <pkg> as <aname>` isn’t supported and throws a
 
 Improve the error message to say that the syntax is wrong and hinting at the correct syntax.
 
-## Finding 19 - Implicit import of plt in compiler.py
+## Finding 18 - Implicit import of plt in compiler.py
 
 Category: *Maintainability/Minor*
 
