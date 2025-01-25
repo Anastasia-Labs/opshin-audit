@@ -421,7 +421,7 @@ To improve the development experience, it would be beneficial to implement a
 method or tool that formats the `UPLC` output and `Pluto` output and dumps it
 into a folder for each validator for easier interpretation and review.
 
-Variable names should be improved, and only the used builtins should be injected.
+Variable names should be improved (e.g. the adhoc pattern can be made more compact smaller), and only the used builtins should be injected. 
 
 ## Finding 04 - Improve Documentation on optimization level
 
@@ -472,6 +472,25 @@ Imagine both a singular name (eg. `asset`) and a plural name (eg. `assets`) are 
 
 The codebase defines a variable with the same name and type multiple times, but each time another value is assigned. For the programmer it is ambiguous which value will actually be used when referencing the variable. The programmer doesn’t know enough about the library code being imported to intuitively figure out which variable shadows all the others.
 
+### Scenario 3
+
+```python
+@dataclass()
+class Address(PlutusData):
+    street: bytes
+    city: bytes
+    zip_code: int
+
+@dataclass()
+class Employee(PlutusData):
+    name: bytes
+    age: int
+    address: Address
+```
+
+This code defines a custom class named `Address`, which shadows the built-in Address type from the Cardano ecosystem.
+It throws a type inference error. However, it should show a warning indicating that the name is shadowed.
+
 ### Recommendation
 
 The current OpShin import mechanism is generally poorly implemented, also for builtins:
@@ -493,6 +512,7 @@ Nice to have:
    - Detect which python builtins and OpShin builtins are being used, and only inject those.
    - Don't expose `@wraps_builtin` decorator
    - Builtin scope entries can be given a "forbid override" flag, instead of having to maintain a list of forbidden overrides in `rewrite/rewrite_forbidden_overwrites.py`
+   - Implement a warning for shadowing (instead of e.g. the type inference error  thrown in scenario 3). This would help developers catch potential issues early without halting compilation.
 
 ## Finding 07 - Compiler version inconsistency
 
@@ -651,6 +671,39 @@ At the same time `CompilingNodeTransformer` and `NoOp` are imported directly fro
 ### Recommendation
 
 Consistently used named imports in whole compiler codebase
+
+## Findings 19 - Irrelevant UPLC builtins in output
+
+```python
+def validator(datum: bytes, redeemer: None, context: ScriptContext) -> None:
+    assert datum[0] == 0, "Datum must start with null byte"
+```
+
+Compiling this Opshin code using both the default optimiser and the aggressive optimiser (-O3 optimization flag) resulted in the same output. It includes built-in functions like addInteger, lessThanInteger, and lengthOfByteString, which seems irrelevant while the logic is to access the first byte of the datum( `ByteString` ) and to check if its equal to 0.
+
+## Findings 20 - Determinisim of Constructor Ids
+
+```python
+@dataclass
+class DatumOne(PlutusData):
+    CONSTR_ID = 0
+    inttype: int
+
+@dataclass
+class DatumTwo(PlutusData):
+    CONSTR_ID = 1
+    inttype: bytes
+```
+
+If `CONSTR_ID` values are not explicitly defined for PlutusData classes, they are deterministically generated based on the class structure (e.g., field names, types, and class name) and when the classes are serialized to UPLC, constructor IDs are assigned automatically.
+
+## Recommendation:
+
+The current behavior of throwing an assertion error for duplicate `CONSTR_ID` values in Union types should be maintained. Additionally, it could be expanded to include a warning or error if no `CONSTR_ID` is provided, to alert developers about relying on automatically generated IDs.
+
+## Findings 21 - Function `to_cbor_hex()` not working
+
+Though `to_cbor_hex()` is defined in the file `serialisation.py`, usage of the same throws an `TypeInferenceError`.
 
 # General Recommendations
 
