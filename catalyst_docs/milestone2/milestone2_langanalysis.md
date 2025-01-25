@@ -581,11 +581,11 @@ Tuple unpacking (step 7) is currently being rewritten before the ATI (aggressive
 
 If there there are more names on the left side this throws a non-user friendly FreeVariableError. If there are less the rewritten code is valid, even though in python it wouldn't be valid, thus violating the expected "strict subset of python" behavior.
 
-There are probably other ways this can be abused to get inconsistent behavior.
+There might be other ways this can be abused to get inconsistent behavior.
 
 ### Recommendation
 
-Perform this step after type inference. Check tuple types during the type inference.
+Perform this step after type inference. Check tuple types during type inference.
 
 ## Finding 13 - Non-friendly error message in AggressiveTypeInferencer.visit_comprehension
 
@@ -609,11 +609,11 @@ class MyDatum(PlutusData):
         return 1
 ```
 
-leads to the following error message: "list index out of range"
+gives the following error message when compiling: "list index out of range"
 
 ### Recommendation
 
-Detect that the class method has zero arguments, or that the first argument isn't `self`, and throw a better error message.
+Detect that the class method has zero arguments, or that the first argument isn't `self`, and throw a more user friendly error message.
 
 ## Finding 15 - Incorrect hint when using Dict[int, int] inside Union
 
@@ -627,7 +627,7 @@ When using `List` in a similar way, a similarly incorrect hint is given.
 
 ### Recommendation
 
-Remove the `Dict` and `List` from the hints. Also: improve the error message when using `Dict` and `List` inside `Union`.
+Remove `Dict` and `List` from the hints. Also: improve the error message when using `Dict` and `List` inside `Union`.
 
 ##  Finding 16 - Incorrect hints when using opshin eval incorrectly
 
@@ -639,7 +639,7 @@ When subsequently trying the `opshin eval lib` command, the following error is t
 
 When trying with `opshin eval lib -fno-remove-dead-code`, the following error is thrown: "Can not evaluate a library". 
 
-So why is `opshin eval lib` even proposed in the first place?
+Why does the first hint propose using `opshin eval lib`?
 
 ### Recommendation
 
@@ -670,7 +670,7 @@ At the same time `CompilingNodeTransformer` and `NoOp` are imported directly fro
 
 ### Recommendation
 
-Consistently used named imports in whole compiler codebase
+Consistently use named imports in whole compiler codebase.
 
 ## Findings 19 - Irrelevant UPLC builtins in output
 
