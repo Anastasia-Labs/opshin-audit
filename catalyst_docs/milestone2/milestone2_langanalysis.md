@@ -34,20 +34,20 @@ as running it on-chain.
 
 The OpShin language is a subset of python, having the following limitations:
 
-   - User-defined symbols can only be imported using `from <pkg> import *`. `import <pkg>` isn't supported.
-   - Mutual recursion isn't supported
-   - Classes can't inherit
-   - Tuples can't contain heterogenous types
-   - Containers can't contain function values
-   - Compiler errors are throw immediately when encountered instead of being collected 
-   - ...
+- User-defined symbols can only be imported using `from <pkg> import *`. `import <pkg>` isn't supported.
+- Mutual recursion isn't supported
+- Classes can't inherit
+- Tuples can't contain heterogenous types
+- Containers can't contain function values
+- Compiler errors are throw immediately when encountered instead of being collected
+- ...
 
 ### Deviations from python
 
 The limitations of OpShin don't invalidate the claim that it is a subset of python. OpShin however deviates slightly from python, making it not strictly a subset of python:
 
-   - ... 
-   
+- ...
+
 ## Type System
 
 One of the limitations of using Python as-is for smart contract development is
@@ -115,42 +115,44 @@ and access important contract information such as addresses and blueprints.
 
 Because Opshin syntax is a subset of valid python syntax, Opshin uses the python AST parsing function built into the python `ast` standard library. This completely eliminates the need to implement the first two steps of the compilation pipeline: tokenization and AST building.
 
-Once an entrypoint is parsed into an AST, 27 distinct AST transformations are applied that weed out syntax and type errors, and gradually transform the AST into something that can easily be converted into *pluthon*. The last transformation step performs the actual conversion to a *pluthon* AST. The conversion to the on-chain *UPLC* format is handled by the *pluthon* library and is out of scope of this library.
+Once an entrypoint is parsed into an AST, 27 distinct AST transformations are applied that weed out syntax and type errors, and gradually transform the AST into something that can easily be converted into _pluthon_. The last transformation step performs the actual conversion to a _pluthon_ AST. The conversion to the on-chain _UPLC_ format is handled by the _pluthon_ library and is out of scope of this library.
 
 Each of the following steps is implemented using a recursive top-down visitor pattern, where each visit is responsible for continuing the recursion of child nodes. This is the same approach as the python internals.
 
-  1. Resolves `ImportFrom` statements respecting the `from <pkg> import *` format, mimicking the python module resolution behavior to get the module file path, then calling the standard `parse()` method, and recursively resolving nested `from <pkg> import *` statements in the imported modules. This step ignores imports of builtin modules. The `from <pkg> import *` AST node is transformed into a list of statements, all sharing the same scope.
-  2. Throws an error when detecting a `return` statement outside a function definition.
-  3. (Optional) Subexpressions that can be evaluated to constant python values are replaced by their `Constant(value)` equivalents.
-  4. Removes a deprecated python 3.8 AST node
-  5. Replaces augmented assignment by their simple assignment equivalents. Eg. `a += 1` is tranformed into `a = a + 1`
-  6. Replaces comparison chains by a series of binary operations. Eg. `a < b < c` is transformed into `(a < b) and (b < c)`
-  7. Replaces tuple unpacking expressions in assignments and for-loops, by multiple single assignments. Eg. `(a, b) = <tuple-expr>` is transformed into:
-    ```
-    <tmp-var> = <tuple-expr>
-    a = <tmp-var>[0]
-    b = <tmp-var>[1]
-    ```
-  8. Detects `from opshin.std.integrity import check_integrity` and `from opshin.std.integrity import check_integrity as <name>` statements and injects the `check_integrity` macro into the top-level scope.
-  9. Ensures that all classes inherit `PlutusData` and that `PlutusData` is imported using `from pycardano import Datum as Anything, PlutusData`
-  10. Replaces hashlib functions (`sha256`, `sha3_256`, `blake2b`) imported using `from hashlib import <hash-fn> as <aname>` by raw *pluthon* lambda function definitions.
-  11. Detects classes with methods, ensures that `Self` is imported using `from typing import Self`, and changes adds a class reference to the `Self` AST nodes. Also ensures `List`, `Dict` and `Union` are imported using `from typing import Dict, List, Union`.
-  12. Throws an error if some of the builtin symbols are shadowed.
-  13. Ensures that classes are decorated with `@dataclass` and that `@dataclass` is imported using `from dataclasses import dataclass`.
-  14. Injects the *pluthon* implementations of a subset of python builtins before the main module body.
-  15. Explicitly casts anything that should be boolean (eg. if-then-else conditions, comparison bin ops) by injecting `bool()`
-  16. Sets the `orig_name` property of Name, FunctionDef and ClassDef AST nodes.
-  17. Gives each variable a unique name by appending a scope id.
-  18. Aggressive Type Inference: Visits each AST node to determine its type, setting its `.typ` property in the process.
-  19. Turns empty lists into raw *pluthon* expressions.
-  20. Turns empty dicts into raw *pluthon* expressions.
-  21. Ensures that a function that is decorated with a single amed decorated, is decorated with the `@wraps_builtin` decorator, which must be imported using `from opshin.bridge import wraps_builtin`. Such decorated functions are then converted into raw *pluthon* expressions.
-  22. Injects the `bytes()`, `int()`, `bool()` and `str()` cast builtins.
-  23. Removes assignments of types, classes and polymorphic functions (eg. `MyList = List[int]`)
-  24. (Optional) Iteratively collects all used variables and removes the unused variables. The iteration is stopped if the set of remaining used variables remains unchanged.
-  25. (Optional) Removes constant statements.
-  26. Removes Pass AST nodes.
-  27. Generates the *pluthon* AST
+1. Resolves `ImportFrom` statements respecting the `from <pkg> import *` format, mimicking the python module resolution behavior to get the module file path, then calling the standard `parse()` method, and recursively resolving nested `from <pkg> import *` statements in the imported modules. This step ignores imports of builtin modules. The `from <pkg> import *` AST node is transformed into a list of statements, all sharing the same scope.
+2. Throws an error when detecting a `return` statement outside a function definition.
+3. (Optional) Subexpressions that can be evaluated to constant python values are replaced by their `Constant(value)` equivalents.
+4. Removes a deprecated python 3.8 AST node
+5. Replaces augmented assignment by their simple assignment equivalents. Eg. `a += 1` is tranformed into `a = a + 1`
+6. Replaces comparison chains by a series of binary operations. Eg. `a < b < c` is transformed into `(a < b) and (b < c)`
+7. Replaces tuple unpacking expressions in assignments and for-loops, by multiple single assignments. Eg. `(a, b) = <tuple-expr>` is transformed into:
+
+   ```
+   <tmp-var> = <tuple-expr>
+   a = <tmp-var>[0]
+   b = <tmp-var>[1]
+   ```
+
+8. Detects `from opshin.std.integrity import check_integrity` and `from opshin.std.integrity import check_integrity as <name>` statements and injects the `check_integrity` macro into the top-level scope.
+9. Ensures that all classes inherit `PlutusData` and that `PlutusData` is imported using `from pycardano import Datum as Anything, PlutusData`
+10. Replaces hashlib functions (`sha256`, `sha3_256`, `blake2b`) imported using `from hashlib import <hash-fn> as <aname>` by raw _pluthon_ lambda function definitions.
+11. Detects classes with methods, ensures that `Self` is imported using `from typing import Self`, and changes adds a class reference to the `Self` AST nodes. Also ensures `List`, `Dict` and `Union` are imported using `from typing import Dict, List, Union`.
+12. Throws an error if some of the builtin symbols are shadowed.
+13. Ensures that classes are decorated with `@dataclass` and that `@dataclass` is imported using `from dataclasses import dataclass`.
+14. Injects the _pluthon_ implementations of a subset of python builtins before the main module body.
+15. Explicitly casts anything that should be boolean (eg. if-then-else conditions, comparison bin ops) by injecting `bool()`
+16. Sets the `orig_name` property of Name, FunctionDef and ClassDef AST nodes.
+17. Gives each variable a unique name by appending a scope id.
+18. Aggressive Type Inference: Visits each AST node to determine its type, setting its `.typ` property in the process.
+19. Turns empty lists into raw _pluthon_ expressions.
+20. Turns empty dicts into raw _pluthon_ expressions.
+21. Ensures that a function that is decorated with a single amed decorated, is decorated with the `@wraps_builtin` decorator, which must be imported using `from opshin.bridge import wraps_builtin`. Such decorated functions are then converted into raw _pluthon_ expressions.
+22. Injects the `bytes()`, `int()`, `bool()` and `str()` cast builtins.
+23. Removes assignments of types, classes and polymorphic functions (eg. `MyList = List[int]`)
+24. (Optional) Iteratively collects all used variables and removes the unused variables. The iteration is stopped if the set of remaining used variables remains unchanged.
+25. (Optional) Removes constant statements.
+26. Removes Pass AST nodes.
+27. Generates the _pluthon_ AST
 
 # Quantitative Metrics
 
@@ -421,7 +423,7 @@ To improve the development experience, it would be beneficial to implement a
 method or tool that formats the `UPLC` output and `Pluto` output and dumps it
 into a folder for each validator for easier interpretation and review.
 
-Variable names should be improved (e.g. the adhoc pattern can be made more compact smaller), and only the used builtins should be injected. 
+Variable names should be improved (e.g. the adhoc pattern can be made more compact smaller), and only the used builtins should be injected.
 
 ## Finding 04 - Improve Documentation on optimization level
 
@@ -458,7 +460,7 @@ optimization levels during the build process.
 
 ## Finding 06 - Lack of namespaced imports
 
-Categories: *Usability/Critical* and *Performance/Critical*
+Categories: _Usability/Critical_ and _Performance/Critical_
 
 User defined symbols can only be imported using `from <pkg> import *`, and every time such a statement is encountered the complete list of imported module statements is inlined. This can lead to a lot of duplicate statements, and quickly pollutes the global namespace with every symbol defined in every (imported) package.
 
@@ -491,32 +493,44 @@ class Employee(PlutusData):
 This code defines a custom class named `Address`, which shadows the built-in Address type from the Cardano ecosystem.
 It throws a type inference error. However, it should show a warning indicating that the name is shadowed.
 
+### Scenario 4
+
+The code checks for the length of imports, empty asnames, and \* as a name (lines 76–84), but it does not check for duplicate imports. This allows the same module to be imported multiple times without warnings or errors.
+
+```python
+from typing import Dict, List, Union
+from typing import Dict, List, Union
+from typing import Dict, List, Union
+```
+
+These imports can be given any number of times, leading to redundant code.
+
 ### Recommendation
 
 The current OpShin import mechanism is generally poorly implemented, also for builtins:
 
-   - The `hashlib` functions are handled differently from `opshin.std`, yet there is no obvious reason why they should be treated differently
-   - The `check_integrity` macro is added to the global scope with its alias name, meaning it suddenly pollutes the namespace of upstream packages.
-   - Some of the builtin imports suffer from the same issue as imports of user defined symbols: duplication.
-   - `Dict, List, Union` must be imported in that order from `typing`
-   - The `Datum as Anything` import from `pycardano` seems to only exist to help define `Anything` for eg. IDEs, but `Anything` is actually defined elsewhere.
+- The `hashlib` functions are handled differently from `opshin.std`, yet there is no obvious reason why they should be treated differently
+- The `check_integrity` macro is added to the global scope with its alias name, meaning it suddenly pollutes the namespace of upstream packages.
+- Some of the builtin imports suffer from the same issue as imports of user defined symbols: duplication.
+- `Dict, List, Union` must be imported in that order from `typing`
+- The `Datum as Anything` import from `pycardano` seems to only exist to help define `Anything` for eg. IDEs, but `Anything` is actually defined elsewhere.
 
 Though the import of builtins will be hidden behind `opshin.prelude` for most users, it is still not implemented in a maintainable way.
 
 A complete overhaul of the import mechanism is recommended, including the implementation of the `import <pkg>` syntax. The OpShin AST should be able to have multiple Module nodes, each with their own scope.
 
-Nice to have: 
+Nice to have:
 
-   - Use `.pyi` files for builtin packages, and define the actual builtin package implementation in code in importable scopes
-   - OpShin specific builtins should be importable in any pythonic way, even with aliases. Name resolution should be able to figure out the original builtin symbol id/name.
-   - Detect which python builtins and OpShin builtins are being used, and only inject those.
-   - Don't expose `@wraps_builtin` decorator
-   - Builtin scope entries can be given a "forbid override" flag, instead of having to maintain a list of forbidden overrides in `rewrite/rewrite_forbidden_overwrites.py`
-   - Implement a warning for shadowing (instead of e.g. the type inference error  thrown in scenario 3). This would help developers catch potential issues early without halting compilation.
+- Use `.pyi` files for builtin packages, and define the actual builtin package implementation in code in importable scopes
+- OpShin specific builtins should be importable in any pythonic way, even with aliases. Name resolution should be able to figure out the original builtin symbol id/name.
+- Detect which python builtins and OpShin builtins are being used, and only inject those.
+- Don't expose `@wraps_builtin` decorator
+- Builtin scope entries can be given a "forbid override" flag, instead of having to maintain a list of forbidden overrides in `rewrite/rewrite_forbidden_overwrites.py`
+- Implement a warning for shadowing (instead of e.g. the type inference error thrown in scenario 3). This would help developers catch potential issues early without halting compilation.
 
 ## Finding 07 - Compiler version inconsistency
 
-Category: *Maintainability/Minor* 
+Category: _Maintainability/Minor_
 
 The compiler version is defined explicitly in both `pyproject.toml` and `opshin/__init__.py`, which can lead to accidently mismatch if the maintainers of OpShin forget to update either.
 
@@ -531,19 +545,19 @@ __version__ = importlib.metadata.version("opshin")
 
 ## Finding 08 - Migrate some utility functions
 
-*Maintainability/Informational*
+_Maintainability/Informational_
 
 Some utility functions defined in the `opshin` library would make more sense as part of the `uplc` or `pluthon` packages.
 
-  - `rec_constant_map_data()` and `rec_constant_map()` (defined in `opshin/compiler.py`) can be moved to the `uplc` package.
-  - `to_uplc_builtin()` and `to_python()` (defined in `opshin/bridge.py`) can also be moved to the `uplc` package.
-  - `OVar()`, `OLambda()`, `OLet()`, `SafeLambda()`, `SafeOLambda()` and `SafeApply()` (defined in `opshin/util.py`) can be moved to the `pluthon` package.
+- `rec_constant_map_data()` and `rec_constant_map()` (defined in `opshin/compiler.py`) can be moved to the `uplc` package.
+- `to_uplc_builtin()` and `to_python()` (defined in `opshin/bridge.py`) can also be moved to the `uplc` package.
+- `OVar()`, `OLambda()`, `OLet()`, `SafeLambda()`, `SafeOLambda()` and `SafeApply()` (defined in `opshin/util.py`) can be moved to the `pluthon` package.
 
 ## Finding 09 - PlutoCompiler.visit_Pass is redundant
 
-Category: *Maintainability/Informational*
+Category: _Maintainability/Informational_
 
-Compiler step 26 removes the Pass AST node, but step 27 (the *pluthon* code generation step) defines a `visit_Pass` method that seems to return the identity function.
+Compiler step 26 removes the Pass AST node, but step 27 (the _pluthon_ code generation step) defines a `visit_Pass` method that seems to return the identity function.
 
 ### Recommendation
 
@@ -551,7 +565,7 @@ Remove the `visit_Pass` method. If step 26 fails to remove all Pass AST nodes, t
 
 ## Finding 10 - Rewriting chained comparisons doesn't create copies of middle expressions
 
-Categories: *Maintainability/Major* and *Performance/Minor*
+Categories: _Maintainability/Major_ and _Performance/Minor_
 
 When rewriting `<expr-a> < <expr-b> < <expr-c>` to `(<expr-a> < <expr-b>) and (<expr-b> < <expr-c>)` in `rewrite/rewrite_comparison_chaining.py`, no copies of `<expr-b>` seem to be created, leading to the same AST node instance appearing twice in the AST.
 
@@ -565,7 +579,7 @@ This approach avoids the issue described and also avoids the recalculation of th
 
 ## Finding 11 - Compiler step 22 doesn't do anything
 
-Category: *Maintainability/Major*
+Category: _Maintainability/Major_
 
 Compiler step 22 is supposed to inject `bool()`, `bytes()`, `int()`, and `str()` builtins as RawPlutExprs, but the internal types (i.e. `.constr_type()`) of those functions is `PolymorphicFunctionType`, which is immediately skipped.
 
@@ -575,7 +589,7 @@ Get rid of compiler step 22, thus getting rid of `rewrite/rewrite_inject_builtin
 
 ## Finding 12 - Type safe tuple unpacking
 
-Category: *Usability/Major*
+Category: _Usability/Major_
 
 Tuple unpacking (step 7) is currently being rewritten before the ATI (aggressive type inference) step. This allows writing unpacking assignments with a mismatched number of tuple entries.
 
@@ -589,7 +603,7 @@ Perform this step after type inference. Check tuple types during type inference.
 
 ## Finding 13 - Non-friendly error message in AggressiveTypeInferencer.visit_comprehension
 
-Category: *Usability/Minor*
+Category: _Usability/Minor_
 
 Error message on line 1185 of `opshin/type_inference.py` claims "Type deconstruction in for loops is not supported yet". But such for-loop specific deconstructions should be ok as they were rewritten in compiler step 7.
 
@@ -599,9 +613,10 @@ Change error message to "Type deconstruction in comprehensions is not supported 
 
 ## Finding 14 - Non-friendly error message when defining associated method on class
 
-Category: *Usability/Minor*
+Category: _Usability/Minor_
 
 Writing the following OpShin code:
+
 ```python
 @dataclass
 class MyDatum(PlutusData):
@@ -617,7 +632,7 @@ Detect that the class method has zero arguments, or that the first argument isn'
 
 ## Finding 15 - Incorrect hint when using Dict[int, int] inside Union
 
-Category: *Usability/Minor*
+Category: _Usability/Minor_
 
 When using `Dict[int, int]` inside a `Union` the following error is thrown: "Only Dict[Anything, Anything] or Dict is supported in Unions. Received Dict[int, int]".
 
@@ -629,15 +644,15 @@ When using `List` in a similar way, a similarly incorrect hint is given.
 
 Remove `Dict` and `List` from the hints. Also: improve the error message when using `Dict` and `List` inside `Union`.
 
-##  Finding 16 - Incorrect hints when using opshin eval incorrectly
+## Finding 16 - Incorrect hints when using opshin eval incorrectly
 
-Category: *Usability/Minor*
+Category: _Usability/Minor_
 
 When trying to evaluate a simple OpShin expression (e.g. `1 + 1`) defined in a file `example.py` using `opshin eval`, the following error is thrown: "Contract has no function called 'validator'. Make sure the compiled contract contains one function called 'validator' or eval using `opshin eval lib example.py`".
 
-When subsequently trying the `opshin eval lib` command, the following error is thrown: "Libraries must have dead code removal disabled (-fno-remove-dead-code)". 
+When subsequently trying the `opshin eval lib` command, the following error is thrown: "Libraries must have dead code removal disabled (-fno-remove-dead-code)".
 
-When trying with `opshin eval lib -fno-remove-dead-code`, the following error is thrown: "Can not evaluate a library". 
+When trying with `opshin eval lib -fno-remove-dead-code`, the following error is thrown: "Can not evaluate a library".
 
 Why does the first hint propose using `opshin eval lib`?
 
@@ -647,7 +662,7 @@ Remove the "or eval using `opshin eval lib example.py`" part of the first hint.
 
 ## Finding 17 - Non-friendly error message when using wrong import syntax
 
-Category: *Usability/Major*
+Category: _Usability/Major_
 
 Using `import <pkg>` or `import <pkg> as <aname>` isn’t supported and throws a non-user friendly error: "free variable '\<pkg-root\>' referenced before assignment in enclosing scope".
 
@@ -657,16 +672,16 @@ Improve the error message to say that the syntax is wrong and hinting at the cor
 
 ## Finding 18 - Implicit import of plt in compiler.py
 
-Category: *Maintainability/Minor*
+Category: _Maintainability/Minor_
 
-In `compiler.py`: 
+In `compiler.py`:
 
-  - `plt` is made available by import all from `type_inference`
-  - and inside `type_inference.py` importing all from `typed_ast`
-  - and inside `typed_ast.py` importing all from `type_impls`
-  - and finally inside `type_impls.py` importing all from `util`. 
+- `plt` is made available by import all from `type_inference`
+- and inside `type_inference.py` importing all from `typed_ast`
+- and inside `typed_ast.py` importing all from `type_impls`
+- and finally inside `type_impls.py` importing all from `util`.
 
-At the same time `CompilingNodeTransformer` and `NoOp` are imported directly from `util`. 
+At the same time `CompilingNodeTransformer` and `NoOp` are imported directly from `util`.
 
 ### Recommendation
 
@@ -697,13 +712,210 @@ class DatumTwo(PlutusData):
 
 If `CONSTR_ID` values are not explicitly defined for PlutusData classes, they are deterministically generated based on the class structure (e.g., field names, types, and class name) and when the classes are serialized to UPLC, constructor IDs are assigned automatically.
 
-## Recommendation:
+## Recommendation
 
 The current behavior of throwing an assertion error for duplicate `CONSTR_ID` values in Union types should be maintained. Additionally, it could be expanded to include a warning or error if no `CONSTR_ID` is provided, to alert developers about relying on automatically generated IDs.
 
 ## Findings 21 - Function `to_cbor_hex()` not working
 
 Though `to_cbor_hex()` is defined in the file `serialisation.py`, usage of the same throws an `TypeInferenceError`.
+
+## Findings 22 - Relative Imports Not Supported
+
+Relative imports (e.g., from .module import x) are not supported because the package parameter is always set to `None` in the method `import_module` in `rewrite/rewrite_import.py`. This was tested by creating two files inside a package like below and they did not work.
+
+```python
+# example_module.py
+from opshin.prelude import *
+
+@dataclass
+class ExampleClass(PlutusData):
+    CONSTR_ID = 0
+    pubkeyhash: PubKeyHash
+
+def validator():
+    pass
+```
+
+```python
+# example_relativeimport.py
+from .example_module import ExampleClass
+
+def validator():
+    obj = ExampleClass(pubkeyhash = "12344")
+    print("Rewrite import test:", obj)
+```
+
+## Recommendation
+
+1. Modify the code to handle relative imports by correctly setting the package parameter according to the code.
+
+2. Add documentation clarifying how to use relative imports.
+
+## Findings 23 - Assumption of **spec** for the Parent Module in rewrite/rewrite_import.py
+
+1. The code assumes that `__spec__` is always available for the parent module. However, this may not always be true, especially in dynamically created modules.
+
+2. The code does not handle cases where `spec.loader.exec_module` fails to load the module.
+
+## Recommendation
+
+1. Provide a fallback mechanism or raise a more descriptive error message if **spec** is missing, ensuring the code does not fail silently.
+
+2. Wrap the call `spec.loader.exec_module(module)` in a try-catch block and log or raise an appropriate error message to help diagnose issues when module loading fails.
+
+## Findings 24 - Iterating Over `sys.modules` Safely
+
+The code does not follow the Python documentation's recommendation to use sys.modules.copy() or tuple(sys.modules) when iterating over sys.modules. This can lead to exceptions if the size of `sys.modules` changes during iteration due to code execution or activity in other threads.
+
+## Recommendation
+
+Replace any direct iteration over `sys.modules` with `sys.modules.copy()` or `tuple(sys.modules)` to avoid potential runtime exceptions.
+
+Ensure that all iterations over `sys.modules` are thread-safe and do not cause side effects during execution.
+
+## Finding 25 - Nested Lists Not Handled Correctly
+
+The following program throws an error
+
+```python
+from typing import Dict, List, Union
+
+def validator()-> List[List[int]]:
+    empty_List : List[List[int]] = [[]]
+    return empty_List
+```
+
+Error:
+
+`    empty_List : List[List[int]] = [[]]
+                                   ^
+IndexError: list index out of range
+Note that opshin errors may be overly restrictive as they aim to prevent code with unintended consequences.`
+
+It fails for empty nested lists like [[]], likely due to issues with type inference or improper handling of nested structures.
+
+## Finding 26 - Error Messages Are Not Descriptive in Rewrite transformers
+
+The error messages for assertions in most of the rewrite transformers are generic and do not provide enough context to help users understand the issue. For example, in the file `rewrite/rewrite_import_dataclasses.py` the error message "The program must contain one 'from dataclasses import dataclass`" is repeated for various cases, making it difficult to diagnose specific problems.
+
+Example:
+
+```python
+from pycardano import Datum as Anything, PlutusData
+from dataclasses import dataclass as dc
+
+@dc
+class MyClass(PlutusData):
+    pass
+
+def validator() :
+    return None
+```
+
+The issue here is the use of an alias name. The error message below does not convey the root cause of the problem properly.
+
+```error
+from dataclasses import dataclass as dc
+AssertionError: The program must contain one 'from dataclasses import dataclass'
+Note that opshin errors may be overly restrictive as they aim to prevent code with unintended consequences.
+```
+
+## Recommendation
+
+1. Improve error messages to be more specific. For example in this case if alias name is used, an error message could be something like this: "Aliasing 'dataclass' is not allowed. Use 'from dataclasses import dataclass' directly."
+
+2. Review all assertion error messages in the following transformer rewrites.
+
+- rewrite_import_dataclasses.py
+- rewrite_import_typing.py
+
+## Finding 27 - Custom Function declarartions are Overridden
+
+The code does not validate the source of the `@dataclass` decorator. If a custom dataclass function is defined, it overrides the imported dataclass decorator, and the rewrite transformers does not detect and report this issue.
+
+Example:
+
+```python
+
+from dataclasses import dataclass
+
+# Custom dataclass decorator
+def dataclass(cls):
+  return cls
+
+# Refers to the custom decorator, not the one from 'dataclasses'
+@dataclass
+class MyClass(PlutusData):
+
+
+def validator(a: int) -> None:
+  return None
+```
+
+The code checks for the presence of the `@dataclass` decorator and validates dataclass is imported from the package `dataclasses` but does not verify/report if the decorator is overridden by a custom dataclass function.
+
+## Recommendation
+
+1. To ensure that function names are also not overridden in addition to variable names, we recommend to extend the `RewriteForbiddenOverwrites` transformer to check for forbidden names in function definitions. This will ensure that function names do not conflict with reserved or forbidden names.
+
+2. Raise a descriptive warning if any custom definitions are detected, e.g., In this case "The dataclass function can't override the exisitng import".
+
+## Finding 28 - Alias names for imports
+
+In both `rewrite/rewrite_import_hashlib.py` and `rewrite/rewrite_import_integrity_check.py`, there is a potential issue with name conflicts when handling aliased imports.
+
+**1.rewrite/rewrite_import_hashlib.py:**
+
+The transformer handles aliased imports but does not explicitly check for name conflicts with existing variables or functions in the scope.
+
+Currently, if a conflict occurs like the code below, it throws a type inference error. It does not provide a clear or user-friendly error message about the name conflict.
+
+```python
+from hashlib import sha256 as hsh
+
+    x = hsh(b"123").digest()
+    hsh = b"opshin"
+```
+
+**2.rewrite/rewrite_import_integrity_check.py:**
+
+When an alias is used (e.g., import check_integrity as ci), the alias name (ci) is added to INITIAL_SCOPE as a new key-value pair.
+
+There is no explicit check to ensure that the alias does not conflict with existing names in INITIAL_SCOPE.
+
+This could lead to unintended overwriting of existing variables, causing subtle bugs or unexpected behavior.
+
+## Recommendation
+
+To address these issues, the following improvements are recommended:
+
+- Before adding an aliased import to the scope, explicitly check if the alias (or the original name, if no alias is provided) already exists in the scope.
+
+- If a conflict is detected, raise a clear and descriptive error indicating the name conflict and suggesting a resolution (e.g., using a different alias).
+
+## Finding 29 - Importing Self from typing does not work
+
+1. When attempting to import Self from the typing module, the following error occurs:
+
+```python
+from typing import Self
+
+from opshin.prelude import *
+
+@dataclass
+class MyClass(PlutusData):
+    def method1(self) -> Self:
+        pass
+```
+
+```
+ImportError: cannot import name 'Self' from 'typing' (/usr/lib/python3.10/typing.py)
+```
+
+2. The `visit_classDef` method in `rewrite/rewrite_import_typing.py` currently replaces self with the class name, likely for type-checking purposes.
+   However, it only checks for Name and Union types.
+   It does not handle cases where Self is used in types, such as List[Self] or Dict[str, Self].
 
 # General Recommendations
 
