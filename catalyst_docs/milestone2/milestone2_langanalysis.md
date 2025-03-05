@@ -992,7 +992,7 @@ def validator(a: Union[A]) -> None:
     assert isinstance(a, A)
 ```
 
-Though an error is expected, the compiler throws the following unrelated error message: `'Name' object has no attribute 'elts'`.
+An error is expected, but the compiler throws the following unrelated error message: `'Name' object has no attribute 'elts'`.
 
 ### Recommendation
 
@@ -1021,7 +1021,7 @@ def validator(a: Union[A, A, B]) -> None:
     assert isinstance(a, A)
 ```
 
-Expectedely, the compiler throws the following error: `Duplicate constr_ids for records in Union: {'A': 1, 'B': 2}`.
+Expectedly, the compiler throws the following error: `Duplicate constr_ids for records in Union: {'A': 1, 'B': 2}`.
 
 But the following example validator compiles without errors:
 
@@ -1044,7 +1044,7 @@ def validator(a: Union[A, Union[A, B]]) -> None:
 
 Flatten `Union`s before detecting duplicate entries. This will make `Union`s more user-friendly, especially when type aliases in deep transient imports are being used, which might lead to unexpected duplicate entries in `Union`s.
 
-Optionally a compiler step can be added to detected duplicate (unresolved) names in a single level of a `Union`, which can signify that the user made a mistake.
+Optionally a compiler step can be added to detect duplication of unresolved names in a single level of a `Union`, which might point to the user having made a mistake.
 
 ## Finding 34 - Unions can contain classes with same CONSTR_ID if their fields are also the same
 
@@ -1076,7 +1076,7 @@ def validator(_: Union[Union[A, B], C]) -> None:
     pass
 ```
 
-Only after changing the fields of `C` are changed, does the compiler throw the expected error: `Union must combine PlutusData classes with unique constructors`.
+Only after if the fields of `C` are changed (e.g. changing the name of field `b` to `c`), does the compiler throw the expected error: `Union must combine PlutusData classes with unique constructors`.
 
 Changing the annotation in the example to `Union[A, B, C]` (while keeping the fields of `B` and `C` the same) gives the following compiler error: `Duplicate constr_ids for records in Union: {'A': 1, 'B': 2, 'C': 2}`.
 
@@ -1123,7 +1123,7 @@ def validator(_: None) -> None:
 
 Allowing downstream type information to propagate upstream in all possible cases would require significant changes to `AggressiveTypeInferencer`, which might not be feasible.
 
-## Finding 39 - calling `str()` with a Union-type argument gives a non user-friendly error
+## Finding 39 - calling `str()` on a Union gives a non user-friendly error
 
 Category: _Usability/Major_
 
@@ -1165,9 +1165,9 @@ Either remove the tuple related type checks in `AggressiveTypeInferencer.visit_F
 
 Category: _Security/Critical_
 
-The list comprehension type checks in `AggressiveTypeInferencer.list_comprehension()` doesn't check that comprehension that the `ifs` filter expressions are of boolean type. 
+The list comprehension type checks in `AggressiveTypeInferencer.list_comprehension()` doesn't check that the comprehension `ifs` filter expressions are of boolean type. 
 
-If the user inadvertently uses a comprehension filter expression that doesn't evaluate to a bool, a runtime error will always by thrown if the comprehension generator returns a non-empty list. This can lead to a dead-lock of user funds if a mainnet validator hasn't been sufficiently tested to catch this.
+If the user inadvertently uses a comprehension filter expression that doesn't evaluate to a bool, a runtime error will always by thrown if the comprehension generator returns a non-empty list. This can lead to a dead-lock of user funds if a validator hasn't been sufficiently tested.
 
 As an example, the following validator will compile without errors, but will always throw a runtime error when the argument is a non-empty list:
 
@@ -1183,7 +1183,7 @@ Wrap list comprehension `ifs` with Bool casts in `rewrite_cast_condition.py`.
 
 ## Finding 42 - eval_uplc doesn't handle errors in ComputationResult correctly
 
-Evaluating an Opshin validator script using the `eval_uplc` command doesn't display runtime errors correctly. For example calling the `eval_uplc` command with the example validator from finding 41, gives the following output:
+Evaluating an Opshin validator script using the `eval_uplc` command doesn't display runtime errors correctly. For example, calling the `eval_uplc` command with the example validator from finding 41, gives the following output:
 
 ```
 Starting execution
@@ -1293,6 +1293,133 @@ def validator(a: Union[int, bytes]) -> None:
 
 Reuse logic related to `self.wrapped` from `AggressiveTypeInferencer.visit_If()`.
 
+## Finding 47 - wrong return type annotation of some TypeCheckVisitor methods
+
+Category: _Maintainability/Informational_
+
+`visit_BoolOp()` and `visit_UnaryOp()` use `PairType` as the return type annotation, but actually return tuples.
+
+### Recommendation
+
+Change the return type of `visit_BoolOp()` and `visit_UnaryOp()` from `PairType` to `TypeMapPair`.
+
+## Finding 48 - error-prone implementation of `scopes` and `wrapped` in AggressiveTypeInferencer
+
+Category: _Maintainability/Major_
+
+The way `self.scopes` and `self.wrapped` are mutated/restored inside `AggressiveTypeInferencer` gives fragile and duplicate code.
+
+### Recommendation
+
+Pass a context object as a separate argument through all the `visit_<Node-type>()` methods. The context object contains the current scope and type assertion information like `wrapped`, and links to parent scopes.
+
+## Finding 49 - resetting of `self.wrapped` in AggressiveTypeInferencer can be refactored into a separate method and simplified
+
+Category: _Maintainability/Informational_
+
+`visit_IfExp()` and `visit_If()` (and once finding 45 is resolved, `visit_While()`) contain the following (duplicate) lines of python code:
+
+```python
+self.wrapped = [x for x in self.wrapped if x not in prevtyps.keys()]
+```
+
+Besides being duplicate, the `x not in prevtyps.keys()` expression can be replaced by `x not in prevtyps`.
+
+### Recommendation
+
+Refactor the code the reverts `self.wrapped` into a new method of `AggressiveTypeInferencer`, and replace `prevtyps.keys()` by `prevtyps`.
+
+## Finding 50 - redundant code in AggressiveTypeInferencer
+
+Category: _Maintainability/Informational_
+
+In `AggressiveTypeInferencer.visit_sequence()`, the `arg.annotation is None` test in the second assertion is redundant, as the surrounding `if` statement test already ensures this is always false.
+
+### Recommendation
+
+Remove the redundant check in the second assertion in `AggressiveTypeInferencer.visit_sequence()` in `type_inference.py`.
+
+## Finding 51 - rewrite of dunder override of `not in` AggressiveTypeInferencer is spread over multiple methods
+
+Category: _Maintainability/Informational_
+
+In `AggressiveTypeInferencer.dunder_override()`, `not in` is treated as `in` , and `not` is treated as `__bool__`. Then in `visit_Compare()` and `visit_UnaryOp()` respectively this is compensated for by wrapping the AST node returned by the `dunder_override()` method with a `Not` AST node.
+
+So logic that is inherently related to `dunder_override()` is spread over two other functions as well.
+
+### Recommendation
+
+Return the final AST node from `dunder_override()`, so the explicit wrapping with a `Not` AST node doesn't become the responsability of the callsite.
+
+## Finding 52 - omitting class method return type gives non user-friendly error
+
+Category: _Usability/Minor_
+
+Consider the following example validator:
+
+```python
+from opshin.prelude import *
+
+@dataclass()
+class MyClass(PlutusData):
+    def my_method(self):
+        pass
+
+def validator(_: None) -> None:
+    c = MyClass()
+    c.my_method()
+```
+
+Compiling this example gives the following error: `Invalid Python, class name is undefined at this stage`.
+
+The error message doesn't help the user understand what is wrong with the code.
+
+### Recommendation
+
+Detect class methods missing return types and throw an explicit error.
+
+## Finding 53 - list item that was just appended accessed immediately after
+
+Category: _Maintainability/Informational_
+
+In `AggressiveTypeInferencer.visit_BoolOp()`, child nodes visited and the returned typed AST nodes are appended to a `values` list, the appended value is then immediately referenced as `values[-1]`
+
+### Recommendation
+
+Assign the return typed AST nodes to a variable, and reference that variable in the subsequent line of code where the type checks are generated.
+
+## Finding 54 - inconsistent treatement of tuple slicing
+
+Category: _Maintainability/Informational_
+
+Has `AggressiveTypeInferencer.visit_Subscript()` allows tuples to be sliced, but `PlutoComplier.visit_Subscript()` doesn't.
+
+### Recommendation
+
+In the TupleType branch in `AggressiveTypeInferencer.visit_Subscript()`: remove the nested branch with the condition that reads: `all(ts.value.typ.typ.typs[0] == t for t in ts.value.typ.typ.typs)`.
+
+## Finding 55 - `eval_uplc` ignores print()
+
+Category: _Usability/Minor_
+
+Messages printed when evaluating a validator using `eval_uplc` aren't displayed 
+
+Optimization level doesn't seem to have any impact on this.
+
+### Recommendation
+
+Show messages from `print()` calls when evaluating a validator.
+
+## Finding 56 - RecordReader.extract() doesn't need to be static
+
+Category: _Maintainability/Informational_
+
+`RecordReader.extract()`, in `type_inference.py`, is static has the `@classmethod`. This leads to unnecessary indirection when this method is called.
+
+### Recommendation
+
+Instantiate the `RecordReader` directly with an argument of `AggressiveTypeInferencer` type, and change `extract()` to be a regular method (internally changing `f` to `self`).
+
 # General Recommendations
 
 1. Currently, there are several optimizations levels and optimization-related flags.
@@ -1308,7 +1435,4 @@ Reuse logic related to `self.wrapped` from `AggressiveTypeInferencer.visit_If()`
    Given its significance in the overall system, we strongly recommend prioritizing a comprehensive audit of this specific conversion process.
    This proactive measure would provide an additional layer of assurance.
 
-4. In AggressiveTypeInferencer: the scope-wrapping implementation is difficult to maintain.
-   It might be better to pass scope-related information as an additional argument into the visitor pattern algorithm instead of wrapping/pushing/popping/restoring.
-
-5. Add static code analyzer (generalization of static type checker) to build process. For example: `mypy`.
+4. Add static code analyzer (generalization of static type checker) to build process. For example: `mypy`.
