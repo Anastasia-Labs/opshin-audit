@@ -528,6 +528,8 @@ Nice to have:
 - Builtin scope entries can be given a "forbid override" flag, instead of having to maintain a list of forbidden overrides in `rewrite/rewrite_forbidden_overwrites.py`
 - Implement a warning for shadowing (instead of e.g. the type inference error thrown in scenario 3). This would help developers catch potential issues early without halting compilation.
 
+An additional advantage of having multiple independent Module AST nodes is that some compilation steps can be multi-threaded.
+
 ## Finding 07 - Compiler version inconsistency
 
 Category: _Maintainability/Minor_
@@ -917,6 +919,496 @@ ImportError: cannot import name 'Self' from 'typing' (/usr/lib/python3.10/typing
    However, it only checks for Name and Union types.
    It does not handle cases where Self is used in types, such as List[Self] or Dict[str, Self].
 
+## Finding 30 - using List or Dict directly as function argument types throws a non user-friendly error
+
+Category: _Usability/Minor_
+
+Newcomers to Opshin might try the following syntax:
+
+```python
+from opshin.prelude import *
+
+def validator(_: List) -> None:
+    pass
+```
+
+This fails to compile, throwing the following error message: `Variable List not initialized at access`. This error message doesn't help the user resolve the issue (`List[Anything]` must be used instead of `List`).
+
+A similarly unhelpful error is thrown for `Dict`:
+
+```python
+from opshin.prelude import *
+
+def validator(_: Dict) -> None:
+    pass
+``` 
+
+### Recommendation
+
+Either infer the types of `List` and `Dict` annotations as `List[Anything]` and `Dict[Anything, Anything]` respectively, or improve the error message by explaining the actual issue and providing a hint on how to resolve it.
+
+## Finding 31 - bytes.fromhex() doesn't work
+
+Category: _Usability/Major_
+
+The Opshin documentation mentions the existence of the `bytes.fromhex()` static method.
+
+The following snippet doesn't compile though:
+
+```python
+def validator(_: None) -> None:
+    bs = bytes.fromhex("0123")
+    assert len(bs) == 2
+```
+
+The compiler throws the following error: `Can only access attributes of instances`.
+
+### Recommendation
+
+Either ensure attributes of builtin types like `bytes` can actually be accessed, or remove `bytes.fromhex()` from the Opshin documentation.
+
+## Finding 32 - non user-friendly error when using Union of single type
+
+Category: _Usability/Minor_
+
+In the following example validator, an argument is annoted with a `Union` of a single type:
+
+```python
+from opshin.prelude import *
+
+@dataclass()
+class A(PlutusData):
+    x: int
+
+def validator(a: Union[A]) -> None:
+    assert isinstance(a, A)
+```
+
+An error is expected, but the compiler throws the following unrelated error message: `'Name' object has no attribute 'elts'`.
+
+### Recommendation
+
+The compiler should detect `Union`s containing only a single entry, and throw an explicit error.
+
+## Finding 33 - inconsistent treatment of duplicate entries in Union
+
+Category: _Usability/Minor_
+
+Duplicate entries in `Union`s give compiler errors, but duplicate entries in nested `Union`s don't.
+
+Consider the following example validator:
+
+```python
+from opshin.prelude import *
+
+@dataclass()
+class A(PlutusData):
+    x: int
+
+@dataclass()
+class B(PlutusData):
+    x: bytes
+
+def validator(a: Union[A, A, B]) -> None:
+    assert isinstance(a, A)
+```
+
+Expectedly, the compiler throws the following error: `Duplicate constr_ids for records in Union: {'A': 1, 'B': 2}`.
+
+But the following example validator compiles without errors:
+
+```python
+from opshin.prelude import *
+
+@dataclass()
+class A(PlutusData):
+    x: int
+
+@dataclass()
+class B(PlutusData):
+    x: bytes
+
+def validator(a: Union[A, Union[A, B]]) -> None:
+    assert isinstance(a, A)
+```
+
+### Recommendation
+
+Flatten `Union`s before detecting duplicate entries. This will make `Union`s more user-friendly, especially when type aliases in deep transient imports are being used, which might lead to unexpected duplicate entries in `Union`s.
+
+Optionally a compiler step can be added to detect duplication of unresolved names in a single level of a `Union`, which might point to the user having made a mistake.
+
+## Finding 34 - Unions can contain classes with same CONSTR_ID if their fields are also the same
+
+Category: _Usability/Major_
+
+The following example validator compiles without error:
+
+```python
+from opshin.prelude import *
+
+@dataclass()
+class A(PlutusData):
+    CONSTR_ID = 1
+    a: bytes
+    
+@dataclass()
+class B(PlutusData):
+    CONSTR_ID = 2
+    a: int
+    b: int
+
+@dataclass()
+class C(PlutusData):
+    CONSTR_ID = 2
+    a: int
+    b: int
+
+def validator(_: Union[Union[A, B], C]) -> None:
+    pass
+```
+
+Only after if the fields of `C` are changed (e.g. changing the name of field `b` to `c`), does the compiler throw the expected error: `Union must combine PlutusData classes with unique constructors`.
+
+Changing the annotation in the example to `Union[A, B, C]` (while keeping the fields of `B` and `C` the same) gives the following compiler error: `Duplicate constr_ids for records in Union: {'A': 1, 'B': 2, 'C': 2}`.
+
+Now consider the following modified validator using the same three classes:
+```python
+def validator(x: Union[Union[A, B], C]) -> None:
+    assert isinstance(x, C)
+```
+Compiling this example gives the following non user-friendly error: `Trying to cast an instance of Union type to non-instance of union type`.
+
+### Recommendation
+
+Fix these error inconsistencies by detecting duplicate CONSTR_IDs after flattening the Union in `union_types()` in `type_inference.py`. Detect duplicates based on CONSTR_ID alone, and not based on data field equivalence.
+
+## Finding 35 - can't use empty literal dicts in arbitrary expressions
+
+Category: _Usability/Minor_
+
+The type of an empty literal dict is never inferred, and as a consequence can only be used on the right-hand-side of an annotated assignment.
+
+Consider the following example validator:
+```python
+from opshin.prelude import *
+
+def my_len_fn(d: Dict[Anything, Anything]) -> int:
+    return len(d)
+
+def validator(_: None) -> None:
+    assert my_len_fn({}) == 0
+```
+
+Compiling this example throws the following non user-friendly error: `list index out of range`. The same error is thrown when empty literal dicts are used in other expressions, for example in annotation-less assignments:
+
+```python
+def validator(_: None) -> None:
+    d = {}
+    pass
+```
+
+### Recommendation
+
+Add a note to the Opshin documentation that empty literal dicts must be assigned to a variable with type annotation before being usable (similar to the note already present about empty literal lists).
+
+## Finding 39 - calling `str()` on a Union gives a non user-friendly error
+
+Category: _Usability/Major_
+
+Consider the following example validator:
+
+```python
+def validator(a: Union[int, bytes]) -> None:
+    assert str(a) == "0"
+```
+
+Compiling this example gives the following error: `'IntegerType' object has no attribute 'record'`.
+
+### Recommendation
+
+Generalize the code generation in `UnionType.stringify()` in `type_impls.py`, so that it works for any combination of `int`, `bytes`, `List[Anything]` or `Dict[Anything, Anything]`.
+
+## Finding 40 - unable to loop over tuple
+
+Category: _Maintainability/Major_
+
+According to `AggressiveTypeInferencer.visit_For()`, the following validator should be valid:
+
+```python
+def validator(_: None) -> None:
+    t = (1, 2)
+    for x in t:
+        pass
+```
+
+Instead the compiler throw the following non user-friendly error: `'InstanceType' object has no attribute 'typs'`.
+
+### Recommendation
+
+The PlutoCompiler doesn't actually allow iterating over tuples using for loops.
+
+Either remove the tuple related type checks in `AggressiveTypeInferencer.visit_For()` and throw a more explicit error, or implement the necessary code generation that allows iterating over tuples in `PlutoCompiler.visit_For()`.
+
+## Finding 41 - list and dict comprehensions don't check that filters evaluate to boolean types
+
+Category: _Security/Critical_
+
+The list comprehension type checks in `AggressiveTypeInferencer.list_comprehension()` doesn't check that the comprehension `ifs` filter expressions are of boolean type. 
+
+If the user inadvertently uses a comprehension filter expression that doesn't evaluate to a bool, a runtime error will always by thrown if the comprehension generator returns a non-empty list. This can lead to a dead-lock of user funds if a validator hasn't been sufficiently tested.
+
+As an example, the following validator will compile without errors, but will always throw a runtime error when the argument is a non-empty list:
+
+```python
+def validator(a: List[int]) -> None:
+    b = [x for x in a if x]
+    pass
+```
+
+### Recommendation
+
+Wrap list comprehension `ifs` with Bool casts in `rewrite_cast_condition.py`.
+
+## Finding 42 - eval_uplc doesn't handle errors in ComputationResult correctly
+
+Evaluating an Opshin validator script using the `eval_uplc` command doesn't display runtime errors correctly. For example, calling the `eval_uplc` command with the example validator from finding 41, gives the following output:
+
+```
+Starting execution
+------------------
+Execution succeeded
+Traceback (most recent call last):
+  File "/home/user/.cache/pypoetry/virtualenvs/opshin-Gqoty4Xw-py3.9/bin/opshin", line 6, in <module>
+    sys.exit(main())
+  File "/home/user/Src/Opshin/opshin/opshin/__main__.py", line 518, in main
+    perform_command(args)
+  File "/home/user/Src/Opshin/opshin/opshin/__main__.py", line 416, in perform_command
+    ret = uplc.dumps(ret.result)
+  File "/home/user/.cache/pypoetry/virtualenvs/opshin-Gqoty4Xw-py3.9/lib/python3.9/site-packages/uplc/tools.py", line 105, in dumps
+    return u.dumps(dialect)
+AttributeError: 'AssertionError' object has no attribute 'dumps'
+```
+
+### Recommendation
+
+In file `opshin/__main__.py`, in the last branch of `perform_command()`, test if `ret.result` is an error, and show an appropriate failure message in the case that it is.
+
+## Finding 43 - Dict with Union type key, can't be accessed with a Union type which has the same entries but in a different order
+
+Category: _Usability/Minor_
+
+Consider the following validator:
+
+```python
+from opshin.prelude import *
+
+def validator(d: Dict[Union[int, bytes], int]) -> int:
+    key: Union[bytes, int] = 0
+    return d[key]
+```
+
+Compiling this example throws the following error: `Dict subscript must have dict key type InstanceType(typ=UnionType(typs=[IntegerType(), ByteStringType()])) but has type InstanceType(typ=UnionType(typs=[ByteStringType(), IntegerType()]))`
+
+### Recommendation
+
+In `union_types()` in `type_inference.py`: sort Union entries in an unambiguous way.
+
+## Finding 44 - inconsistent type inference of literal lists and dicts
+
+Category: _Usability/Major_
+
+The following is valid Opshin:
+
+```python
+a: Union[int, bytes] = 10
+l = [a, 10, b'abcd']
+```
+
+`l` in this snippet will have inferred type `List[Union[int, bytes]]`. However, because in `AggressiveTypeInferencer.visit_List()`, the first list entry is used as the inferred item type, changing the order of these items will lead to compiler error, for example the following snippet will fail to compile:
+
+```python
+a: Union[int, bytes] = 10
+l = [10, a, b'abcd']
+```
+
+Similarly, `AggressiveTypeInferencer.visit_Dict()` will use the type of the first key and the first value for the inferred type.
+
+### Recommendation
+
+Find the most generic type contained in the list or dict, instead of using the first item type to determine the list or dict type.
+
+## Finding 45 - type assertion wrappers not applied in while statement bodies
+
+Category: _Security/Critical_
+
+In `AggressiveTypeInferencer.visit_While()`, type assertions performed in the while statement condition don't result in the addition of Pluto AST nodes that convert UPLC data types to primitive types.
+
+This leads to unexpected runtime type errors, and can potentially lead to smart contract dead-locks if the compiled validator isn't sufficiently unit-tested.
+
+The following validator is an example of valid Opshin that will produce UPLC that will always fail if the `while` body is entered:
+
+```python
+from opshin.prelude import *
+
+def validator(a: Union[int, bytes]) -> None:
+    while (isinstance(a, int)):
+        if (a > 0):
+            a -= 1
+```
+
+### Recommendation
+
+Reuse logic related to `self.wrapped` from `AggressiveTypeInferencer.visit_If()`. 
+
+## Finding 46 - type assertion wrappers not applied on the right-hand-side of BoolOp
+
+Category: _Security/Critical_
+
+In `AggressiveTypeInferencer.visit_BoolOp()`, type assertions performed on the left-hand-side don't result in Pluto AST nodes that convert UPLC data types to primitive types.
+
+Similar to finding 44, this leads to unexpected runtime type errors, and can potentially lead to smart contract dead-locks if the compiled validator isn't sufficiently unit-tested.
+
+The following validator is an example of valid Opshin that will produce UPLC that will always fail if the left-hand-side of the `and` expression is true:
+
+```python
+from opshin.prelude import *
+
+def validator(a: Union[int, bytes]) -> None:
+    assert isinstance(a, int) and a == 10 
+```
+
+### Recommendation
+
+Reuse logic related to `self.wrapped` from `AggressiveTypeInferencer.visit_If()`.
+
+## Finding 47 - wrong return type annotation of some TypeCheckVisitor methods
+
+Category: _Maintainability/Informational_
+
+`visit_BoolOp()` and `visit_UnaryOp()` use `PairType` as the return type annotation, but actually return tuples.
+
+### Recommendation
+
+Change the return type of `visit_BoolOp()` and `visit_UnaryOp()` from `PairType` to `TypeMapPair`.
+
+## Finding 48 - error-prone implementation of `scopes` and `wrapped` in AggressiveTypeInferencer
+
+Category: _Maintainability/Major_
+
+The way `self.scopes` and `self.wrapped` are mutated/restored inside `AggressiveTypeInferencer` gives fragile and duplicate code.
+
+### Recommendation
+
+Pass a context object as a separate argument through all the `visit_<Node-type>()` methods. The context object contains the current scope and type assertion information like `wrapped`, and links to parent scopes.
+
+## Finding 49 - resetting of `self.wrapped` in AggressiveTypeInferencer can be refactored into a separate method and simplified
+
+Category: _Maintainability/Informational_
+
+`visit_IfExp()` and `visit_If()` (and once finding 45 is resolved, `visit_While()`) contain the following (duplicate) lines of python code:
+
+```python
+self.wrapped = [x for x in self.wrapped if x not in prevtyps.keys()]
+```
+
+Besides being duplicate, the `x not in prevtyps.keys()` expression can be replaced by `x not in prevtyps`.
+
+### Recommendation
+
+Refactor the code the reverts `self.wrapped` into a new method of `AggressiveTypeInferencer`, and replace `prevtyps.keys()` by `prevtyps`.
+
+## Finding 50 - redundant code in AggressiveTypeInferencer
+
+Category: _Maintainability/Informational_
+
+In `AggressiveTypeInferencer.visit_sequence()`, the `arg.annotation is None` test in the second assertion is redundant, as the surrounding `if` statement test already ensures this is always false.
+
+### Recommendation
+
+Remove the redundant check in the second assertion in `AggressiveTypeInferencer.visit_sequence()` in `type_inference.py`.
+
+## Finding 51 - rewrite of dunder override of `not in` AggressiveTypeInferencer is spread over multiple methods
+
+Category: _Maintainability/Informational_
+
+In `AggressiveTypeInferencer.dunder_override()`, `not in` is treated as `in` , and `not` is treated as `__bool__`. Then in `visit_Compare()` and `visit_UnaryOp()` respectively this is compensated for by wrapping the AST node returned by the `dunder_override()` method with a `Not` AST node.
+
+So logic that is inherently related to `dunder_override()` is spread over two other functions as well.
+
+### Recommendation
+
+Return the final AST node from `dunder_override()`, so the explicit wrapping with a `Not` AST node doesn't become the responsability of the callsite.
+
+## Finding 52 - omitting class method return type gives non user-friendly error
+
+Category: _Usability/Minor_
+
+Consider the following example validator:
+
+```python
+from opshin.prelude import *
+
+@dataclass()
+class MyClass(PlutusData):
+    def my_method(self):
+        pass
+
+def validator(_: None) -> None:
+    c = MyClass()
+    c.my_method()
+```
+
+Compiling this example gives the following error: `Invalid Python, class name is undefined at this stage`.
+
+The error message doesn't help the user understand what is wrong with the code.
+
+### Recommendation
+
+Detect class methods missing return types and throw an explicit error.
+
+## Finding 53 - list item that was just appended accessed immediately after
+
+Category: _Maintainability/Informational_
+
+In `AggressiveTypeInferencer.visit_BoolOp()`, child nodes visited and the returned typed AST nodes are appended to a `values` list, the appended value is then immediately referenced as `values[-1]`
+
+### Recommendation
+
+Assign the return typed AST nodes to a variable, and reference that variable in the subsequent line of code where the type checks are generated.
+
+## Finding 54 - inconsistent treatement of tuple slicing
+
+Category: _Maintainability/Informational_
+
+Has `AggressiveTypeInferencer.visit_Subscript()` allows tuples to be sliced, but `PlutoComplier.visit_Subscript()` doesn't.
+
+### Recommendation
+
+In the TupleType branch in `AggressiveTypeInferencer.visit_Subscript()`: remove the nested branch with the condition that reads: `all(ts.value.typ.typ.typs[0] == t for t in ts.value.typ.typ.typs)`.
+
+## Finding 55 - `eval_uplc` ignores print()
+
+Category: _Usability/Minor_
+
+Messages printed when evaluating a validator using `eval_uplc` aren't displayed 
+
+Optimization level doesn't seem to have any impact on this.
+
+### Recommendation
+
+Show messages from `print()` calls when evaluating a validator.
+
+## Finding 56 - RecordReader.extract() doesn't need to be static
+
+Category: _Maintainability/Informational_
+
+`RecordReader.extract()`, in `type_inference.py`, is static has the `@classmethod`. This leads to unnecessary indirection when this method is called.
+
+### Recommendation
+
+Instantiate the `RecordReader` directly with an argument of `AggressiveTypeInferencer` type, and change `extract()` to be a regular method (internally changing `f` to `self`).
+
 ## Finding 57 - TypedModule Dependency Before Type Inference
 
 Category: Maintainability/Minor
@@ -997,3 +1489,5 @@ def validator(x:List[int]) -> int:
 3. The conversion process to Pluto/Untyped Plutus Core (UPLC) is a complex and crucial step that could potentially contain vulnerabilities.
    Given its significance in the overall system, we strongly recommend prioritizing a comprehensive audit of this specific conversion process.
    This proactive measure would provide an additional layer of assurance.
+
+4. Add static code analyzer (generalization of static type checker) to build process. For example: `mypy`.
