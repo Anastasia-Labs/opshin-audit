@@ -322,3 +322,67 @@ the rewrite code checks the format "from <pkg> import dataclass" and
 
 16. [SR] - `rewrite/rewrite_import_integrity_check.py`
     Similar to 15, if line 55 has a alias name it will be added to INITIAL_SCOPE as a new pair 
+
+17. [SR] - `rewrite/rewrite_subscript38.py`
+    - Tested for index (python old version of slice) 
+    - Tested for nested index - worked
+      def validator(x:List[List[int]]) -> int:
+        x = [[1,2],[3,4]]
+        b = x[1][0]
+        return b
+    - Tried for a complex case - works
+      Ex : 
+      def validator(x:List[int]) -> int:
+        x = [1,2,3,4]
+        index = 1
+        return (x[index + 1]) 
+    - mixed slicing and index - works
+      Ex :
+      def validator(x:List[List[int]]) -> List[int]:
+          x = [[1, 2], [3, 4], [5, 6]]
+          return (x[1:3][0]) 
+      Ex2:
+        `@dataclass
+        class Buy(PlutusData):
+        CONSTR_ID = 0
+        index : int
+
+        Const_list = [1,2,3,4]
+
+        def validator(x:Buy) -> int:
+            return (Const_list[x.index])`  
+Edge case:
+    - Empty index doesn't work - its an invalid syntax in python itself(valid case)
+
+18. [SR]- rewrite/rewrite_cast_condition.py - 
+  - if the condition is already a boolean and if its a constant node, explicit cast to bool is redundant
+  - small performance overhead - using timeit performance with and without bool was analysed
+  
+19. [SR] - `rewrite/rewrite_augassign.py`
+  - checked the order of precedence
+    Ex!:
+    def validator(x:int,y:int, z:int) -> int:
+    x += y*z
+    return x  -> it becomes x= x+(y*z)
+    Ex2: (Finding)
+    def validator(x:List[int]) -> int:
+    x =[1,2,3,4]
+    x[0] += 1
+    return x 
+    Error - "Can only assign to variable names, no type deconstruction" - this is possible in python 
+
+20. [SR] - `rewrite/rewrite_remove_type_stuff.py` - No issues
+21. [SR] - `rewrite/rewrite_tuple_assign.py` - need for it if the tuple is complex, reuse and efficiency
+    What is the need of temporary variables like 2_uid_tup , why can't it be assigned using the tuple itself
+    Ex :
+    a,b =(1,2)
+    a =(1,2)[0]
+    b =(1,2)[1] 
+22- [SR] - `rewrite/rewrite_inject_builtins.py` - no issues
+
+     Q - until the aggressive type inference occurs , there wouldn't be any typed modules ,so how can it take an typedmodule node? - maintainability issue, 
+     Q - polymorphic functions are skipped, two different ways to find if the node is polymorphic - maintainability - polymorphic func can be known only after type checking
+
+23 - [SR] - `rewrite_inject_builtin_constr.py`
+     Q - For all the builtins, constr_type is polymorphic only, that check is redundant or may be for a future use casez
+          -- already there  (finding 11 - try to add the comment )

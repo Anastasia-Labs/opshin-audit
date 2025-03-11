@@ -581,7 +581,7 @@ This approach avoids the issue described and also avoids the recalculation of th
 
 Category: _Maintainability/Major_
 
-Compiler step 22 is supposed to inject `bool()`, `bytes()`, `int()`, and `str()` builtins as RawPlutExprs, but the internal types (i.e. `.constr_type()`) of those functions is `PolymorphicFunctionType`, which is immediately skipped.
+Compiler step 22 is supposed to inject `bool()`, `bytes()`, `int()`, and `str()` builtins as RawPlutExprs, but the internal types (i.e. `.constr_type()`) of those functions is inherently polymorphic (i.e. `PolymorphicFunctionType`), which is immediately skipped. This check is either redundant or may be intended for a future use case that hasn't been implemented yet. Currently, this step adds no value to the compilation process.
 
 ### Recommendation
 
@@ -916,6 +916,72 @@ ImportError: cannot import name 'Self' from 'typing' (/usr/lib/python3.10/typing
 2. The `visit_classDef` method in `rewrite/rewrite_import_typing.py` currently replaces self with the class name, likely for type-checking purposes.
    However, it only checks for Name and Union types.
    It does not handle cases where Self is used in types, such as List[Self] or Dict[str, Self].
+
+## Finding 57 - TypedModule Dependency Before Type Inference
+
+Category: Maintainability/Minor
+
+The `RewriteInjectBuiltins` transformer operates on `TypedModule` nodes, which are expected to be available only after aggressive type inference has occurred. However, this transformer is part of the compilation process that runs before type inference is complete. This creates a logical inconsistency, as `TypedModule` nodes are not guaranteed to exist at this stage.
+
+### Recommendation
+
+Refactor the transformer to work with untyped or partially typed nodes until type inference is complete. Alternatively, ensure that this step is moved to a later stage in the compilation process, where TypedModule nodes are guaranteed to exist.
+
+## Finding 58 - Inconsistent Handling of Polymorphic Functions
+
+Category: Maintainability/Minor
+
+The code uses two different approaches to identify and skip polymorphic functions:
+
+Case 1: Checks if b.value is not an instance of plt.AST:
+
+```python
+if not isinstance(b.value, plt.AST):
+    continue
+```
+
+Case 2: Checks if the type of the function is PolymorphicFunctionType:
+
+```python
+if isinstance(typ.typ, PolymorphicFunctionType):
+    continue
+```
+This dual approach makes the code harder to understand. Additionally, polymorphic functions can only be definitively identified after type checking, which further complicates the logic.
+
+## Recommendation
+
+1. Unify the logic for identifying polymorphic functions. 
+
+2. Since polymorphic functions can only be definitively identified after type checking, consider moving the logic of `rewrite/rewrite_inject_builtins.py` to a later stage in the compilation process, where type information is fully available.
+
+## Finding 59 - Redundant Explicit Cast to Boolean
+
+Category: Performance/Minor
+
+The `RewriteConditions` transformer explicitly rewrites all conditions (e.g., in if, while, assert, etc.) to include an implicit cast to bool using a special variable `SPECIAL_BOOL`. However, this transformation is redundant when:
+  1. The condition is already a boolean (e.g., if True or if x == y where the result is already a boolean).
+  2. The condition is a constant node (e.g., if True or if False).
+
+In such cases, adding an explicit cast to bool is unnecessary and can degrade performance, especially in cases where the condition is evaluated repeatedly (e.g., in loops).
+
+## Recommendation
+Modify the `RewriteConditions` transformer in `rewrite/rewrite_cast_condition.py` to skip the explicit cast to bool when the condition is already a boolean and a constant node.
+
+## Finding 60 - Inability to Assign to List Elements in Validator Functions
+
+Category : Functionality/Minor
+
+In the provided code, the validator function attempts to modify an element of a list (x[0] += 1). However, the compiler raises an error: "Can only assign to variable names, no type deconstruction". This restriction prevents list element assignment, which is a common and valid operation in Python and can be useful for on-chain code logic.
+
+```python
+def validator(x:List[int]) -> int:
+    x =[1,2,3,4]
+    x[0] += 1
+    return x 
+```
+## Recommendation
+1. Extend the compiler to support assignments to list elements.
+2. If supporting list element assignment is not feasible,enhance the error message to explain the limitation and suggest possible workarounds.
 
 # General Recommendations
 
