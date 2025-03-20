@@ -951,17 +951,9 @@ Either infer the types of `List` and `Dict` annotations as `List[Anything]` and 
 
 Category: _Usability/Major_
 
-In the following example validator, a bytestring literal is defined using double quotes instead of single quotes:
+The Opshin documentation mentions the existence of the `bytes.fromhex()` static method.
 
-```python
-def validator(_: None) -> None:
-    bs = b"0123"
-    assert len(bs) == 2
-```
-
-Compiling this validator gives the following warning: `WARNING for validator.py:2 The string b'0123' looks like it is supposed to be a hex-encoded bytestring but is actually utf8-encoded. Try using 'bytes.fromhex('0123')' instead`
-
-In the following example validator `bytes.fromhex()` is used as suggested:
+The following snippet doesn't compile though:
 
 ```python
 def validator(_: None) -> None:
@@ -969,11 +961,11 @@ def validator(_: None) -> None:
     assert len(bs) == 2
 ```
 
-The compiler now throws the following error: `Can only access attributes of instances`.
+The compiler throws the following error: `Can only access attributes of instances`.
 
 ### Recommendation
 
-Either ensure attributes of builtin types like `bytes` can actually be accessed, or remove `bytes.fromhex()` from the warning and the Opshin documentation.
+Either ensure attributes of builtin types like `bytes` can actually be accessed, or remove `bytes.fromhex()` from the Opshin documentation.
 
 ## Finding 32 - non user-friendly error when using Union of single type
 
@@ -1091,37 +1083,34 @@ Compiling this example gives the following non user-friendly error: `Trying to c
 
 Fix these error inconsistencies by detecting duplicate CONSTR_IDs after flattening the Union in `union_types()` in `type_inference.py`. Detect duplicates based on CONSTR_ID alone, and not based on data field equivalence.
 
-## Finding 35 - can't use empty literal lists and dicts in arbitrary expressions
+## Finding 35 - can't use empty literal dicts in arbitrary expressions
 
-Category: _Usability/Major_
+Category: _Usability/Minor_
 
-The type of an empty literal list or empty literal dict is never inferred, and as a consequence can only be used on the right-hand-side of an annotated assignment.
+The type of an empty literal dict is never inferred, and as a consequence can only be used on the right-hand-side of an annotated assignment.
 
 Consider the following example validator:
 ```python
 from opshin.prelude import *
 
-def my_len_fn(l: List[Anything]) -> int:
-    return len(l)
+def my_len_fn(d: Dict[Anything, Anything]) -> int:
+    return len(d)
 
 def validator(_: None) -> None:
-    assert my_len_fn([]) == 0
+    assert my_len_fn({}) == 0
 ```
 
-Compiling this example throws the following non user-friendly error: `list index out of range`. The same error is thrown when empty literal lists or dicts are used in other expression, for example in annotation-less assignments:
+Compiling this example throws the following non user-friendly error: `list index out of range`. The same error is thrown when empty literal dicts are used in other expressions, for example in annotation-less assignments:
 
 ```python
 def validator(_: None) -> None:
-    l = []
+    d = {}
     pass
 ```
 
 ### Recommendation
 
-1. Improve the error message when an empty list or dict is used in an arbitrary expression
-2. In `AggressiveTypeInferencer.visit_Call()`: detect when empty literal lists or dicts are passed as arguments, and infer their types using the function argument details stored in `self.FUNCTION_ARGUMENT_REGISTRY`.
-
-Allowing downstream type information to propagate upstream in all possible cases would require significant changes to `AggressiveTypeInferencer`, which might not be feasible.
+Add a note to the Opshin documentation that empty literal dicts must be assigned to a variable with type annotation before being usable (similar to the note already present about empty literal lists).
 
 ## Finding 39 - calling `str()` on a Union gives a non user-friendly error
 
