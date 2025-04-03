@@ -392,7 +392,7 @@ if x
 
 26 - [SR]- `rewrite/rewrite_orig_name.py`--> maintainability/minor add finding
 - Have to check on annotated nodes,besides names, classdef and function def nodes.
-  x:int = 10 'These nodes are not taken into account' - *add finding* 
+  x:int = 10 'These nodes are not taken into account' - *add finding* - added
 
 27 - [SR] - `rewrite/rewrite_comparison_chaining.py`
 - No other finding other than finding 10
@@ -430,3 +430,30 @@ used for debugging
   - 1 followed by variable names like 1val_param0 - affects readability, instead use variable names 
   - O_adhocpattern_hash of the ast - the hashes are long and affects readability
   - Line 213 -- force_params-> all parameters - default and correct
+2. [SR] - `fun_impls.py`
+    Function: `len`
+    - Correctly uses FoldList, Integer. starts at 0 and adds 1
+    - ByteString case (uses LengthOfByteString)
+    - List/Dict case (uses FoldList with increment)
+    - Tuple case (returns fixed length)
+    - Raises non implemented error for unsupported types
+[x] - empty case of len (len[]) is not handled here,avoid indexError: list index out of range
+    - Function reserved, print, abs , all and any - no issues
+[x] - pow(2,3), contains traceerror in uplc output even if `3<0`, reason is lazy execution of `plt.ite`
+
+3. `rewrite/rewrite_empty_lists.py` - as per the code
+```python 
+def validator(x:List[int]):
+  x : List[int] = []
+```
+  - output builtins in uplc code, 
+    builtin unListData,builtin unIData, (con (list integer) []),builtin constrData,con integer 0,
+    [(builtin mkNilData) (con unit ())], builtin mkcons, builtin chooseList, builtin headList, builtin tailList
+
+4. `rewrite/rewrite_empty_dicts.py` - as per the code
+
+```python
+def validator(x:Dict[str,int]):
+   x :Dict[str,int] = {}
+```
+  - builtin unMapData, [(builtin constrData) (con integer 0)], [(builtin mkNilData) (con unit ())]
