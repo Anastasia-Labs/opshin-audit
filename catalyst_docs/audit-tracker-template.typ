@@ -220,6 +220,7 @@ the OpShin Language.
   - Challenge - opshin supports only a limited language constructs, its a challenge
     to replicate most of the aiken acceptance tests.
 
+=== Rewrites and Optimizations
 6. [SR] `rewrite/rewrite_import.py` -
   - Observations:
     1. Relative imports are not supported as the package is always set to none (test
@@ -292,8 +293,7 @@ the rewrite code checks the format "from <pkg> import dataclass" and
   x =10 y =15
 
 1. `Visit_ImportForm` in class DefinedTimesVisitor - this class collects how often
-  variables are written from ast import `*` - how can this node name be
-  incremented, How to test this?
+  variables are written from ast import `*` - not handled -- To be added to finding
 
 11. [SR] `rewrite/rewrite_import_plutusdata.py`
   1. all assertions have the same error message, can be informative
@@ -309,8 +309,9 @@ the rewrite code checks the format "from <pkg> import dataclass" and
     Self -- from typing import Dict, List, Union, Self)
   4. visit_classDef, checks replace self with classname(probably for type checking)
     only checks for Name and Union, why not List[Self] if the datum classes are used
-    part of List , also for dictionaries  - importerror, self is not from typing anymore? - TODO : create a test with List[Self]
-    Python docs to be cheked - to give the example self-> Self (it nor rewritten)
+    part of List , also for dictionaries - importerror, self is not from typing
+    anymore? - TODO : create a test with List[Self] Python docs to be cheked - to
+    give the example self-> Self (it nor rewritten)
 
 13. [SR] `rewrite/rewrite_forbidden_overwrites.py`
 
@@ -318,71 +319,173 @@ the rewrite code checks the format "from <pkg> import dataclass" and
 
 14. [SR] `rewrite/rewrite_forbidden_return.py` - No issues
 15. [SR] `rewrite/rewrite_import_hashlib.py`
-    1. Aliased imports -- this transformer handles alias name, What happens if the alias conflicts with an existing variable or function in the scope ? - It throws a type inference error, a check for name conflicts can be used instead.
+  1. Aliased imports -- this transformer handles alias name, What happens if the
+    alias conflicts with an existing variable or function in the scope ? - It throws
+    a type inference error, a check for name conflicts can be used instead.
 
-16. [SR] - `rewrite/rewrite_import_integrity_check.py`
-    Similar to 15, if line 55 has a alias name it will be added to INITIAL_SCOPE as a new pair 
+16. [SR] - `rewrite/rewrite_import_integrity_check.py` Similar to 15, if line 55 has
+  a alias name it will be added to INITIAL_SCOPE as a new pair
 
 17. [SR] - `rewrite/rewrite_subscript38.py`
-    - Tested for index (python old version of slice) 
-    - Tested for nested index - worked
-      def validator(x:List[List[int]]) -> int:
-        x = [[1,2],[3,4]]
-        b = x[1][0]
-        return b
-    - Tried for a complex case - works
-      Ex : 
-      def validator(x:List[int]) -> int:
-        x = [1,2,3,4]
-        index = 1
-        return (x[index + 1]) 
-    - mixed slicing and index - works
-      Ex :
-      def validator(x:List[List[int]]) -> List[int]:
-          x = [[1, 2], [3, 4], [5, 6]]
-          return (x[1:3][0]) 
-      Ex2:
-        `@dataclass
-        class Buy(PlutusData):
-        CONSTR_ID = 0
-        index : int
+  - Tested for index (python old version of slice)
+  - Tested for nested index - worked def validator(x:List[List[int]]) -> int: x =
+    [[1,2],[3,4]] b = x[1][0] return b
+  - Tried for a complex case - works Ex : def validator(x:List[int]) -> int: x =
+    [1,2,3,4] index = 1 return (x[index + 1])
+  - mixed slicing and index - works Ex : def validator(x:List[List[int]]) ->
+    List[int]: x = [[1, 2], [3, 4], [5, 6]] return (x[1:3][0]) Ex2: `@dataclass
+     class Buy(PlutusData):
+     CONSTR_ID = 0
+     index : int
 
-        Const_list = [1,2,3,4]
+     Const_list = [1,2,3,4]
 
-        def validator(x:Buy) -> int:
-            return (Const_list[x.index])`  
+     def validator(x:Buy) -> int:
+     return (Const_list[x.index])`
 Edge case:
-    - Empty index doesn't work - its an invalid syntax in python itself(valid case)
+- Empty index doesn't work - its an invalid syntax in python itself(valid case)
 
-18. [SR]- rewrite/rewrite_cast_condition.py - 
-  - if the condition is already a boolean and if its a constant node, explicit cast to bool is redundant
-  - small performance overhead - using timeit performance with and without bool was analysed
-  
+18. [SR]- rewrite/rewrite_cast_condition.py -
+  - if the condition is already a boolean and if its a constant node, explicit cast
+    to bool is redundant
+  - small performance overhead - using timeit performance with and without bool was
+    analysed
+
 19. [SR] - `rewrite/rewrite_augassign.py`
-  - checked the order of precedence
-    Ex!:
-    def validator(x:int,y:int, z:int) -> int:
-    x += y*z
-    return x  -> it becomes x= x+(y*z)
-    Ex2: (Finding)
-    def validator(x:List[int]) -> int:
-    x =[1,2,3,4]
-    x[0] += 1
-    return x 
-    Error - "Can only assign to variable names, no type deconstruction" - this is possible in python 
+  - checked the order of precedence Ex!: def validator(x:int,y:int, z:int) -> int: x
+    += y*z return x -> it becomes x= x+(y*z) Ex2: (Finding) def
+    validator(x:List[int]) -> int: x =[1,2,3,4] x[0] += 1 return x Error - "Can only
+    assign to variable names, no type deconstruction" - this is possible in python
 
 20. [SR] - `rewrite/rewrite_remove_type_stuff.py` - No issues
-21. [SR] - `rewrite/rewrite_tuple_assign.py` - need for it if the tuple is complex, reuse and efficiency
-    What is the need of temporary variables like 2_uid_tup , why can't it be assigned using the tuple itself
-    Ex :
-    a,b =(1,2)
-    a =(1,2)[0]
-    b =(1,2)[1] 
+21. [SR] - `rewrite/rewrite_tuple_assign.py` - need for it if the tuple is complex,
+  reuse and efficiency What is the need of temporary variables like 2_uid_tup ,
+  why can't it be assigned using the tuple itself Ex : a,b =(1,2) a =(1,2)[0] b
+  =(1,2)[1]
 22- [SR] - `rewrite/rewrite_inject_builtins.py` - no issues
 
-     Q - until the aggressive type inference occurs , there wouldn't be any typed modules ,so how can it take an typedmodule node? - maintainability issue, 
-     Q - polymorphic functions are skipped, two different ways to find if the node is polymorphic - maintainability - polymorphic func can be known only after type checking
+Q - until the aggressive type inference occurs , there wouldn't be any typed
+modules ,so how can it take an typedmodule node? - maintainability issue, Q -
+polymorphic functions are skipped, two different ways to find if the node is
+polymorphic - maintainability - polymorphic func can be known only after type
+checking
 
-23 - [SR] - `rewrite_inject_builtin_constr.py`
-     Q - For all the builtins, constr_type is polymorphic only, that check is redundant or may be for a future use casez
-          -- already there  (finding 11 - try to add the comment )
+23 - [SR] - `rewrite_inject_builtin_constr.py` Q - For all the builtins,
+constr_type is polymorphic only, that check is redundant or may be for a future
+use cases -- already there (finding 11 - try to add the comment )
+
+24 - [SR] - `rewrite/rewrite_import_uplc_builtins.py`
+1. line 33 - What if the the function defintion has more than one decorator along
+  with wraps_builtin
+2. for splitting the function name - relies on the underscore and a digit following
+the underscore,foo_bar_123, this will be split foo and bar_123 and captilised
+into Foo and Bar_123 - the logic for splitting may not handle all cases
+
+25 - [SR] - `optimize/optimize_remove_comments.py` If the need is to remove only
+string comments, checking instance of constant node removes all constants Ex:
+"this is a comment" 42 , if i add this to the code, to debug my on-chain this
+will be removed as well None x = , here True will be removed as part of this
+code
+
+if x
+"some text" - worked fine
+
+26 - [SR]- `rewrite/rewrite_orig_name.py`--> maintainability/minor add finding
+- Have to check on annotated nodes,besides names, classdef and function def nodes.
+  x:int = 10 'These nodes are not taken into account' - *add finding* - added
+
+27 - [SR] - `rewrite/rewrite_comparison_chaining.py`
+- No other finding other than finding 10
+
+28 - [SR] - `optimize/optimize_remove_pass.py`
+- Q - clarify finding 9- Which visit_pass method?
+
+29 - [SR] - `optimize/optimize_remove_deadvars.py`
+
+`visit_If` - it looks for an intersection of the if body and else body, what if
+there is a break statement ? - as break is not implemented yet, this finding is
+not needed for now
+
+```python
+def validator(x:int,y:int):
+ while x == 1:
+ if x > 0:
+ y = 10
+ break
+ else:
+ y = 20
+ print("The value of y is:",y)
+``` Notimplemented Error : NotImplementedError: Cannot infer type of
+non-implemented node `<class 'ast.Break'>`
+
+30 -[SR] - `rewrite/rewrite_scoping` 
+
+The process of rewriting the variable names with scope id to resolve scopes and
+used for debugging
+- How to check if builtins are not rewritten? tried using `test_rewrites.py`- confirmed that builtins are not rewritten
+
+=== code Generation parts
+
+1. [SR] - `util.py`
+  - 1 followed by variable names like 1val_param0 - affects readability, instead use variable names 
+  - O_adhocpattern_hash of the ast - the hashes are long and affects readability
+  - Line 213 -- force_params-> all parameters - default and correct
+2. [SR] - `fun_impls.py`
+    Function: `len`
+    - Correctly uses FoldList, Integer. starts at 0 and adds 1
+    - ByteString case (uses LengthOfByteString)
+    - List/Dict case (uses FoldList with increment)
+    - Tuple case (returns fixed length)
+    - Raises non implemented error for unsupported types
+[x] - empty case of len (len[]) is not handled here,avoid indexError: list index out of range
+    - Function reserved, print, abs , all and any - no issues
+    - pow(2,3), contains traceerror in uplc output even if `3<0`, reason is lazy execution of `plt.ite`
+[x] - recursion depth can be specified in hex, to avoid max recursion error 
+
+3. `rewrite/rewrite_empty_lists.py` - as per the code
+```python 
+def validator(x:List[int]):
+  x : List[int] = []
+```
+  - output builtins in uplc code, 
+    builtin unListData,builtin unIData, (con (list integer) []),builtin constrData,con integer 0,
+    [(builtin mkNilData) (con unit ())], builtin mkcons, builtin chooseList, builtin headList, builtin tailList
+
+4. `rewrite/rewrite_empty_dicts.py` - as per the code
+
+```python
+def validator(x:Dict[str,int]):
+   x :Dict[str,int] = {}
+```
+  - builtin unMapData, [(builtin constrData) (con integer 0)], [(builtin mkNilData) (con unit ())]
+
+6. `rewrite/rewrite_import_hashlib.py`
+```python
+#from hashlib import sha256 as hsh
+from hashlib import blake2b
+
+# def validator () -> bytes:
+#     x = sha3_256(b"123").digest()
+#     return x
+def validator () -> bytes:
+    x = blake2b(b"123").digest()
+    return x
+```
+as expected `(lam x [(lam x (lam _ [(builtin blake2b_256) x]))])`
+
+
+7.`rewrite/rewrite_integrity_check.py`
+
+```python 
+@dataclass()
+class B(PlutusData):
+    CONSTR_ID = 1
+    foobar: int
+    bar: int
+
+def validator(x: B) -> None:
+    check_integrity(x)
+
+```
+as expected - 
+`(lam 1x [(lam 1x (force [[[(force (builtin ifThenElse)) [[(builtin equalsData) 1x] [0p_AdHocPattern_6e5e35746e0db09c0956f182750126a838d5650add52b85f95f67e428d0912cc_ 1x]]] (delay (con unit ()))] (delay [(lam _ (error)) [[(force (builtin trace)) (con string "ValueError: datum integrity check failed")]]])]))])`

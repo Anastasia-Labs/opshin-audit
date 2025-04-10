@@ -941,7 +941,7 @@ from opshin.prelude import *
 
 def validator(_: Dict) -> None:
     pass
-``` 
+```
 
 ### Recommendation
 
@@ -1051,7 +1051,7 @@ from opshin.prelude import *
 class A(PlutusData):
     CONSTR_ID = 1
     a: bytes
-    
+
 @dataclass()
 class B(PlutusData):
     CONSTR_ID = 2
@@ -1073,10 +1073,12 @@ Only after if the fields of `C` are changed (e.g. changing the name of field `b`
 Changing the annotation in the example to `Union[A, B, C]` (while keeping the fields of `B` and `C` the same) gives the following compiler error: `Duplicate constr_ids for records in Union: {'A': 1, 'B': 2, 'C': 2}`.
 
 Now consider the following modified validator using the same three classes:
+
 ```python
 def validator(x: Union[Union[A, B], C]) -> None:
     assert isinstance(x, C)
 ```
+
 Compiling this example gives the following non user-friendly error: `Trying to cast an instance of Union type to non-instance of union type`.
 
 ### Recommendation
@@ -1090,6 +1092,7 @@ Category: _Usability/Minor_
 The type of an empty literal dict is never inferred, and as a consequence can only be used on the right-hand-side of an annotated assignment.
 
 Consider the following example validator:
+
 ```python
 from opshin.prelude import *
 
@@ -1154,7 +1157,7 @@ Either remove the tuple related type checks in `AggressiveTypeInferencer.visit_F
 
 Category: _Security/Critical_
 
-The list comprehension type checks in `AggressiveTypeInferencer.list_comprehension()` doesn't check that the comprehension `ifs` filter expressions are of boolean type. 
+The list comprehension type checks in `AggressiveTypeInferencer.list_comprehension()` doesn't check that the comprehension `ifs` filter expressions are of boolean type.
 
 If the user inadvertently uses a comprehension filter expression that doesn't evaluate to a bool, a runtime error will always by thrown if the comprehension generator returns a non-empty list. This can lead to a dead-lock of user funds if a validator hasn't been sufficiently tested.
 
@@ -1259,7 +1262,7 @@ def validator(a: Union[int, bytes]) -> None:
 
 ### Recommendation
 
-Reuse logic related to `self.wrapped` from `AggressiveTypeInferencer.visit_If()`. 
+Reuse logic related to `self.wrapped` from `AggressiveTypeInferencer.visit_If()`.
 
 ## Finding 46 - type assertion wrappers not applied on the right-hand-side of BoolOp
 
@@ -1275,7 +1278,7 @@ The following validator is an example of valid Opshin that will produce UPLC tha
 from opshin.prelude import *
 
 def validator(a: Union[int, bytes]) -> None:
-    assert isinstance(a, int) and a == 10 
+    assert isinstance(a, int) and a == 10
 ```
 
 ### Recommendation
@@ -1391,7 +1394,7 @@ In the TupleType branch in `AggressiveTypeInferencer.visit_Subscript()`: remove 
 
 Category: _Usability/Minor_
 
-Messages printed when evaluating a validator using `eval_uplc` aren't displayed 
+Messages printed when evaluating a validator using `eval_uplc` aren't displayed
 
 Optimization level doesn't seem to have any impact on this.
 
@@ -1438,11 +1441,12 @@ Case 2: Checks if the type of the function is PolymorphicFunctionType:
 if isinstance(typ.typ, PolymorphicFunctionType):
     continue
 ```
+
 This dual approach makes the code harder to understand. Additionally, polymorphic functions can only be definitively identified after type checking, which further complicates the logic.
 
 ## Recommendation
 
-1. Unify the logic for identifying polymorphic functions. 
+1. Unify the logic for identifying polymorphic functions.
 
 2. Since polymorphic functions can only be definitively identified after type checking, consider moving the logic of `rewrite/rewrite_inject_builtins.py` to a later stage in the compilation process, where type information is fully available.
 
@@ -1451,12 +1455,14 @@ This dual approach makes the code harder to understand. Additionally, polymorphi
 Category: Performance/Minor
 
 The `RewriteConditions` transformer explicitly rewrites all conditions (e.g., in if, while, assert, etc.) to include an implicit cast to bool using a special variable `SPECIAL_BOOL`. However, this transformation is redundant when:
-  1. The condition is already a boolean (e.g., if True or if x == y where the result is already a boolean).
-  2. The condition is a constant node (e.g., if True or if False).
+
+1. The condition is already a boolean (e.g., if True or if x == y where the result is already a boolean).
+2. The condition is a constant node (e.g., if True or if False).
 
 In such cases, adding an explicit cast to bool is unnecessary and can degrade performance, especially in cases where the condition is evaluated repeatedly (e.g., in loops).
 
 ## Recommendation
+
 Modify the `RewriteConditions` transformer in `rewrite/rewrite_cast_condition.py` to skip the explicit cast to bool when the condition is already a boolean and a constant node.
 
 ## Finding 60 - Inability to Assign to List Elements in Validator Functions
@@ -1469,11 +1475,24 @@ In the provided code, the validator function attempts to modify an element of a 
 def validator(x:List[int]) -> int:
     x =[1,2,3,4]
     x[0] += 1
-    return x 
+    return x
 ```
+
 ## Recommendation
+
 1. Extend the compiler to support assignments to list elements.
 2. If supporting list element assignment is not feasible,enhance the error message to explain the limitation and suggest possible workarounds.
+
+## Finding 61- Annotated Variable Nodes Not Handled in `rewrite/rewrite_orig_name.py`
+
+Category: Maintainability / Minor
+
+The logic in `rewrite/rewrite_orig_name.py` currently checks for `Name`, `ClassDef`, and `FunctionDef` nodes but does not account for annotated variable assignments (e.g., x: int = 10). These nodes (`AnnAssign` in AST terms) may
+may also contain a pointer to the original name for good.
+
+## Recommendation
+
+Extend the node-checking logic to include `AnnAssign`.
 
 # General Recommendations
 
