@@ -439,7 +439,8 @@ used for debugging
     - Raises non implemented error for unsupported types
 [x] - empty case of len (len[]) is not handled here,avoid indexError: list index out of range
     - Function reserved, print, abs , all and any - no issues
-[x] - pow(2,3), contains traceerror in uplc output even if `3<0`, reason is lazy execution of `plt.ite`
+    - pow(2,3), contains traceerror in uplc output even if `3<0`, reason is lazy execution of `plt.ite`
+[x] - recursion depth can be specified in hex, to avoid max recursion error 
 
 3. `rewrite/rewrite_empty_lists.py` - as per the code
 ```python 
@@ -457,3 +458,34 @@ def validator(x:Dict[str,int]):
    x :Dict[str,int] = {}
 ```
   - builtin unMapData, [(builtin constrData) (con integer 0)], [(builtin mkNilData) (con unit ())]
+
+6. `rewrite/rewrite_import_hashlib.py`
+```python
+#from hashlib import sha256 as hsh
+from hashlib import blake2b
+
+# def validator () -> bytes:
+#     x = sha3_256(b"123").digest()
+#     return x
+def validator () -> bytes:
+    x = blake2b(b"123").digest()
+    return x
+```
+as expected `(lam x [(lam x (lam _ [(builtin blake2b_256) x]))])`
+
+
+7.`rewrite/rewrite_integrity_check.py`
+
+```python 
+@dataclass()
+class B(PlutusData):
+    CONSTR_ID = 1
+    foobar: int
+    bar: int
+
+def validator(x: B) -> None:
+    check_integrity(x)
+
+```
+as expected - 
+`(lam 1x [(lam 1x (force [[[(force (builtin ifThenElse)) [[(builtin equalsData) 1x] [0p_AdHocPattern_6e5e35746e0db09c0956f182750126a838d5650add52b85f95f67e428d0912cc_ 1x]]] (delay (con unit ()))] (delay [(lam _ (error)) [[(force (builtin trace)) (con string "ValueError: datum integrity check failed")]]])]))])`
