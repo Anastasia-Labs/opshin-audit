@@ -501,7 +501,7 @@ def validator(x:int):
     assert x == 1
 ```
 - When there is no return type mentioned, data is constructed for integer 0 in addition to `mkNilData` 
-
+- performance - minor - add this finding
 ```python
 @wraps_builtin
 def add_integer(x: int, y: int) -> int:
@@ -513,7 +513,58 @@ def validator():
 ```
 
 - this `add_integer` is already defined under `builtins.py` file, if someone tries to define anything at all , this will be directly mapped to uplc builtin, how safe this could be?
-Recom : local definition should be declined when builtins are used from `builtin.py`
+Recom : local definition should be declined when builtins are used from `builtin.py` - already noted in finding 6
         Why should the user be given a choice to wrap the builtin?
 
 9. `transform_ext_params_map(),transform_output_map(),empty_List()` - None
+
+== List of Files Audited
+
+#table(
+  columns: 3,  // Number of columns
+  [Folder], [List of Files], [Audited], // Header row
+  [Ledger],  [api_v2.py],[] ,  // Row 1
+  [],  [interval.py],[],   // Row 2
+  [optimize],  [optimize_const_folding.py],[Done] ,  // Row 1
+  [],  [optimize_remove_comments.py],[Done],
+  [],  [optimize_remove_deadvars.py],[Done] ,  // Row 1
+  [],  [optimize_remove_pass.py],[Done],
+  [rewrite], [rewrite_augassign.py],[Done] ,  // Row 1
+  [],  [rewrite_cast_condition.py],[Done],
+  [],  [rewrite_comparison_chaining.py],[Done],
+  [],  [rewrite_empty_dicts.py],[Done],
+  [],  [rewrite_empty_lists.py],[Done],
+  [],  [rewrite_forbidden_overwrites.py],[Done],
+  [],  [rewrite_forbidden_return.py],[Done],
+  [],  [rewrite_import_dataclasses.py],[Done],
+  [],  [rewrite_import_hashlib],[Done],
+  [],  [rewrite_import_integrity_check],[Done],
+  [],  [rewrite_import_plutusdata],[Done],
+  [],  [rewrite_import_typing],[Done],
+  [],  [rewrite_import_uplc_builtins],[Done],
+  [],  [rewrite_import],[Done],
+  [],  [rewrite_inject_builtin_constr],[Done],
+  [],  [rewrite_inject_builtins],[Done],
+  [],  [rewrite_orig_name],[Done],
+  [],  [rewrite_remove_type_stuff],[Done],
+  [],  [rewrite_scoping],[Done],
+  [],  [rewrite_subscript38],[Done],
+  [],  [rewrite_tuple_assign],[Done],
+  [std],  [bitmap.py],[],
+  [],  [builtins.py],[],
+  [],  [fractions.py],[],
+  [],  [hashlib.py],[],
+  [],  [integrity.py],[],
+  [],  [math.py],[],
+  [opshin],  [bridge.py],[],
+  [],  [builder.py],[],
+  [],  [compiler_config.py],[],
+  [],  [compiler.py],[Done],
+  [],  [fun_impls.py],[Done],
+  [],  [prelude.py],[],
+  [],  [type_impls.py],[Done],
+  [],  [type_inference.py],[Done],
+  [],  [typed_ast.py],[],
+  [],  [util.py],[],
+  
+)
