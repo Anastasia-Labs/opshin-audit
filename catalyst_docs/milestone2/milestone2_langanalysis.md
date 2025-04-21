@@ -1905,6 +1905,83 @@ In `fun_impls.py`, the `oct` builtin uses exactly the same logic as `hex`, excep
 ### Recommendation
 
 Refactor and reuse the code generation logic of `hex` for `oct`.
+=======
+## Finding - can't use empty literal lists in arbitrary expressions
+
+Category: _Usability/Minor_
+
+When a variable is first declared with a type annotation (e.g., def validator(x: List[int])) and later assigned to an empty value (e.g., x = []), the type checker fails to infer the type from the prior annotation and throws an unhelpful error `IndexError: list index out of range`. This occurs because the type checker treats annotated assignments (x: List[int] = []) and regular assignments (x = []) differently.
+
+```python
+
+from typing import List
+
+def validator(x: List[int]) -> int:
+    x = []  # throws `IndexError` instead of inferring `List[int]`
+    return len(x)
+```
+
+## Recommendations:
+
+1.Improve Error Messaging:
+
+- Replace the cryptic IndexError with a clear, actionable error.
+- If the variable has a prior type annotation, suggest: "Variable 'x' was previously annotated as 'List[int]'".
+
+  2.Leverage Prior Annotations in `visit_Assign`:
+
+- Modify the type checker to check for existing type annotations on the target variable during `visit_Assign`.
+
+- If the target has a known type (e.g., from a prior annotation or parameter type), use it to infer the type of value of the expression.
+
+## Finding: Unclear Error for Unimplemented Bitwise XOR
+
+When using unsupported operators (e.g., bitwise XOR ^) in operations, the evaluation throws a `RecursionError: maximum recursion depth exceeded` instead of a clear error indicating the operator is unimplemented. However this compiles when the optimization of constant expressions is turned on.
+
+```python
+
+def validator():
+    x = hex(1 ^ 256)  # Throws `RecursionError` instead of "Operator '^' not supported"
+    print(x)
+```
+
+## Recommendations:
+
+- Detect unsupported operators during parsing/compilation and raise a descriptive error (e.g., CompilerError: Operator '^' (bitwise XOR) is not supported).
+
+- Include a list of supported operators in the error message (e.g., Supported operators: +, -, \*, /, &, |).
+
+- Prioritize implementing commonly used missing operators or explicitly document unsupported ones.
+
+## Finding - Optimization not showing the result of execution
+
+As there is no equivalent for the `check_integrity` function in python,the optimizer isn't able to perform it and just gives out the result of compilation.
+
+```python
+@dataclass()
+class B(PlutusData):
+    CONSTR_ID = 1
+    foobar: int
+    bar: int
+
+def validator(x: B) -> None:
+    x = B(4,5)
+    check_integrity(x)
+```
+
+For this code, the uplc spits outs the compiled code of both the branches of the builtin function `ifThenElse`.
+`(lam 1x [(lam 1x (force [[[(force (builtin ifThenElse)) [[(builtin equalsData) 1x] [0p_AdHocPattern_6e5e35746e0db09c0956f182750126a838d5650add52b85f95f67e428d0912cc_ 1x]]] (delay (con unit ()))] (delay [(lam _ (error)) [[(force (builtin trace)) (con string "ValueError: datum integrity check failed")]]])]))])`
+
+## Finding - Unnecessary Data Construction for Void Validators
+
+```python
+def validator(x:int):
+    assert x == 1
+```
+
+For a simple validator with no returns as shown above, the UPLC constructs data for integer 0 in addition to nil data which isnt necessary and which does not go away even after optimisation.
+
+`[(lam v0 [(lam v1 [(lam v2 (lam v3 [(lam v4 [(lam v5 [(lam v6 [(lam v7 [(lam v8 [[(force v7) v6] (delay v8)]) [(builtin unIData) v3]]) (delay (lam v9 (lam v10 (force [[[(force (builtin ifThenElse)) [(lam v11 [v1 (delay v11)]) [[v2 (force v10)] (con integer 1)]]] (delay [[(builtin constrData) (con integer 0)] [(builtin mkNilData) (con unit ())]])] (delay [(lam v12 (error)) (con unit ())])]))))]) (delay [(lam v13 (error)) [[(force (builtin trace)) (con string "NameError: ~bool")] (con unit ())]])]) (delay [(lam v14 (error)) [[(force (builtin trace)) (con string "NameError: x")] (con unit ())]])]) (delay [(lam v15 (error)) [[(force (builtin trace)) (con string "NameError: validator")] (con unit ())]])])) (builtin equalsInteger)]) [(lam v0 (lam v16 [(lam v17 v17) (force v16)])) (builtin equalsInteger)]]) (builtin equalsInteger)]`
 
 # General Recommendations
 
