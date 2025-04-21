@@ -439,7 +439,7 @@ used for debugging
     - Raises non implemented error for unsupported types
 [x] - empty case of len (len[]) is not handled here,avoid indexError: list index out of range
       Recom: error message has to be improved 
-             visit_Assign , check the target is already given a type - ** Finding**
+             visit_Assign , check the target is already given a type - * Finding*
     - Function reserved, print, abs , all and any - no issues
     - pow(2,3), contains traceerror in uplc output even if `3<0`, reason is lazy execution of `plt.ite`
 [x] - recursion depth can be specified in hex, to avoid max recursion error - finding - 
