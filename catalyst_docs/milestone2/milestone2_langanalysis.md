@@ -1693,18 +1693,6 @@ In `PlutoCompiler` in `compiler.py`, the `visit_ListComp()` and `visit_DictComp(
 
 Refactor and reuse the common functionality of `PlutoCompiler.visit_ListComp()` and `PlutoCompiler.visit_DictComp()`.
 
-## Finding 74 - builtin functions and methods aren't reused
-
-Category: _Usability/Major_
-
-Builtin functions defined in `fun_impls.py`, and type-specific constructors and methods defined in `type_impls.py`, are inlined everytime they are referenced. This can lead to a lot of duplication in the UPLC.
-
-Due to the strict on-chain validator 16KB size limit, this duplication can easily lead to UPLC scripts that  surpass the limit and can't be used in production. Common subexpression factorization can eliminate such duplication, but such an algorithm is complex and difficult to implement.
-
-### Recommendation
-
-Larger builtin functions and methods should be saved to a registry with a unique name, and then referenced by name instead of inlining the Pluto AST nodes.
-
 ## Finding 75 - wrong type annotation in `Type.binop` and `Type._binop_bin_fun`
 
 Category: _Maintainability/Minor_
@@ -1982,6 +1970,39 @@ def validator(x:int):
 For a simple validator with no returns as shown above, the UPLC constructs data for integer 0 in addition to nil data which isnt necessary and which does not go away even after optimisation.
 
 `[(lam v0 [(lam v1 [(lam v2 (lam v3 [(lam v4 [(lam v5 [(lam v6 [(lam v7 [(lam v8 [[(force v7) v6] (delay v8)]) [(builtin unIData) v3]]) (delay (lam v9 (lam v10 (force [[[(force (builtin ifThenElse)) [(lam v11 [v1 (delay v11)]) [[v2 (force v10)] (con integer 1)]]] (delay [[(builtin constrData) (con integer 0)] [(builtin mkNilData) (con unit ())]])] (delay [(lam v12 (error)) (con unit ())])]))))]) (delay [(lam v13 (error)) [[(force (builtin trace)) (con string "NameError: ~bool")] (con unit ())]])]) (delay [(lam v14 (error)) [[(force (builtin trace)) (con string "NameError: x")] (con unit ())]])]) (delay [(lam v15 (error)) [[(force (builtin trace)) (con string "NameError: validator")] (con unit ())]])])) (builtin equalsInteger)]) [(lam v0 (lam v16 [(lam v17 v17) (force v16)])) (builtin equalsInteger)]]) (builtin equalsInteger)]`
+
+## Finding 89 - `FalseData` and `TrueData` is the wrong `CONSTR_ID`
+
+Category: _Security/Critical_
+
+In `ledger/api_v2.py`, `FalseData` uses `CONSTR_ID=1`, and `TrueData` uses `CONSTR_ID=0`.
+
+But according to line 24 of [https://github.com/IntersectMBO/plutus/blob/master/plutus-tx/src/PlutusTx/IsData/Instances.hs](https://github.com/IntersectMBO/plutus/blob/master/plutus-tx/src/PlutusTx/IsData/Instances.hs):
+
+```haskell
+$(makeIsDataSchemaIndexed ''Bool [('False, 0), ('True, 1)])
+```
+
+This mismatch changes the expected behavior of the functions operating on time ranges.
+
+### Recommendation
+
+Change the `CONSTR_ID` of `FalseData` to 0, and change the `CONSTR_ID` of `TrueData` to 1.
+
+## Finding 90 - `POWS` always accessed in reverse order
+
+Category: _Performance/Minor_
+
+In `std/bitmap.py`, the `POWS` list is always accessed in reverse order:
+```python
+POWS[(BYTE_SIZE - 1) - (i % BYTE_SIZE)]
+```
+
+The `POWS` can be reversed instead, allowing the elimination of the `(BYTE_SIZE - 1) -` operation.
+
+### Recommendation
+
+Reverse `POWS` during its assignment using the `reversed()` builtin, then remove the `(BYTE_SIZE - 1) -` operation wherever `POWS` is accessed.
 
 # General Recommendations
 
