@@ -293,7 +293,8 @@ the rewrite code checks the format "from <pkg> import dataclass" and
   x =10 y =15
 
 1. `Visit_ImportForm` in class DefinedTimesVisitor - this class collects how often
-  variables are written from ast import `*` - not handled -- To be added to finding
+  variables are written from ast import `*` - not handled -- To be added to
+  finding
 
 11. [SR] `rewrite/rewrite_import_plutusdata.py`
   1. all assertions have the same error message, can be informative
@@ -418,41 +419,43 @@ def validator(x:int,y:int):
 ``` Notimplemented Error : NotImplementedError: Cannot infer type of
 non-implemented node `<class 'ast.Break'>`
 
-30 -[SR] - `rewrite/rewrite_scoping` 
+30 -[SR] - `rewrite/rewrite_scoping`
 
 The process of rewriting the variable names with scope id to resolve scopes and
 used for debugging
-- How to check if builtins are not rewritten? tried using `test_rewrites.py`- confirmed that builtins are not rewritten
+- How to check if builtins are not rewritten? tried using `test_rewrites.py`-
+  confirmed that builtins are not rewritten
 
 === code Generation parts
 
 1. [SR] - `util.py`
-  - 1 followed by variable names like 1val_param0 - affects readability, instead use variable names 
+  - 1 followed by variable names like 1val_param0 - affects readability, instead use
+    variable names
   - O_adhocpattern_hash of the ast - the hashes are long and affects readability
   - Line 213 -- force_params-> all parameters - default and correct
-2. [SR] - `fun_impls.py`
-    Function: `len`
-    - Correctly uses FoldList, Integer. starts at 0 and adds 1
-    - ByteString case (uses LengthOfByteString)
-    - List/Dict case (uses FoldList with increment)
-    - Tuple case (returns fixed length)
-    - Raises non implemented error for unsupported types
-[x] - empty case of len (len[]) is not handled here,avoid indexError: list index out of range
-      Recom: error message has to be improved 
-             visit_Assign , check the target is already given a type - * Finding*
-    - Function reserved, print, abs , all and any - no issues
-    - pow(2,3), contains traceerror in uplc output even if `3<0`, reason is lazy execution of `plt.ite`
-[x] - recursion depth can be specified in hex, to avoid max recursion error - finding - 
-  recom: Xor is not yet implemented, it compiled with optimization
+2. [SR] - `fun_impls.py` Function: `len`
+  - Correctly uses FoldList, Integer. starts at 0 and adds 1
+  - ByteString case (uses LengthOfByteString)
+  - List/Dict case (uses FoldList with increment)
+  - Tuple case (returns fixed length)
+  - Raises non implemented error for unsupported types
+[x] - empty case of len (len[]) is not handled here,avoid indexError: list index
+out of range Recom: error message has to be improved visit_Assign , check the
+target is already given a type - * Finding*
+- Function reserved, print, abs , all and any - no issues
+- pow(2,3), contains traceerror in uplc output even if `3<0`, reason is lazy
+  execution of `plt.ite`
+[x] - recursion depth can be specified in hex, to avoid max recursion error -
+finding - recom: Xor is not yet implemented, it compiled with optimization
 
 3. `rewrite/rewrite_empty_lists.py` - as per the code
-```python 
+```python
 def validator(x:List[int]):
   x : List[int] = []
 ```
-  - output builtins in uplc code, 
-    builtin unListData,builtin unIData, (con (list integer) []),builtin constrData,con integer 0,
-    [(builtin mkNilData) (con unit ())], builtin mkcons, builtin chooseList, builtin headList, builtin tailList
+- output builtins in uplc code, builtin unListData,builtin unIData, (con (list
+  integer) []),builtin constrData,con integer 0, [(builtin mkNilData) (con unit
+  ())], builtin mkcons, builtin chooseList, builtin headList, builtin tailList
 
 4. `rewrite/rewrite_empty_dicts.py` - as per the code
 
@@ -460,7 +463,8 @@ def validator(x:List[int]):
 def validator(x:Dict[str,int]):
    x :Dict[str,int] = {}
 ```
-  - builtin unMapData, [(builtin constrData) (con integer 0)], [(builtin mkNilData) (con unit ())]
+- builtin unMapData, [(builtin constrData) (con integer 0)], [(builtin mkNilData)
+  (con unit ())]
 
 6. `rewrite/rewrite_import_hashlib.py`
 ```python
@@ -476,10 +480,9 @@ def validator () -> bytes:
 ```
 as expected `(lam x [(lam x (lam _ [(builtin blake2b_256) x]))])`
 
-
 7.`rewrite/rewrite_integrity_check.py`
 
-```python 
+```python
 @dataclass()
 class B(PlutusData):
     CONSTR_ID = 1
@@ -490,81 +493,176 @@ def validator(x: B) -> None:
     check_integrity(x)
 
 ```
-as expected - 
-`(lam 1x [(lam 1x (force [[[(force (builtin ifThenElse)) [[(builtin equalsData) 1x] [0p_AdHocPattern_6e5e35746e0db09c0956f182750126a838d5650add52b85f95f67e428d0912cc_ 1x]]] (delay (con unit ()))] (delay [(lam _ (error)) [[(force (builtin trace)) (con string "ValueError: datum integrity check failed")]]])]))])`
+as expected - `(lam 1x [(lam 1x (force [[[(force (builtin ifThenElse))
+[[(builtin equalsData) 1x]
+[0p_AdHocPattern_6e5e35746e0db09c0956f182750126a838d5650add52b85f95f67e428d0912cc_
+1x]]] (delay (con unit ()))] (delay [(lam _ (error)) [[(force (builtin trace))
+(con string "ValueError: datum integrity check failed")]]])]))])`
 
-lazy evalution of ifThenElse but then trace error always thrown in putput -- finding 
+lazy evalution of ifThenElse but then trace error always thrown in putput --
+finding
 
 8. `rewrite/rewrite_import_UPLC_builtins.py`
 ```python
 def validator(x:int):
     assert x == 1
 ```
-- When there is no return type mentioned, data is constructed for integer 0 in addition to `mkNilData` 
+- When there is no return type mentioned, data is constructed for integer 0 in
+  addition to `mkNilData`
 - performance - minor - add this finding
 ```python
 @wraps_builtin
 def add_integer(x: int, y: int) -> int:
     z = x*y
-    return x 
+    return x
 
 def validator():
     assert add_integer(1, 2) == 3
 ```
 
-- this `add_integer` is already defined under `builtins.py` file, if someone tries to define anything at all , this will be directly mapped to uplc builtin, how safe this could be?
-Recom : local definition should be declined when builtins are used from `builtin.py` - already noted in finding 6
-        Why should the user be given a choice to wrap the builtin?
+- this `add_integer` is already defined under `builtins.py` file, if someone tries
+  to define anything at all , this will be directly mapped to uplc builtin, how
+  safe this could be?
+Recom : local definition should be declined when builtins are used from
+`builtin.py` - already noted in finding 6 Why should the user be given a choice
+to wrap the builtin?
 
 9. `transform_ext_params_map(),transform_output_map(),empty_List()` - None
 
 == List of Files Audited
 
 #table(
-  columns: 3,  // Number of columns
-  [Folder], [List of Files], [Audited], // Header row
-  [Ledger],  [api_v2.py],[] ,  // Row 1
-  [],  [interval.py],[],   // Row 2
-  [optimize],  [optimize_const_folding.py],[Done] ,  // Row 1
-  [],  [optimize_remove_comments.py],[Done],
-  [],  [optimize_remove_deadvars.py],[Done] ,  // Row 1
-  [],  [optimize_remove_pass.py],[Done],
-  [rewrite], [rewrite_augassign.py],[Done] ,  // Row 1
-  [],  [rewrite_cast_condition.py],[Done],
-  [],  [rewrite_comparison_chaining.py],[Done],
-  [],  [rewrite_empty_dicts.py],[Done],
-  [],  [rewrite_empty_lists.py],[Done],
-  [],  [rewrite_forbidden_overwrites.py],[Done],
-  [],  [rewrite_forbidden_return.py],[Done],
-  [],  [rewrite_import_dataclasses.py],[Done],
-  [],  [rewrite_import_hashlib],[Done],
-  [],  [rewrite_import_integrity_check],[Done],
-  [],  [rewrite_import_plutusdata],[Done],
-  [],  [rewrite_import_typing],[Done],
-  [],  [rewrite_import_uplc_builtins],[Done],
-  [],  [rewrite_import],[Done],
-  [],  [rewrite_inject_builtin_constr],[Done],
-  [],  [rewrite_inject_builtins],[Done],
-  [],  [rewrite_orig_name],[Done],
-  [],  [rewrite_remove_type_stuff],[Done],
-  [],  [rewrite_scoping],[Done],
-  [],  [rewrite_subscript38],[Done],
-  [],  [rewrite_tuple_assign],[Done],
-  [std],  [bitmap.py],[],
-  [],  [builtins.py],[],
-  [],  [fractions.py],[],
-  [],  [hashlib.py],[],
-  [],  [integrity.py],[],
-  [],  [math.py],[],
-  [opshin],  [bridge.py],[],
-  [],  [builder.py],[],
-  [],  [compiler_config.py],[],
-  [],  [compiler.py],[Done],
-  [],  [fun_impls.py],[Done],
-  [],  [prelude.py],[],
-  [],  [type_impls.py],[Done],
-  [],  [type_inference.py],[Done],
-  [],  [typed_ast.py],[],
-  [],  [util.py],[],
-  
+  columns: 3, // Number of columns
+  [Folder],
+  [List of Files],
+  [Audited], // Header row
+  [Ledger],
+  [api_v2.py],
+  [Done], // Row 1
+  [],
+  [interval.py],
+  [Done], // Row 2
+  [optimize],
+  [optimize_const_folding.py],
+  [Done], // Row 1
+  [],
+  [optimize_remove_comments.py],
+  [Done],
+  [],
+  [optimize_remove_deadvars.py],
+  [Done], // Row 1
+  [],
+  [optimize_remove_pass.py],
+  [Done],
+  [rewrite],
+  [rewrite_augassign.py],
+  [Done], // Row 1
+  [],
+  [rewrite_cast_condition.py],
+  [Done],
+  [],
+  [rewrite_comparison_chaining.py],
+  [Done],
+  [],
+  [rewrite_empty_dicts.py],
+  [Done],
+  [],
+  [rewrite_empty_lists.py],
+  [Done],
+  [],
+  [rewrite_forbidden_overwrites.py],
+  [Done],
+  [],
+  [rewrite_forbidden_return.py],
+  [Done],
+  [],
+  [rewrite_import_dataclasses.py],
+  [Done],
+  [],
+  [rewrite_import_hashlib],
+  [Done],
+  [],
+  [rewrite_import_integrity_check],
+  [Done],
+  [],
+  [rewrite_import_plutusdata],
+  [Done],
+  [],
+  [rewrite_import_typing],
+  [Done],
+  [],
+  [rewrite_import_uplc_builtins],
+  [Done],
+  [],
+  [rewrite_import],
+  [Done],
+  [],
+  [rewrite_inject_builtin_constr],
+  [Done],
+  [],
+  [rewrite_inject_builtins],
+  [Done],
+  [],
+  [rewrite_orig_name],
+  [Done],
+  [],
+  [rewrite_remove_type_stuff],
+  [Done],
+  [],
+  [rewrite_scoping],
+  [Done],
+  [],
+  [rewrite_subscript38],
+  [Done],
+  [],
+  [rewrite_tuple_assign],
+  [Done],
+  [std],
+  [bitmap.py],
+  [Done],
+  [],
+  [builtins.py],
+  [Done],
+  [],
+  [fractions.py],
+  [Done],
+  [],
+  [hashlib.py],
+  [Done],
+  [],
+  [integrity.py],
+  [Done],
+  [],
+  [math.py],
+  [Done],
+  [opshin],
+  [bridge.py],
+  [Done],
+  [],
+  [builder.py],
+  [Done],
+  [],
+  [compiler_config.py],
+  [Done],
+  [],
+  [compiler.py],
+  [Done],
+  [],
+  [fun_impls.py],
+  [Done],
+  [],
+  [prelude.py],
+  [Done],
+  [],
+  [type_impls.py],
+  [Done],
+  [],
+  [type_inference.py],
+  [Done],
+  [],
+  [typed_ast.py],
+  [Done],
+  [],
+  [util.py],
+  [Done],
 )
