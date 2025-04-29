@@ -1,4 +1,4 @@
-# OpShin - Language analysis Report
+# OpShin - Language Analysis Report
 
 ## Table of Contents
 
@@ -331,7 +331,7 @@ that this document does not constitute the final audit report. The contents are
 meant to offer a preliminary insight into our findings up to this point and are
 subject to change as our audit progresses.
 
-## Finding 41 - list and dict comprehensions don't check that filters evaluate to boolean types
+## Finding 01 - list and dict comprehensions don't check that filters evaluate to boolean types
 
 Category: _Security/Critical_
 
@@ -347,11 +347,11 @@ def validator(a: List[int]) -> None:
     pass
 ```
 
-## Recommendation
+### Recommendation
 
 Wrap list comprehension `ifs` with Bool casts in `rewrite_cast_condition.py`.
 
-## Finding 46 - type assertion wrappers not applied on the right-hand-side of BoolOp
+## Finding 02 - type assertion wrappers not applied on the right-hand-side of BoolOp
 
 Category: _Security/Critical_
 
@@ -368,11 +368,11 @@ def validator(a: Union[int, bytes]) -> None:
     assert isinstance(a, int) and a == 10
 ```
 
-## Recommendation
+### Recommendation
 
 Reuse logic related to `self.wrapped` from `AggressiveTypeInferencer.visit_If()`.
 
-## Finding 45 - type assertion wrappers not applied in while statement bodies
+## Finding 03 - type assertion wrappers not applied in while statement bodies
 
 Category: _Security/Critical_
 
@@ -391,11 +391,11 @@ def validator(a: Union[int, bytes]) -> None:
             a -= 1
 ```
 
-## Recommendation
+### Recommendation
 
 Reuse logic related to `self.wrapped` from `AggressiveTypeInferencer.visit_If()`.
 
-## Finding 65 - `UnionType` not implicitly converted
+## Finding 04 - `UnionType` not implicitly converted
 
 Category: _Security/Critical_
 
@@ -422,11 +422,11 @@ def validator(a: Union[int, bytes]) -> Union[int, bytes]:
 
 Similarly, these implicit conversions of `Union` values is missing in `PlutoCompiler.visit_AnnAssign()`.
 
-## Recommendation
+### Recommendation
 
 In `compiler.py`, refactor the `isinstance(typ, AnyType) or isinstance(typ, UnionType)` logic used in `PlutoCompiler.visit_Call()`, and reuse it to check for implicit conversion to data in `PlutoCompiler.visit_Return()` and `PlutoCompiler.visit_AnnAssign()`.
 
-## Finding 77 - `ListType.copy_only_attributes()` wrongly applies data conversion to items
+## Finding 05 - `ListType.copy_only_attributes()` wrongly applies data conversion to items
 
 Category: _Security/Critical_
 
@@ -448,7 +448,7 @@ def validator(d: int) -> None:
 
 Similarly, this compiles successfully for Dicts nested in Lists, but throws an error when evaluated.
 
-## Recommendation
+### Recommendation
 
 Remove the conversion to/from data in `ListType.copy_only_attributes()` (i.e. the `transform_ext_params_map(self.typ)(...)` and `transform_output_map(self.typ)(...)` calls).
 
@@ -456,7 +456,7 @@ The `copy_only_attributes()` method of each type should be responsible for its o
 
 This way the `copy_only_attributes()` implementations of `ListType`, `DictType` and `RecordType` don't have to perform explicit conversions of their content, improving maintainability of the codebase.
 
-## Finding 81 - `zip` is used without checking equality of lengths
+## Finding 06 - `zip` is used without checking equality of lengths
 
 Category: _Security/Critical_
 
@@ -476,11 +476,11 @@ def validator(a: int) -> int:
 
 This example validator will compile successfully but will always fail to run.
 
-## Recommendation
+### Recommendation
 
 Ensure the lengths of the `TupleType`s are the same when comparing them in `TupleType.__ge__`.
 
-## Finding 82 - the `index` method of `ListType` is incorrectly implemented
+## Finding 07 - the `index` method of `ListType` is incorrectly implemented
 
 Category: _Security/Critical_
 
@@ -497,11 +497,11 @@ def validator(a: Anything, b: Anything) -> int:
    return l.index(b)
 ```
 
-## Recommendation
+### Recommendation
 
 Change the check to `EqualsData(transform_output_map(itemType)(x), transform_output_map(itemType)(HeadList(xs)))`.
 
-## Finding 76 - the `CONSTR_ID` attribute is defined for `Anything` and `Union` of primitives
+## Finding 08 - the `CONSTR_ID` attribute is defined for `Anything` and `Union` of primitives
 
 Category: _Security/Critical_
 
@@ -522,12 +522,12 @@ def validator(u: Union[int, bytes]) -> int:
    return u.CONSTR_ID
 ```
 
-## Recommendation
+### Recommendation
 
 - The `CONSTR_ID` attribute for `Anything` can be removed.
 - Avoid exposing the `CONSTR_ID` attribute of `Union`s which contain some `non-ConstrData` types.
 
-## Finding 89 - `FalseData` and `TrueData` uses the wrong `CONSTR_ID`
+## Finding 09 - `FalseData` and `TrueData` uses the wrong `CONSTR_ID`
 
 Category: _Security/Critical_
 
@@ -545,7 +545,7 @@ This mismatch changes the expected behavior of the functions operating on time r
 
 Change the `CONSTR_ID` of `FalseData` to 0, and change the `CONSTR_ID` of `TrueData` to 1.
 
-## Finding 06 - Lack of namespaced imports
+## Finding 10 - Lack of namespaced imports
 
 Categories: _Security/Major_
 
@@ -580,7 +580,7 @@ class Employee(PlutusData):
 This code defines a custom class named `Address`, which shadows the built-in Address type from the Cardano ecosystem.
 It throws a type inference error. However, it should show a warning indicating that the name is shadowed.
 
-## Recommendation
+### Recommendation
 
 The current OpShin import mechanism is generally poorly implemented, also for builtins:
 
@@ -605,7 +605,7 @@ Nice to have:
 
 An additional advantage of having multiple independent Module AST nodes is that some compilation steps can be multi-threaded.
 
-## Finding 27 - Custom Function declarartions are Overridden
+## Finding 11 - Custom Function declarartions are Overridden
 
 Category: _Security/Minor_
 
@@ -630,13 +630,13 @@ def validator(a: int) -> None:
 
 The code checks for the presence of the `@dataclass` decorator and validates dataclass is imported from the package `dataclasses` but does not verify/report if the decorator is overridden by a custom dataclass function.
 
-## Recommendation
+### Recommendation
 
 1. To ensure that function names are also not overridden in addition to variable names, we recommend to extend the `RewriteForbiddenOverwrites` transformer to check for forbidden names in function definitions. This will ensure that function names do not conflict with reserved or forbidden names.
 
 2. Raise a descriptive warning if any custom definitions are detected, e.g., In this case "The dataclass function can't override the exisitng import".
 
-## Finding 66 - redundant passing of all possible bound external variables when calling functions
+## Finding 12 - redundant passing of all possible bound external variables when calling functions
 
 Category: _Performance/Major_
 
@@ -699,13 +699,13 @@ Compiling this validator with `opshin compile_pluto validator.py -O3`, produces:
 
 **Note** the redundant passing around of `add_0` as the first argument of `validator_0`.
 
-## Recommendation
+### Recommendation
 
 Opshin doesn't seem to support mutual recursion, so it might not even be necessary to pass all bound vars as arguments to the functions if the functions simply maintain their order in the final UPLC.
 
 Alternatively, if the order of the functions changes in the final UPLC, filter out the bound vars that are naturally available as part of the outer scope of the function.
 
-## Finding 72 - almost every user-defined variable requires `Force`/`Delay`
+## Finding 13 - almost every user-defined variable requires `Force`/`Delay`
 
 Category: _Performance/Major_
 
@@ -713,11 +713,11 @@ Notably in `PlutoCompiler.visit_ClassDef()` in `compiler.py`, the class construc
 
 The architecture of the Opshin compiler currently requires every user-defined variable to be wrapped with `Delay`. Upon referencing those variables, a `Force` term is added. This leads to a small amount overhead almost everywhere in the Opshin generated UPLC.
 
-## Recommendation
+### Recommendation
 
 Don't require wrapping with `Delay`/`Force` for UPLC variables containing Lambda functions. The Opshin AST should contain enough type information to be able to detect when a user-defined variable refers to a Lambda function or not.
 
-## Finding 62 - `NameError` expressions are added for each loaded variable
+## Finding 14 - `NameError` expressions are added for each loaded variable
 
 Category: _Performance/Major_
 
@@ -727,11 +727,11 @@ The benefit of these `NameError` expressions is that runtime debugging is easier
 
 The Opshin Pluto->UPLC compilation step isn't able to eliminate these `NameError` expressions, even at optimization level 3.
 
-## Recommendation
+### Recommendation
 
 A compiler flag so that these `NameError` expressions aren't added to the generated UPLC code.
 
-## Finding 59 - Redundant Explicit Cast to Boolean
+## Finding 15 - Redundant Explicit Cast to Boolean
 
 Category: _Performance/Minor_
 
@@ -742,11 +742,11 @@ The `RewriteConditions` transformer explicitly rewrites all conditions (e.g., in
 
 In such cases, adding an explicit cast to bool is unnecessary and can degrade performance, especially in cases where the condition is evaluated repeatedly (e.g., in loops).
 
-## Recommendation
+### Recommendation
 
 Modify the `RewriteConditions` transformer in `rewrite/rewrite_cast_condition.py` to skip the explicit cast to bool when the condition is already a boolean and a constant node.
 
-## Finding 19 - Irrelevant UPLC builtins in output
+## Finding 16 - Irrelevant UPLC builtins in output
 
 Category: _Performance/Minor_
 
@@ -757,17 +757,17 @@ def validator(datum: bytes, redeemer: None, context: ScriptContext) -> None:
 
 Compiling this Opshin code using both the default optimiser and the aggressive optimiser (-O3 optimization flag) resulted in the same output. It includes built-in functions like addInteger, lessThanInteger, and lengthOfByteString, which seems irrelevant while the logic is to access the first byte of the datum( `ByteString` ) and to check if its equal to 0.
 
-## Finding 71 - key data value conversion is loop invariant
+## Finding 17 - key data value conversion is loop invariant
 
 Category: _Performance/Minor_
 
 In `PlutoCompiler.visit_Subscript()` in `compiler.py`, in the Pluto code generation of the dict key indexing, `transform_output_map(dict_typ.key_typ)(OVar("key"))` doesn't change during the search loop.
 
-## Recommendation
+### Recommendation
 
 Assign `transform_output_map(dict_typ.key_typ)(OVar("key"))` to a temporary variable and move it out of the loop.
 
-## Finding 84 - `hex` and `oct` methods perform two loops
+## Finding 18 - `hex` and `oct` methods perform two loops
 
 Category: _Performance/Minor_
 
@@ -777,11 +777,11 @@ Similarly in `fun_impls.py`, the `hex` and `oct` functions perform two loops.
 
 UPLC loops have non-negligible overhead, and merging these two loops into a single loop will give some performance benefit.
 
-## Recommendation
+### Recommendation
 
 Merge the two loops of the `hex` method of `ByteString`, and the `hex` and `oct` functions in `fun_impls.py`, into one loop.
 
-## Finding 85 - `int` method performs two loops when parsing strings
+## Finding 19 - `int` method performs two loops when parsing strings
 
 Category: _Performance/Minor_
 
@@ -789,17 +789,17 @@ In `type_impls.py`, the `IntImpl` class generates UPLC code that performs two lo
 
 Due to UPLC Loop overhead, merging these two loops into a single loop will give some performance benefit.
 
-## Finding 87 - the `all` and `any` builtins always iterate to end of list
+## Finding 20 - the `all` and `any` builtins always iterate to end of list
 
 Category: _Performance/Minor_
 
 In `fun_impls.py`, the `all` builtin keeps iterating to the end of the boolean list, even if a `false` value has already been encountered. Similarly, the `any` builtin keeps iterating even if a `true` value has already been encountered.
 
-## Recommendation
+### Recommendation
 
 Use a variant of the Pluto `FoldList` function to exit the iteration prematurely when `all` or `any` encounter a `false` or `true` value respectively.
 
-## Finding 64 - unnecessary identity function wrapping in annotated assignment when assigning data to data (i.e. `Anything` to `Anything`)
+## Finding 21 - unnecessary identity function wrapping in annotated assignment when assigning data to data (i.e. `Anything` to `Anything`)
 
 Category: _Performance/Minor_
 
@@ -813,7 +813,7 @@ The double conversion doesn't have much overhead as it results in two wrapped id
 
 Don't perform any implicit conversions if both the right-hand-side and the left-hand-side are data values.
 
-## Finding 90 - `POWS` always accessed in reverse order
+## Finding 22 - `POWS` always accessed in reverse order
 
 Category: _Performance/Minor_
 
@@ -829,7 +829,7 @@ The `POWS` can be reversed instead, allowing the elimination of the `(BYTE_SIZE 
 
 Reverse `POWS` during its assignment using the `reversed()` builtin, then remove the `(BYTE_SIZE - 1) -` operation wherever `POWS` is accessed.
 
-## Finding - Optimization not showing the result of execution
+## Finding 23 - Optimization not showing the result of execution
 
 Category: _Performance/Informational_
 
@@ -850,7 +850,7 @@ def validator(x: B) -> None:
 For this code, the uplc spits outs the compiled code of both the branches of the builtin function `ifThenElse`.
 `(lam 1x [(lam 1x (force [[[(force (builtin ifThenElse)) [[(builtin equalsData) 1x] [0p_AdHocPattern_6e5e35746e0db09c0956f182750126a838d5650add52b85f95f67e428d0912cc_ 1x]]] (delay (con unit ()))] (delay [(lam _ (error)) [[(force (builtin trace)) (con string "ValueError: datum integrity check failed")]]])]))])`
 
-## Finding 10 - Rewriting chained comparisons doesn't create copies of middle expressions
+## Finding 24 - Rewriting chained comparisons doesn't create copies of middle expressions
 
 Categories: _Maintainability/Major_
 
@@ -858,23 +858,23 @@ When rewriting `<expr-a> < <expr-b> < <expr-c>` to `(<expr-a> < <expr-b>) and (<
 
 The compiler steps frequently mutate the AST nodes instead of creating copies, which can lead to difficult to debug issues in this case.
 
-## Recommendation
+### Recommendation
 
 Similar to `rewrite/rewrite_tuple_assign.py`, create temporary variables for each of the middle expressions in the chain. Then refer to those temporary variables in the resulting BinOp expressions.
 
 This approach avoids the issue described and also avoids the recalculation of the same expression (potentially expensive).
 
-## Finding 11 - Compiler step 22 doesn't do anything
+## Finding 25 - Compiler step 22 doesn't do anything
 
 Category: _Maintainability/Major_
 
 Compiler step 22 is supposed to inject `bool()`, `bytes()`, `int()`, and `str()` builtins as RawPlutExprs, but the internal types (i.e. `.constr_type()`) of those functions is inherently polymorphic (i.e. `PolymorphicFunctionType`), which is immediately skipped. This check is either redundant or may be intended for a future use case that hasn't been implemented yet. Currently, this step adds no value to the compilation process.
 
-## Recommendation
+### Recommendation
 
 Get rid of compiler step 22, thus getting rid of `rewrite/rewrite_inject_builtin_constr.py`.
 
-## Finding 28 - Alias names for imports
+## Finding 26 - Alias names for imports
 
 Category: _Maintainability/Major_
 
@@ -901,7 +901,7 @@ There is no explicit check to ensure that the alias does not conflict with exist
 
 This could lead to unintended overwriting of existing variables, causing subtle bugs or unexpected behavior.
 
-## Recommendation
+### Recommendation
 
 To address these issues, the following improvements are recommended:
 
@@ -909,7 +909,7 @@ To address these issues, the following improvements are recommended:
 
 - If a conflict is detected, raise a clear and descriptive error indicating the name conflict and suggesting a resolution (e.g., using a different alias).
 
-## Finding 40 - unable to loop over tuple
+## Finding 27 - unable to loop over tuple
 
 Category: _Maintainability/Major_
 
@@ -924,23 +924,23 @@ def validator(_: None) -> None:
 
 Instead the compiler throw the following non user-friendly error: `'InstanceType' object has no attribute 'typs'`.
 
-## Recommendation
+### Recommendation
 
 The PlutoCompiler doesn't actually allow iterating over tuples using for loops.
 
 Either remove the tuple related type checks in `AggressiveTypeInferencer.visit_For()` and throw a more explicit error, or implement the necessary code generation that allows iterating over tuples in `PlutoCompiler.visit_For()`.
 
-## Finding 48 - error-prone implementation of `scopes` and `wrapped` in AggressiveTypeInferencer
+## Finding 28 - error-prone implementation of `scopes` and `wrapped` in AggressiveTypeInferencer
 
 Category: _Maintainability/Major_
 
 The way `self.scopes` and `self.wrapped` are mutated/restored inside `AggressiveTypeInferencer` gives fragile and duplicate code.
 
-## Recommendation
+### Recommendation
 
 Pass a context object as a separate argument through all the `visit_<Node-type>()` methods. The context object contains the current scope and type assertion information like `wrapped`, and links to parent scopes.
 
-## Finding - Unnecessary Data Construction for Void Validators
+## Finding 29 - Unnecessary Data Construction for Void Validators
 
 Category: _Maintainability/Major_
 
@@ -953,13 +953,13 @@ For a simple validator with no returns as shown above, the UPLC constructs data 
 
 `[(lam v0 [(lam v1 [(lam v2 (lam v3 [(lam v4 [(lam v5 [(lam v6 [(lam v7 [(lam v8 [[(force v7) v6] (delay v8)]) [(builtin unIData) v3]]) (delay (lam v9 (lam v10 (force [[[(force (builtin ifThenElse)) [(lam v11 [v1 (delay v11)]) [[v2 (force v10)] (con integer 1)]]] (delay [[(builtin constrData) (con integer 0)] [(builtin mkNilData) (con unit ())]])] (delay [(lam v12 (error)) (con unit ())])]))))]) (delay [(lam v13 (error)) [[(force (builtin trace)) (con string "NameError: ~bool")] (con unit ())]])]) (delay [(lam v14 (error)) [[(force (builtin trace)) (con string "NameError: x")] (con unit ())]])]) (delay [(lam v15 (error)) [[(force (builtin trace)) (con string "NameError: validator")] (con unit ())]])])) (builtin equalsInteger)]) [(lam v0 (lam v16 [(lam v17 v17) (force v16)])) (builtin equalsInteger)]]) (builtin equalsInteger)]`
 
-## Finding 07 - Compiler version inconsistency
+## Finding 30 - Compiler version inconsistency
 
 Category: _Maintainability/Minor_
 
 The compiler version is defined explicitly in both `pyproject.toml` and `opshin/__init__.py`, which can lead to accidently mismatch if the maintainers of OpShin forget to update either.
 
-## Recommendation
+### Recommendation
 
 According to [stackoverflow](https://stackoverflow.com/questions/67085041/how-to-specify-version-in-only-one-place-when-using-pyproject-toml), the following change to `__init__.py` might be enough:
 
@@ -968,7 +968,7 @@ import importlib.metadata
 __version__ = importlib.metadata.version("opshin")
 ```
 
-## Finding 18 - Implicit import of plt in compiler.py
+## Finding 31 - Implicit import of plt in compiler.py
 
 Category: _Maintainability/Minor_
 
@@ -981,21 +981,21 @@ In `compiler.py`:
 
 At the same time `CompilingNodeTransformer` and `NoOp` are imported directly from `util`.
 
-## Recommendation
+### Recommendation
 
 Consistently use named imports in whole compiler codebase.
 
-## Finding 57 - TypedModule Dependency Before Type Inference
+## Finding 32 - TypedModule Dependency Before Type Inference
 
 Category: _Maintainability/Minor_
 
 The `RewriteInjectBuiltins` transformer operates on `TypedModule` nodes, which are expected to be available only after aggressive type inference has occurred. However, this transformer is part of the compilation process that runs before type inference is complete. This creates a logical inconsistency, as `TypedModule` nodes are not guaranteed to exist at this stage.
 
-## Recommendation
+### Recommendation
 
 Refactor the transformer to work with untyped or partially typed nodes until type inference is complete. Alternatively, ensure that this step is moved to a later stage in the compilation process, where TypedModule nodes are guaranteed to exist.
 
-## Finding 58 - Inconsistent Handling of Polymorphic Functions
+## Finding 33 - Inconsistent Handling of Polymorphic Functions
 
 Category: _Maintainability/Minor_
 
@@ -1017,13 +1017,13 @@ if isinstance(typ.typ, PolymorphicFunctionType):
 
 This dual approach makes the code harder to understand. Additionally, polymorphic functions can only be definitively identified after type checking, which further complicates the logic.
 
-## Recommendation
+### Recommendation
 
 1. Unify the logic for identifying polymorphic functions.
 
 2. Since polymorphic functions can only be definitively identified after type checking, consider moving the logic of `rewrite/rewrite_inject_builtins.py` to a later stage in the compilation process, where type information is fully available.
 
-## Finding 22 - Relative Imports Not Supported
+## Finding 34 - Relative Imports Not Supported
 
 Category: _Maintainability/Minor_
 
@@ -1051,44 +1051,44 @@ def validator():
     print("Rewrite import test:", obj)
 ```
 
-## Recommendation
+### Recommendation
 
 1. Modify the code to handle relative imports by correctly setting the package parameter according to the code.
 
 2. Add documentation clarifying how to use relative imports.
 
-## Finding 61- Annotated Variable Nodes Not Handled in `rewrite/rewrite_orig_name.py`
+## Finding 35- Annotated Variable Nodes Not Handled in `rewrite/rewrite_orig_name.py`
 
 Category: _Maintainability/Minor_
 
 The logic in `rewrite/rewrite_orig_name.py` currently checks for `Name`, `ClassDef`, and `FunctionDef` nodes but does not account for annotated variable assignments (e.g., x: int = 10). These nodes (`AnnAssign` in AST terms) may
 may also contain a pointer to the original name for good.
 
-## Recommendation
+### Recommendation
 
 Extend the node-checking logic to include `AnnAssign`.
 
-## Finding 73 - `PlutoCompiler` `visit_ListComp()` and `visit_DictComp()` are mostly the same
+## Finding 36 - `PlutoCompiler` `visit_ListComp()` and `visit_DictComp()` are mostly the same
 
 Category: _Maintainability/Minor_
 
 In `PlutoCompiler` in `compiler.py`, the `visit_ListComp()` and `visit_DictComp()` methods are very similar.
 
-## Recommendation
+### Recommendation
 
 Refactor and reuse the common functionality of `PlutoCompiler.visit_ListComp()` and `PlutoCompiler.visit_DictComp()`.
 
-## Finding 75 - wrong type annotation in `Type.binop` and `Type._binop_bin_fun`
+## Finding 37 - wrong type annotation in `Type.binop` and `Type._binop_bin_fun`
 
 Category: _Maintainability/Minor_
 
 The type annotations of the `Type.binop` and `Type._binop_bin_fun` methods in `type_impls.py` contains a mistake: `AST` should be `TypedAST`.
 
-## Recommendation
+### Recommendation
 
 Change the type annotation of the `other` argument in `Type.binop` and `Type._binop_bin_fun` from `AST` to `TypedAST`.
 
-## Finding 78 - `RecordType.cmp()` and `UnionType.cmp()` are almost exact copies of `AnyType.cmp()`
+## Finding 38 - `RecordType.cmp()` and `UnionType.cmp()` are almost exact copies of `AnyType.cmp()`
 
 Category: _Maintainability/Minor_
 
@@ -1098,27 +1098,27 @@ In `type_impls.py`, the implementations of `RecordType.cmp()` and `UnionType.cmp
 
 Refactor and reuse the logic of `AnyType.cmp()` for `RecordType.cmp()` and `UnionType.cmp()`.
 
-## Finding 83 - `super.binop_bin_fun()` not called
+## Finding 39 - `super.binop_bin_fun()` not called
 
 Category: _Maintainability/Minor_
 
 In `type_impls.py`, the `_binop_bin_fun()` method implementations don't fall through to calling the `_binop_bin_fun()` method of the `Type` ancestor class.
 
-## Recommendation
+### Recommendation
 
 Fall through to calling `super._binop_bin_fun()`, so that the associated `“Not implemented”` error is thrown.
 
-## Finding 88 - the `oct` builtin is almost the same as `hex`
+## Finding 40 - the `oct` builtin is almost the same as `hex`
 
 Category: _Maintainability/Minor_
 
 In `fun_impls.py`, the `oct` builtin uses exactly the same logic as `hex`, except that the base is different (8 vs 16).
 
-## Recommendation
+### Recommendation
 
 Refactor and reuse the code generation logic of `hex` for `oct`.
 
-## Finding 68 - unable to use negative index subscripts
+## Finding 41 - unable to use negative index subscripts
 
 Category: _Maintainability/Minor_
 
@@ -1126,13 +1126,13 @@ In `PlutoCompiler.visit_Subscript()` in `compiler.py`, literal negative indices 
 
 Other parts of the codebase do however allow handling negative indices, but using such a literal negative index for tuples and pairs will always throw an error at this (late) compilation stage.
 
-## Recommendation
+### Recommendation
 
 Whenever checking that a subscript is `Constant`, ensure it isn’t negative (so that if future versions of the python tokenizer treat literal negative numbers as `Constant`, this doesn’t break Opshin).
 
 Alternatively: detect negative indexes correctly (also in `AggressiveTypeInferencer.visit_Subscript()` in `type_inference.py`).
 
-## Finding 08 - Migrate some utility functions
+## Finding 42 - Migrate some utility functions
 
 Category: _Maintainability/Informational_
 
@@ -1142,27 +1142,27 @@ Some utility functions defined in the `opshin` library would make more sense as 
 - `to_uplc_builtin()` and `to_python()` (defined in `opshin/bridge.py`) can also be moved to the `uplc` package.
 - `OVar()`, `OLambda()`, `OLet()`, `SafeLambda()`, `SafeOLambda()` and `SafeApply()` (defined in `opshin/util.py`) can be moved to the `pluthon` package.
 
-## Finding 09 - PlutoCompiler.visit_Pass is redundant
+## Finding 43 - PlutoCompiler.visit_Pass is redundant
 
 Category: _Maintainability/Informational_
 
 Compiler step 26 removes the Pass AST node, but step 27 (the _pluthon_ code generation step) defines a `visit_Pass` method that seems to return the identity function.
 
-## Recommendation
+### Recommendation
 
 Remove the `visit_Pass` method. If step 26 fails to remove all Pass AST nodes, then the `PlutoCompiler` will throw a "Can not compile Pass" error, instead of masking the improper implementation of step 26.
 
-## Finding 47 - wrong return type annotation of some TypeCheckVisitor methods
+## Finding 44 - wrong return type annotation of some TypeCheckVisitor methods
 
 Category: _Maintainability/Informational_
 
 `visit_BoolOp()` and `visit_UnaryOp()` use `PairType` as the return type annotation, but actually return tuples.
 
-## Recommendation
+### Recommendation
 
 Change the return type of `visit_BoolOp()` and `visit_UnaryOp()` from `PairType` to `TypeMapPair`.
 
-## Finding 49 - resetting of `self.wrapped` in AggressiveTypeInferencer can be refactored into a separate method and simplified
+## Finding 45 - resetting of `self.wrapped` in AggressiveTypeInferencer can be refactored into a separate method and simplified
 
 Category: _Maintainability/Informational_
 
@@ -1174,21 +1174,21 @@ self.wrapped = [x for x in self.wrapped if x not in prevtyps.keys()]
 
 Besides being duplicate, the `x not in prevtyps.keys()` expression can be replaced by `x not in prevtyps`.
 
-## Recommendation
+### Recommendation
 
 Refactor the code the reverts `self.wrapped` into a new method of `AggressiveTypeInferencer`, and replace `prevtyps.keys()` by `prevtyps`.
 
-## Finding 50 - redundant code in AggressiveTypeInferencer
+## Finding 46 - redundant code in AggressiveTypeInferencer
 
 Category: _Maintainability/Informational_
 
 In `AggressiveTypeInferencer.visit_sequence()`, the `arg.annotation is None` test in the second assertion is redundant, as the surrounding `if` statement test already ensures this is always false.
 
-## Recommendation
+### Recommendation
 
 Remove the redundant check in the second assertion in `AggressiveTypeInferencer.visit_sequence()` in `type_inference.py`.
 
-## Finding 51 - rewrite of dunder override of `not in` AggressiveTypeInferencer is spread over multiple methods
+## Finding 47 - rewrite of dunder override of `not in` AggressiveTypeInferencer is spread over multiple methods
 
 Category: _Maintainability/Informational_
 
@@ -1196,21 +1196,21 @@ In `AggressiveTypeInferencer.dunder_override()`, `not in` is treated as `in` , a
 
 So logic that is inherently related to `dunder_override()` is spread over two other functions as well.
 
-## Recommendation
+### Recommendation
 
 Return the final AST node from `dunder_override()`, so the explicit wrapping with a `Not` AST node doesn't become the responsability of the callsite.
 
-## Finding 53 - list item that was just appended accessed immediately after
+## Finding 48 - list item that was just appended accessed immediately after
 
 Category: _Maintainability/Informational_
 
 In `AggressiveTypeInferencer.visit_BoolOp()`, child nodes visited and the returned typed AST nodes are appended to a `values` list, the appended value is then immediately referenced as `values[-1]`
 
-## Recommendation
+### Recommendation
 
 Assign the return typed AST nodes to a variable, and reference that variable in the subsequent line of code where the type checks are generated.
 
-## Finding 54 - inconsistent treatement of tuple slicing
+## Finding 49 - inconsistent treatement of tuple slicing
 
 Category: _Maintainability/Informational_
 
@@ -1220,17 +1220,17 @@ Has `AggressiveTypeInferencer.visit_Subscript()` allows tuples to be sliced, but
 
 In the TupleType branch in `AggressiveTypeInferencer.visit_Subscript()`: remove the nested branch with the condition that reads: `all(ts.value.typ.typ.typs[0] == t for t in ts.value.typ.typ.typs)`.
 
-## Finding 56 - RecordReader.extract() doesn't need to be static
+## Finding 50 - RecordReader.extract() doesn't need to be static
 
 Category: _Maintainability/Informational_
 
 `RecordReader.extract()`, in `type_inference.py`, is static has the `@classmethod`. This leads to unnecessary indirection when this method is called.
 
-## Recommendation
+### Recommendation
 
 Instantiate the `RecordReader` directly with an argument of `AggressiveTypeInferencer` type, and change `extract()` to be a regular method (internally changing `f` to `self`).
 
-## Finding 23 - Assumption of **spec** for the Parent Module in rewrite/rewrite_import.py
+## Finding 51 - Assumption of **spec** for the Parent Module in rewrite/rewrite_import.py
 
 Category: _Maintainability/Informational_
 
@@ -1238,25 +1238,25 @@ Category: _Maintainability/Informational_
 
 2. The code does not handle cases where `spec.loader.exec_module` fails to load the module.
 
-## Recommendation
+### Recommendation
 
 1. Provide a fallback mechanism or raise a more descriptive error message if **spec** is missing, ensuring the code does not fail silently.
 
 2. Wrap the call `spec.loader.exec_module(module)` in a try-catch block and log or raise an appropriate error message to help diagnose issues when module loading fails.
 
-## Finding 24 - Iterating Over `sys.modules` Safely
+## Finding 52 - Iterating Over `sys.modules` Safely
 
 Category: _Maintainability/Informational_
 
 The code does not follow the Python documentation's recommendation to use sys.modules.copy() or tuple(sys.modules) when iterating over sys.modules. This can lead to exceptions if the size of `sys.modules` changes during iteration due to code execution or activity in other threads.
 
-## Recommendation
+### Recommendation
 
 Replace any direct iteration over `sys.modules` with `sys.modules.copy()` or `tuple(sys.modules)` to avoid potential runtime exceptions.
 
 Ensure that all iterations over `sys.modules` are thread-safe and do not cause side effects during execution.
 
-## Finding 67 - `plt.ConstrData(plt.Integer(0), plt.EmptyDataList())` appears in several places
+## Finding 53 - `plt.ConstrData(plt.Integer(0), plt.EmptyDataList())` appears in several places
 
 Category: _Maintainability/Informational_
 
@@ -1266,11 +1266,11 @@ Category: _Maintainability/Informational_
     - twice in `PlutoCompiler.visit_Module()` in `compiler.py`
     - once in `TransformOutputMap` in `type_impls.py`
 
-## Recommendation
+### Recommendation
 
 Assign `plt.ConstrData(plt.Integer(0), plt.EmptyDataList())` to a new variable named `Void` (or another appropriate name), and reuse that instead.
 
-## Finding 70 - `TypedSubscript.slice.lower` and `TypedSubscript.slice.upper` don't exclude `None`
+## Finding 54 - `TypedSubscript.slice.lower` and `TypedSubscript.slice.upper` don't exclude `None`
 
 Category: _Maintainability/Informational_
 
@@ -1278,41 +1278,41 @@ In `PlutoCompiler.visit_Subscript()` in `compiler.py`, in list slice indexing, t
 
 In `type_inference.py`, `TypedSubscript.slice.lower` and `TypedSubscript.slice.upper` are ensured to be defined. The resulting typed AST never contains unset slice ranges.
 
-## Recommendation
+### Recommendation
 
 In `typed_ast.py`, annotate that `TypedSubscript.slice.lower` and `TypedSubscript.slice..upper` can’t be `None`.
 
-## Finding 80 - inconsistent naming of temporary variable in `UnionType.stringify()`
+## Finding 55 - inconsistent naming of temporary variable in `UnionType.stringify()`
 
 Category: _Maintainability/Informational_
 
 In `UnionType.stringify()` in `type_impls.py`, `c` is used a temporary variable for the constructor index, but in other places `constr` is used.
 
-## Recommendation
+### Recommendation
 
 Change `c` to `constr` so that `constr` is used consistently as the name of the Pluto variable containing the constructor index.
 
-## Finding 86 - typo in assertion message
+## Finding 56 - typo in assertion message
 
 Category: _Maintainability/Informational_
 
 In `BytesImpl` in `type_impls.py`, the second assertion reads `"Can only create bools from instances"`.
 
-## Recommendation
+### Recommendation
 
 Change the error message to `"Can only create bytes from instances"`.
 
-## Finding 63 - It isn't clear when a Python `Constant` can be `PlutusData`
+## Finding 57 - It isn't clear when a Python `Constant` can be `PlutusData`
 
 Category: _Maintainability/Informational_
 
 In function `rec_constant_map()` in `compiler.py`, the value of the `Constant` AST node can apparently be `PlutusData`. It is unclear where or how this is used. `PlutusData` `Constant` values possibly result from evaluation in `optimize_const_folding.py`, but also this is unclear.
 
-## Recommendation
+### Recommendation
 
 Add a comment to `rec_constant_map()` explaining where `PlutusData` comes from.
 
-## Finding 12 - Type safe tuple unpacking
+## Finding 58 - Type safe tuple unpacking
 
 Category: _Usability/Major_
 
@@ -1322,21 +1322,21 @@ If there there are more names on the left side this throws a non-user friendly F
 
 There might be other ways this can be abused to get inconsistent behavior.
 
-## Recommendation
+### Recommendation
 
 Perform this step after type inference. Check tuple types during type inference.
 
-## Finding 17 - Non-friendly error message when using wrong import syntax
+## Finding 59 - Non-friendly error message when using wrong import syntax
 
 Category: _Usability/Major_
 
 Using `import <pkg>` or `import <pkg> as <aname>` isn’t supported and throws a non-user friendly error: "free variable '\<pkg-root\>' referenced before assignment in enclosing scope".
 
-## Recommendation
+### Recommendation
 
 Improve the error message to say that the syntax is wrong and hinting at the correct syntax.
 
-## Finding 31 - bytes.fromhex() doesn't work
+## Finding 60 - bytes.fromhex() doesn't work
 
 Category: _Usability/Major_
 
@@ -1352,11 +1352,11 @@ def validator(_: None) -> None:
 
 The compiler throws the following error: `Can only access attributes of instances`.
 
-## Recommendation
+### Recommendation
 
 Either ensure attributes of builtin types like `bytes` can actually be accessed, or remove `bytes.fromhex()` from the Opshin documentation.
 
-## Finding 34 - Unions can contain classes with same CONSTR_ID if their fields are also the same
+## Finding 61 - Unions can contain classes with same CONSTR_ID if their fields are also the same
 
 Category: _Usability/Major_
 
@@ -1399,11 +1399,11 @@ def validator(x: Union[Union[A, B], C]) -> None:
 
 Compiling this example gives the following non user-friendly error: `Trying to cast an instance of Union type to non-instance of union type`.
 
-## Recommendation
+### Recommendation
 
 Fix these error inconsistencies by detecting duplicate CONSTR_IDs after flattening the Union in `union_types()` in `type_inference.py`. Detect duplicates based on CONSTR_ID alone, and not based on data field equivalence.
 
-## Finding 39 - calling `str()` on a Union gives a non user-friendly error
+## Finding 62 - calling `str()` on a Union gives a non user-friendly error
 
 Category: _Usability/Major_
 
@@ -1416,11 +1416,11 @@ def validator(a: Union[int, bytes]) -> None:
 
 Compiling this example gives the following error: `'IntegerType' object has no attribute 'record'`.
 
-## Recommendation
+### Recommendation
 
 Generalize the code generation in `UnionType.stringify()` in `type_impls.py`, so that it works for any combination of `int`, `bytes`, `List[Anything]` or `Dict[Anything, Anything]`.
 
-## Finding 44 - inconsistent type inference of literal lists and dicts
+## Finding 63 - inconsistent type inference of literal lists and dicts
 
 Category: _Usability/Major_
 
@@ -1440,11 +1440,11 @@ l = [10, a, b'abcd']
 
 Similarly, `AggressiveTypeInferencer.visit_Dict()` will use the type of the first key and the first value for the inferred type.
 
-## Recommendation
+### Recommendation
 
 Find the most generic type contained in the list or dict, instead of using the first item type to determine the list or dict type.
 
-## Finding 13 - Non-friendly error message in AggressiveTypeInferencer.visit_comprehension
+## Finding 64 - Non-friendly error message in AggressiveTypeInferencer.visit_comprehension
 
 Category: _Usability/Minor_
 
@@ -1454,7 +1454,7 @@ Error message on line 1185 of `opshin/type_inference.py` claims "Type deconstruc
 
 Change error message to "Type deconstruction in comprehensions is not supported yet".
 
-## Finding 15 - Incorrect hint when using Dict[int, int] inside Union
+## Finding 65 - Incorrect hint when using Dict[int, int] inside Union
 
 Category: _Usability/Minor_
 
@@ -1464,11 +1464,11 @@ When subsequently following the hint, and using `Dict` directly (without bracket
 
 When using `List` in a similar way, a similarly incorrect hint is given.
 
-## Recommendation
+### Recommendation
 
 Remove `Dict` and `List` from the hints. Also: improve the error message when using `Dict` and `List` inside `Union`.
 
-## Finding 16 - Incorrect hints when using opshin eval incorrectly
+## Finding 66 - Incorrect hints when using opshin eval incorrectly
 
 Category: _Usability/Minor_
 
@@ -1480,11 +1480,11 @@ When trying with `opshin eval lib -fno-remove-dead-code`, the following error is
 
 Why does the first hint propose using `opshin eval lib`?
 
-## Recommendation
+### Recommendation
 
 Remove the "or eval using `opshin eval lib example.py`" part of the first hint.
 
-## Finding 30 - using List or Dict directly as function argument types throws a non user-friendly error
+## Finding 67 - using List or Dict directly as function argument types throws a non user-friendly error
 
 Category: _Usability/Minor_
 
@@ -1508,11 +1508,11 @@ def validator(_: Dict) -> None:
     pass
 ```
 
-## Recommendation
+### Recommendation
 
 Either infer the types of `List` and `Dict` annotations as `List[Anything]` and `Dict[Anything, Anything]` respectively, or improve the error message by explaining the actual issue and providing a hint on how to resolve it.
 
-## Finding 32 - non user-friendly error when using Union of single type
+## Finding 68 - non user-friendly error when using Union of single type
 
 Category: _Usability/Minor_
 
@@ -1531,11 +1531,11 @@ def validator(a: Union[A]) -> None:
 
 An error is expected, but the compiler throws the following unrelated error message: `'Name' object has no attribute 'elts'`.
 
-## Recommendation
+### Recommendation
 
 The compiler should detect `Union`s containing only a single entry, and throw an explicit error.
 
-## Finding 33 - inconsistent treatment of duplicate entries in Union
+## Finding 69 - inconsistent treatment of duplicate entries in Union
 
 Category: _Usability/Minor_
 
@@ -1577,13 +1577,13 @@ def validator(a: Union[A, Union[A, B]]) -> None:
     assert isinstance(a, A)
 ```
 
-## Recommendation
+### Recommendation
 
 Flatten `Union`s before detecting duplicate entries. This will make `Union`s more user-friendly, especially when type aliases in deep transient imports are being used, which might lead to unexpected duplicate entries in `Union`s.
 
 Optionally a compiler step can be added to detect duplication of unresolved names in a single level of a `Union`, which might point to the user having made a mistake.
 
-## Finding 35 - can't use empty literal dicts in arbitrary expressions
+## Finding 70 - can't use empty literal dicts in arbitrary expressions
 
 Category: _Usability/Minor_
 
@@ -1609,11 +1609,11 @@ def validator(_: None) -> None:
     pass
 ```
 
-## Recommendation
+### Recommendation
 
 Add a note to the Opshin documentation that empty literal dicts must be assigned to a variable with type annotation before being usable (similar to the note already present about empty literal lists).
 
-## Finding 42 - eval_uplc doesn't handle errors in ComputationResult correctly
+## Finding 71 - eval_uplc doesn't handle errors in ComputationResult correctly
 
 Category: _Usability/Minor_
 
@@ -1635,11 +1635,11 @@ Traceback (most recent call last):
 AttributeError: 'AssertionError' object has no attribute 'dumps'
 ```
 
-## Recommendation
+### Recommendation
 
 In file `opshin/__main__.py`, in the last branch of `perform_command()`, test if `ret.result` is an error, and show an appropriate failure message in the case that it is.
 
-## Finding 43 - Dict with Union type key, can't be accessed with a Union type which has the same entries but in a different order
+## Finding 72 - Dict with Union type key, can't be accessed with a Union type which has the same entries but in a different order
 
 Category: _Usability/Minor_
 
@@ -1655,11 +1655,11 @@ def validator(d: Dict[Union[int, bytes], int]) -> int:
 
 Compiling this example throws the following error: `Dict subscript must have dict key type InstanceType(typ=UnionType(typs=[IntegerType(), ByteStringType()])) but has type InstanceType(typ=UnionType(typs=[ByteStringType(), IntegerType()]))`
 
-## Recommendation
+### Recommendation
 
 In `union_types()` in `type_inference.py`: sort Union entries in an unambiguous way.
 
-## Finding 52 - omitting class method return type gives non user-friendly error
+## Finding 73 - omitting class method return type gives non user-friendly error
 
 Category: _Usability/Minor_
 
@@ -1682,11 +1682,11 @@ Compiling this example gives the following error: `Invalid Python, class name is
 
 The error message doesn't help the user understand what is wrong with the code.
 
-## Recommendation
+### Recommendation
 
 Detect class methods missing return types and throw an explicit error.
 
-## Finding 55 - `eval_uplc` ignores print()
+## Finding 74 - `eval_uplc` ignores print()
 
 Category: _Usability/Minor_
 
@@ -1694,11 +1694,11 @@ Messages printed when evaluating a validator using `eval_uplc` aren't displayed
 
 Optimization level doesn't seem to have any impact on this.
 
-## Recommendation
+### Recommendation
 
 Show messages from `print()` calls when evaluating a validator.
 
-## Finding - can't use empty literal lists in arbitrary expressions
+## Finding 75 - can't use empty literal lists in arbitrary expressions
 
 Category: _Usability/Minor_
 
@@ -1713,7 +1713,7 @@ def validator(x: List[int]) -> int:
     return len(x)
 ```
 
-## Recommendations:
+### Recommendations:
 
 1.Improve Error Messaging:
 
@@ -1726,7 +1726,7 @@ def validator(x: List[int]) -> int:
 
 - If the target has a known type (e.g., from a prior annotation or parameter type), use it to infer the type of value of the expression.
 
-## Finding 01 - Improving Error Clarity
+## Finding 76 - Improving Error Clarity
 
 Category: _Usability/Minor_
 
@@ -1765,7 +1765,7 @@ The error is caused by the second argument, where "None" is passed instead of a
 valid Plutus data object for Nothing. The error message could be improved by
 providing a clear example of how to pass parameters correctly in JSON format.
 
-## Finding 04 - Improve Documentation on optimization level
+## Finding 77 - Improve Documentation on optimization level
 
 Category: _Usability/Minor_
 
@@ -1776,13 +1776,13 @@ this information would benefit users of OpShin, as it would give them a better
 understanding of which optimization configuration to choose based on their
 requirement.
 
-## Recommendation
+### Recommendation
 
 The idea behind different Optimization levels(O1,O2,O3) and how the `UPLC`
 differs with each optimization level can be clearly documented with simple
 examples.
 
-## Finding 05 - Effect of optimization level on build output
+## Finding 78 - Effect of optimization level on build output
 
 Category: _Usability/Minor_
 
@@ -1795,24 +1795,24 @@ than necessary, and therefore, the generated CBOR will also be larger.
 This might increase the script size and makes debugging harder when used in off-chain
 transactions.
 
-## Recommendation
+### Recommendation
 
 When building compiled code, OpShin could use the most aggressive optimizer,
 O3, as the default optimization configuration.
 This would allow users to directly utilize the optimized code without needing to specify any
 optimization levels during the build process.
 
-## Finding 69 - out-of-range tuple index throws a non user-friendly error
+## Finding 79 - out-of-range tuple index throws a non user-friendly error
 
 Category: _Usability/Minor_
 
 In `PlutoCompiler.visit_Subscript()` in `compiler.py`, a non user-friendly error is thrown if an out-of-range literal index used when accessing elements of a tuple.
 
-## Recommendation
+### Recommendation
 
 Check out-of-range tuple indexing in `PlutoCompiler.visit_Subscript()` in order to throw a user-friendly error, instead of relying on the error thrown by the Pluto codebase.
 
-## Finding 02 - Attaching file name to title in '.json' file
+## Finding 80 - Attaching file name to title in '.json' file
 
 Category: _Usability/Informational_
 
@@ -1832,7 +1832,7 @@ purposes, adding the validator's file name or function name along with the
 keyword 'Validator' as a title (e.g., Validator/assert_sum) would be helpful for
 debugging and referencing during off-chain validation.
 
-## Finding 03 - Pretty Print generated UPLC and Pluto
+## Finding 81 - Pretty Print generated UPLC and Pluto
 
 Category: _Usability/Informational_
 
@@ -1847,7 +1847,7 @@ the code are compromised, which can hinder examination.
 
 Also all builtins seem to be injected regardless of use. This makes inspecting the generated output more difficult without dead var elimination turned on. Dead var elimination might have however remove parts of code that the user actually expects to be present.
 
-## Recommendation
+### Recommendation
 
 To improve the development experience, it would be beneficial to implement a
 method or tool that formats the `UPLC` output and `Pluto` output and dumps it
@@ -1855,7 +1855,7 @@ into a folder for each validator for easier interpretation and review.
 
 Variable names should be improved (e.g. the adhoc pattern can be made more compact smaller), and only the used builtins should be injected.
 
-## Finding 20 - Determinisim of Constructor Ids
+## Finding 82 - Determinisim of Constructor Ids
 
 Category: _Usability/Informational_
 
@@ -1873,11 +1873,11 @@ class DatumTwo(PlutusData):
 
 If `CONSTR_ID` values are not explicitly defined for PlutusData classes, they are deterministically generated based on the class structure (e.g., field names, types, and class name) and when the classes are serialized to UPLC, constructor IDs are assigned automatically.
 
-## Recommendation
+### Recommendation
 
 The current behavior of throwing an assertion error for duplicate `CONSTR_ID` values in Union types should be maintained. Additionally, it could be expanded to include a warning or error if no `CONSTR_ID` is provided, to alert developers about relying on automatically generated IDs.
 
-## Finding 21 - Function `to_cbor_hex()` not working
+## Finding 83 - Function `to_cbor_hex()` not working
 
 Category: _Usability/Informational_
 
@@ -1899,7 +1899,7 @@ def validator():
 TypeInferenceError: Type Employee_0 does not have attribute to_cbor_hex
 ```
 
-## Finding 25 - Nested Lists Not Handled Correctly
+## Finding 84 - Nested Lists Not Handled Correctly
 
 Category: _Usability/Informational_
 
@@ -1922,7 +1922,7 @@ Note that opshin errors may be overly restrictive as they aim to prevent code wi
 
 It fails for empty nested lists like [[]],[[],[]] likely due to issues with type inference or no support for handling of nested structures.
 
-## Finding 26 - Error Messages Are Not Descriptive in Rewrite transformers
+## Finding 85 - Error Messages Are Not Descriptive in Rewrite transformers
 
 Category: _Usability/Informational_
 
@@ -1950,7 +1950,7 @@ AssertionError: The program must contain one 'from dataclasses import dataclass'
 Note that opshin errors may be overly restrictive as they aim to prevent code with unintended consequences.
 ```
 
-## Recommendation
+### Recommendation
 
 1. Improve error messages to be more specific. For example in this case if alias name is used, an error message could be something like this: "Aliasing 'dataclass' is not allowed. Use 'from dataclasses import dataclass' directly."
 
@@ -1959,7 +1959,7 @@ Note that opshin errors may be overly restrictive as they aim to prevent code wi
 - rewrite_import_dataclasses.py
 - rewrite_import_typing.py
 
-## Finding 60 - Inability to Assign to List Elements in Validator Functions
+## Finding 86 - Inability to Assign to List Elements in Validator Functions
 
 Category : _Usability/Minor_
 
@@ -1972,12 +1972,12 @@ def validator(x:List[int]) -> int:
     return x
 ```
 
-## Recommendation
+### Recommendation
 
 1. Extend the compiler to support assignments to list elements.
 2. If supporting list element assignment is not feasible,enhance the error message to explain the limitation and suggest possible workarounds.
 
-## Finding: Unclear Error for Unimplemented Bitwise XOR
+## Finding 87 - Unclear Error for Unimplemented Bitwise XOR
 
 Category: _Usability/Informational_
 
@@ -1990,7 +1990,7 @@ def validator():
     print(x)
 ```
 
-## Recommendations:
+### Recommendations:
 
 - Detect unsupported operators during parsing/compilation and raise a descriptive error (e.g., CompilerError: Operator '^' (bitwise XOR) is not supported).
 

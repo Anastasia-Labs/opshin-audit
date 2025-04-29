@@ -1526,10 +1526,10 @@ from opshin.prelude import *
 
 def convert(a: int) -> Union[int, bytes]:
     return a
-    
+
 def validator(a: Union[int, bytes]) -> Union[int, bytes]:
-    if isinstance(a, int): 
-        # In the following the typechecking assumes the return type is `Union[int, bytes]`, 
+    if isinstance(a, int):
+        # In the following the typechecking assumes the return type is `Union[int, bytes]`,
         # but on-chain it will still be `int` due to missing conversion
         b = convert(a)
         if isinstance(b, int):
@@ -1560,17 +1560,18 @@ def validator(a: int, b: int) -> int:
    return add(a, b)
 ```
 
-Compiling this validator with `opshin -O3 compile_pluto validator.py`, produces: 
+Compiling this validator with `opshin -O3 compile_pluto validator.py`, produces:
+
 ```pluto
 (\
   1val_param0 1val_param1 -> (
-    let 
+    let
       a_1 = (# (Error ((! Trace) 'NameError: a' ())));
       a_2 = (# (Error ((! Trace) 'NameError: a' ())));
       add_0 = (# (Error ((! Trace) 'NameError: add' ())));
       b_1 = (# (Error ((! Trace) 'NameError: b' ())));
       b_2 = (# (Error ((! Trace) 'NameError: b' ())));
-      validator_0 = (# (Error ((! Trace) 'NameError: validator' ()))) 
+      validator_0 = (# (Error ((! Trace) 'NameError: validator' ())))
     in (
       let add_0 = (# (
         \a_1 b_1 -> (
@@ -1581,7 +1582,7 @@ Compiling this validator with `opshin -O3 compile_pluto validator.py`, produces:
       )) in (
         let validator_0 = (# (\
           add_0 a_2 b_2 -> (
-            let 
+            let
               1p0 = (! a_2);
               1p1 = (! b_2)
             in (
@@ -1590,9 +1591,9 @@ Compiling this validator with `opshin -O3 compile_pluto validator.py`, produces:
           )
         )) in (
           IData (
-            let 
+            let
               1p0 = (UnIData 1val_param0);
-              1p1 = (UnIData 1val_param1) 
+              1p1 = (UnIData 1val_param1)
             in (
               (! validator_0) add_0 (# 1p0) (# 1p1)
             )
@@ -1632,10 +1633,11 @@ Category: _Maintainability/Minor_ (or _Usability/Minor_ ??)
 
 In `PlutoCompiler.visit_Subscript()` in `compiler.py`, literal negative indices for tuples and pairs aren't detected as being a `Constant` AST node.
 
-Other parts of the codebase do however allow handling negative indices, but using such a literal negative index for tuples and pairs will always throw an error at this (late) compilation stage. 
+Other parts of the codebase do however allow handling negative indices, but using such a literal negative index for tuples and pairs will always throw an error at this (late) compilation stage.
 
 ### Recommendation
-Whenever checking that a subscript is `Constant`, ensure it isn’t negative (so that if future versions of the python tokenizer treat literal negative numbers as `Constant`, this doesn’t break Opshin). 
+
+Whenever checking that a subscript is `Constant`, ensure it isn’t negative (so that if future versions of the python tokenizer treat literal negative numbers as `Constant`, this doesn’t break Opshin).
 
 Alternatively: detect negative indexes correctly (also in `AggressiveTypeInferencer.visit_Subscript()` in `type_inference.py`).
 
@@ -1653,7 +1655,7 @@ Check out-of-range tuple indexing in `PlutoCompiler.visit_Subscript()` in order 
 
 Category: _Maintainability/Informational_
 
-In `PlutoCompiler.visit_Subscript()` in `compiler.py`, in list slice indexing, the possibility of `lower==None` and `upper==None` isn’t taken into account here, even though the python types of the `TypedSubscript.slice.lower` and `TypedSubscript.slice.upper` fields still allows `None`. 
+In `PlutoCompiler.visit_Subscript()` in `compiler.py`, in list slice indexing, the possibility of `lower==None` and `upper==None` isn’t taken into account here, even though the python types of the `TypedSubscript.slice.lower` and `TypedSubscript.slice.upper` fields still allows `None`.
 
 In `type_inference.py`, `TypedSubscript.slice.lower` and `TypedSubscript.slice.upper` are ensured to be defined. The resulting typed AST never contains unset slice ranges.
 
@@ -1746,7 +1748,7 @@ Similarly, this compiles successfully for Dicts nested in Lists, but throws an e
 
 Remove the conversion to/from data in `ListType.copy_only_attributes()` (i.e. the `transform_ext_params_map(self.typ)(...)` and `transform_output_map(self.typ)(...)` calls).
 
-The `copy_only_attributes()` method of each type should be responsible for its own conversion to/from data. This means the `AtomicType`s (`IntegerType`, `BoolType` etc.) should implement `copy_only_attributes()` to perform the relevant checks, instead of returning the identity function. 
+The `copy_only_attributes()` method of each type should be responsible for its own conversion to/from data. This means the `AtomicType`s (`IntegerType`, `BoolType` etc.) should implement `copy_only_attributes()` to perform the relevant checks, instead of returning the identity function.
 
 This way the `copy_only_attributes()` implementations of `ListType`, `DictType` and `RecordType` don't have to perform explicit conversions of their content, improving maintainability of the codebase.
 
@@ -1892,8 +1894,8 @@ In `fun_impls.py`, the `oct` builtin uses exactly the same logic as `hex`, excep
 
 ### Recommendation
 
-Refactor and reuse the code generation logic of `hex` for `oct`.
-=======
+# Refactor and reuse the code generation logic of `hex` for `oct`.
+
 ## Finding - can't use empty literal lists in arbitrary expressions
 
 Category: _Usability/Minor_
@@ -1994,6 +1996,7 @@ Change the `CONSTR_ID` of `FalseData` to 0, and change the `CONSTR_ID` of `TrueD
 Category: _Performance/Minor_
 
 In `std/bitmap.py`, the `POWS` list is always accessed in reverse order:
+
 ```python
 POWS[(BYTE_SIZE - 1) - (i % BYTE_SIZE)]
 ```
