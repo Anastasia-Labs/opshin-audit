@@ -318,10 +318,10 @@ TOTAL                                               4374    471   1802    152   
 
 # Summary of Current Findings Across Categories
 
-1. Security - 8
-2. Performance -
-3. Maintainability -
-4. Others - 0
+1. Security - 11
+2. Performance - 12
+3. Maintainability - 34
+4. Usability- 30
 
 # Manual Review Findings
 
@@ -501,40 +501,53 @@ def validator(a: Anything, b: Anything) -> int:
 
 Change the check to `EqualsData(transform_output_map(itemType)(x), transform_output_map(itemType)(HeadList(xs)))`.
 
-## Finding 27 - Custom Function declarartions are Overridden
+## Finding 76 - the `CONSTR_ID` attribute is defined for `Anything` and `Union` of primitives
 
-Category: _Security/Minor_
+Category: _Security/Critical_
 
-The code does not validate the source of the `@dataclass` decorator. If a custom dataclass function is defined, it overrides the imported dataclass decorator, and the rewrite transformers does not detect and report this issue.
-
-Example:
+The following is valid Opshin, but is conceptually strange as it isn't consistent with how attributes are exposed of regular `Union`s (they must exist on each subtype), and can lead to unexpected runtime errors:
+Both these validators compiles successfully, but will always fail to run.
 
 ```python
-from dataclasses import dataclass
+from opshin.prelude import *
 
-# Custom dataclass decorator
-def dataclass(cls):
-  return cls
-
-# Refers to the custom decorator, not the one from 'dataclasses'
-@dataclass
-class MyClass(PlutusData):
-
-def validator(a: int) -> None:
-  return None
+def validator(l: List[Anything]) -> int:
+    return l[0].CONSTR_ID
 ```
 
-The code checks for the presence of the `@dataclass` decorator and validates dataclass is imported from the package `dataclasses` but does not verify/report if the decorator is overridden by a custom dataclass function.
+```python
+from opshin.prelude import *
+
+def validator(u: Union[int, bytes]) -> int:
+   return u.CONSTR_ID
+```
 
 ## Recommendation
 
-1. To ensure that function names are also not overridden in addition to variable names, we recommend to extend the `RewriteForbiddenOverwrites` transformer to check for forbidden names in function definitions. This will ensure that function names do not conflict with reserved or forbidden names.
+- The `CONSTR_ID` attribute for `Anything` can be removed.
+- Avoid exposing the `CONSTR_ID` attribute of `Union`s which contain some `non-ConstrData` types.
 
-2. Raise a descriptive warning if any custom definitions are detected, e.g., In this case "The dataclass function can't override the exisitng import".
+## Finding 89 - `FalseData` and `TrueData` uses the wrong `CONSTR_ID`
+
+Category: _Security/Critical_
+
+In `ledger/api_v2.py`, `FalseData` uses `CONSTR_ID=1`, and `TrueData` uses `CONSTR_ID=0`.
+
+But according to line 24 of [https://github.com/IntersectMBO/plutus/blob/master/plutus-tx/src/PlutusTx/IsData/Instances.hs](https://github.com/IntersectMBO/plutus/blob/master/plutus-tx/src/PlutusTx/IsData/Instances.hs):
+
+```haskell
+$(makeIsDataSchemaIndexed ''Bool [('False, 0), ('True, 1)])
+```
+
+This mismatch changes the expected behavior of the functions operating on time ranges.
+
+### Recommendation
+
+Change the `CONSTR_ID` of `FalseData` to 0, and change the `CONSTR_ID` of `TrueData` to 1.
 
 ## Finding 06 - Lack of namespaced imports
 
-Categories: _Usability/Critical_ and _Performance/Critical_
+Categories: _Security/Major_
 
 User defined symbols can only be imported using `from <pkg> import *`, and every time such a statement is encountered the complete list of imported module statements is inlined. This can lead to a lot of duplicate statements, and quickly pollutes the global namespace with every symbol defined in every (imported) package.
 
@@ -567,18 +580,6 @@ class Employee(PlutusData):
 This code defines a custom class named `Address`, which shadows the built-in Address type from the Cardano ecosystem.
 It throws a type inference error. However, it should show a warning indicating that the name is shadowed.
 
-### Scenario 4
-
-The code checks for the length of imports, empty asnames, and \* as a name (lines 76–84), but it does not check for duplicate imports. This allows the same module to be imported multiple times without warnings or errors.
-
-```python
-from typing import Dict, List, Union
-from typing import Dict, List, Union
-from typing import Dict, List, Union
-```
-
-These imports can be given any number of times, leading to redundant code.
-
 ## Recommendation
 
 The current OpShin import mechanism is generally poorly implemented, also for builtins:
@@ -604,9 +605,40 @@ Nice to have:
 
 An additional advantage of having multiple independent Module AST nodes is that some compilation steps can be multi-threaded.
 
+## Finding 27 - Custom Function declarartions are Overridden
+
+Category: _Security/Minor_
+
+The code does not validate the source of the `@dataclass` decorator. If a custom dataclass function is defined, it overrides the imported dataclass decorator, and the rewrite transformers does not detect and report this issue.
+
+Example:
+
+```python
+from dataclasses import dataclass
+
+# Custom dataclass decorator
+def dataclass(cls):
+  return cls
+
+# Refers to the custom decorator, not the one from 'dataclasses'
+@dataclass
+class MyClass(PlutusData):
+
+def validator(a: int) -> None:
+  return None
+```
+
+The code checks for the presence of the `@dataclass` decorator and validates dataclass is imported from the package `dataclasses` but does not verify/report if the decorator is overridden by a custom dataclass function.
+
+## Recommendation
+
+1. To ensure that function names are also not overridden in addition to variable names, we recommend to extend the `RewriteForbiddenOverwrites` transformer to check for forbidden names in function definitions. This will ensure that function names do not conflict with reserved or forbidden names.
+
+2. Raise a descriptive warning if any custom definitions are detected, e.g., In this case "The dataclass function can't override the exisitng import".
+
 ## Finding 66 - redundant passing of all possible bound external variables when calling functions
 
-Category: _Performance/Major_ or _Performance/Critical_ ??
+Category: _Performance/Major_
 
 In `PlutoCompiler.visit_Call()` in `compiler.py`, `bound_vs` includes all external variables referenced inside a function, which are then passed as the initial arguments of the function whenever it is called. This is unnecessary and can become extremely expensive.
 
@@ -781,6 +813,22 @@ The double conversion doesn't have much overhead as it results in two wrapped id
 
 Don't perform any implicit conversions if both the right-hand-side and the left-hand-side are data values.
 
+## Finding 90 - `POWS` always accessed in reverse order
+
+Category: _Performance/Minor_
+
+In `std/bitmap.py`, the `POWS` list is always accessed in reverse order:
+
+```python
+POWS[(BYTE_SIZE - 1) - (i % BYTE_SIZE)]
+```
+
+The `POWS` can be reversed instead, allowing the elimination of the `(BYTE_SIZE - 1) -` operation.
+
+### Recommendation
+
+Reverse `POWS` during its assignment using the `reversed()` builtin, then remove the `(BYTE_SIZE - 1) -` operation wherever `POWS` is accessed.
+
 ## Finding - Optimization not showing the result of execution
 
 Category: _Performance/Informational_
@@ -804,7 +852,7 @@ For this code, the uplc spits outs the compiled code of both the branches of the
 
 ## Finding 10 - Rewriting chained comparisons doesn't create copies of middle expressions
 
-Categories: _Maintainability/Major_ and _Performance/Minor_
+Categories: _Maintainability/Major_
 
 When rewriting `<expr-a> < <expr-b> < <expr-c>` to `(<expr-a> < <expr-b>) and (<expr-b> < <expr-c>)` in `rewrite/rewrite_comparison_chaining.py`, no copies of `<expr-b>` seem to be created, leading to the same AST node instance appearing twice in the AST.
 
@@ -939,7 +987,7 @@ Consistently use named imports in whole compiler codebase.
 
 ## Finding 57 - TypedModule Dependency Before Type Inference
 
-Category: Maintainability/Minor
+Category: _Maintainability/Minor_
 
 The `RewriteInjectBuiltins` transformer operates on `TypedModule` nodes, which are expected to be available only after aggressive type inference has occurred. However, this transformer is part of the compilation process that runs before type inference is complete. This creates a logical inconsistency, as `TypedModule` nodes are not guaranteed to exist at this stage.
 
@@ -949,7 +997,7 @@ Refactor the transformer to work with untyped or partially typed nodes until typ
 
 ## Finding 58 - Inconsistent Handling of Polymorphic Functions
 
-Category: Maintainability/Minor
+Category: _Maintainability/Minor_
 
 The code uses two different approaches to identify and skip polymorphic functions:
 
@@ -1072,7 +1120,7 @@ Refactor and reuse the code generation logic of `hex` for `oct`.
 
 ## Finding 68 - unable to use negative index subscripts
 
-Category: _Maintainability/Minor_ (or _Usability/Minor_ ??)
+Category: _Maintainability/Minor_
 
 In `PlutoCompiler.visit_Subscript()` in `compiler.py`, literal negative indices for tuples and pairs aren't detected as being a `Constant` AST node.
 
@@ -1395,18 +1443,6 @@ Similarly, `AggressiveTypeInferencer.visit_Dict()` will use the type of the firs
 ## Recommendation
 
 Find the most generic type contained in the list or dict, instead of using the first item type to determine the list or dict type.
-
-## Finding 74 - builtin functions and methods aren't reused
-
-Category: _Usability/Major_
-
-Builtin functions defined in `fun_impls.py`, and type-specific constructors and methods defined in `type_impls.py`, are inlined everytime they are referenced. This can lead to a lot of duplication in the UPLC.
-
-Due to the strict on-chain validator 16KB size limit, this duplication can easily lead to UPLC scripts that surpass the limit and can't be used in production. Common subexpression factorization can eliminate such duplication, but such an algorithm is complex and difficult to implement.
-
-## Recommendation
-
-Larger builtin functions and methods should be saved to a registry with a unique name, and then referenced by name instead of inlining the Pluto AST nodes.
 
 ## Finding 13 - Non-friendly error message in AggressiveTypeInferencer.visit_comprehension
 
@@ -1776,40 +1812,6 @@ In `PlutoCompiler.visit_Subscript()` in `compiler.py`, a non user-friendly error
 
 Check out-of-range tuple indexing in `PlutoCompiler.visit_Subscript()` in order to throw a user-friendly error, instead of relying on the error thrown by the Pluto codebase.
 
-## Finding 76 - the `CONSTR_ID` attribute is defined for `Anything`
-
-Category: _Usability/Minor_
-
-The following is valid Opshin, but is conceptually strange as it isn't consistent with how attributes are exposed of regular `Union`s (they must exist on each subtype), and can lead to unexpected runtime errors:
-
-```python
-from opshin.prelude import *
-
-def validator(l: List[Anything]) -> int:
-    return l[0].CONSTR_ID
-```
-
-## Recommendation
-
-Remove the `CONSTR_ID` attribute for `Anything`.
-
-## Finding 79 - the `CONSTR_ID` attribute is defined for `Union` of primitives.
-
-Category: _Security/Critical_ (or maybe merge with finding 76, and change to _Usability/Major_)
-
-The following example validator compiles successfully, but will always fail to run.
-
-```python
-from opshin.prelude import *
-
-def validator(u: Union[int, bytes]) -> int:
-   return u.CONSTR_ID
-```
-
-## Recommendation
-
-Don't expose the `CONSTR_ID` attribute of `Union`s which contain some non-`ConstrData` types.
-
 ## Finding 02 - Attaching file name to title in '.json' file
 
 Category: _Usability/Informational_
@@ -1957,6 +1959,24 @@ Note that opshin errors may be overly restrictive as they aim to prevent code wi
 - rewrite_import_dataclasses.py
 - rewrite_import_typing.py
 
+## Finding 60 - Inability to Assign to List Elements in Validator Functions
+
+Category : _Usability/Minor_
+
+In the provided code, the validator function attempts to modify an element of a list (x[0] += 1). However, the compiler raises an error: "Can only assign to variable names, no type deconstruction". This restriction prevents list element assignment, which is a common and valid operation in Python and can be useful for on-chain code logic.
+
+```python
+def validator(x:List[int]) -> int:
+    x =[1,2,3,4]
+    x[0] += 1
+    return x
+```
+
+## Recommendation
+
+1. Extend the compiler to support assignments to list elements.
+2. If supporting list element assignment is not feasible,enhance the error message to explain the limitation and suggest possible workarounds.
+
 ## Finding: Unclear Error for Unimplemented Bitwise XOR
 
 Category: _Usability/Informational_
@@ -1977,24 +1997,6 @@ def validator():
 - Include a list of supported operators in the error message (e.g., Supported operators: +, -, \*, /, &, |).
 
 - Prioritize implementing commonly used missing operators or explicitly document unsupported ones.
-
-## Finding 60 - Inability to Assign to List Elements in Validator Functions
-
-Category : Functionality/Minor
-
-In the provided code, the validator function attempts to modify an element of a list (x[0] += 1). However, the compiler raises an error: "Can only assign to variable names, no type deconstruction". This restriction prevents list element assignment, which is a common and valid operation in Python and can be useful for on-chain code logic.
-
-```python
-def validator(x:List[int]) -> int:
-    x =[1,2,3,4]
-    x[0] += 1
-    return x
-```
-
-## Recommendation
-
-1. Extend the compiler to support assignments to list elements.
-2. If supporting list element assignment is not feasible,enhance the error message to explain the limitation and suggest possible workarounds.
 
 # General Recommendations
 
