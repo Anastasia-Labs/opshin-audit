@@ -37,20 +37,15 @@ The limitations of OpShin don't invalidate the claim that it is a subset of pyth
 
 ## Type System
 
-One of the limitations of using Python as-is for smart contract development is
-that it is dynamically typed. The type system of OpShin is much stricter than
-the type system of Python. OpShin addresses this by introducing a strict type
-system on top of Python. What OpShin does is have an independent component
+One limitation of using standard Python for smart contract development is its dynamic typing, which can lead to runtime errors and unpredictability. To solve this, OpShin enforces a strict type system, ensuring type safety and reliability at compile time. OpShin achieves this by executing a process
 called the 'aggressive static type inferencer', which can infer all types of the
 Python AST nodes for a well chosen subset of Python.
 
 The class `AggressiveTypeInferencer` in the file `type_inference.py` employs a
 set of conditions to infer types throughout the Python code. These rules form
 the backbone of the type inference system, enabling type checking for each of
-the variables involved. As per ATI, types are resolved by flow-insensitivity and
-type consistency. Flow-insensitivity ignores control flow, allowing variables to
-retain a union of types across different points in a scope. Type consistency
-ensures that variables maintain the same type throughout their scope, even when
+the variables involved. As per ATI, types are resolved in a flow-insensitive and
+type consistent way. Flow-insensitive analysis means that the type of all variables are inferred as a 'union' type collecting all the possibilities across all potential execution paths. Type consistency ensures that variables maintain the same type throughout their scope, even when
 conflicting information appears. When inconsistencies arise, ATI resolves them
 by considering the broader context and applying a consistent type across the
 scope.
@@ -58,37 +53,36 @@ scope.
 So in simple terms every variable in OpShin has a type. There are no opaque
 types in OpShin, everything can be deconstructed.
 
-| Rule Category                   | Description                                                                              |
-| ------------------------------- | ---------------------------------------------------------------------------------------- |
-| Annotated Types                 | Explicit type annotations are respected and used as the definitive type.                 |
-| Class Type Inference            | Classes must have a CONSTR_ID attribute defined as an integer to uniquely identify them. |
-| Function Type Inference         | Functions are typed based on their input parameters and return annotations.              |
-| Literal Type Inference          | Literal values (integers, strings, booleans) are assigned their corresponding types.     |
-| Operator Type Inference         | Binary operations are typed based on their operands.                                     |
-| Comparison Type Inference       | Comparison operations always result in a boolean type.                                   |
-| List Type Inference             | Lists are typed based on their elements.                                                 |
-| Dictionary Type Inference       | Dictionaries are typed based on their key and value types.                               |
-| Attribute Access Type Inference | Attribute access is typed based on the object's type and the attribute being accessed.   |
-| Function Call Type Inference    | Function calls are typed based on the function's return type.                            |
-| Control Flow Type Inference     | The type of a variable after an if-else block is a union of types from both branches.    |
-| Loop Type Inference             | Variables in loops are typed based on the inferred iterable element type.                |
-| Conflicting Types               | TypeInferenceError is raised if there are conflicting types                              |
+| Type Category     | Description                                                                              |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| Annotated Types   | Explicit type annotations are respected and used as the definitive type.                 |
+| Class             | Classes must have a CONSTR_ID attribute defined as an integer to uniquely identify them. |
+| Function          | Functions are typed based on their input parameters and return annotations.              |
+| Literal           | Literal values (integers, strings, booleans) are assigned their corresponding types.     |
+| Operators         | Binary operations are typed based on their operands.                                     |
+| Comparison        | Comparison operations always result in a boolean type.                                   |
+| List              | Lists are typed based on their elements.                                                 |
+| Dictionary        | Dictionaries are typed based on their key and value types.                               |
+| Attribute Access  | Attribute access is typed based on the object's type and the attribute being accessed.   |
+| Function Call     | Function calls are typed based on the function's return type.                            |
+| Control Flow      | The type of a variable after an if-else block is a union of types from both branches.    |
+| Loops             | Variables in loops are typed based on the inferred iterable element type.                |
+| Conflicting Types | TypeInferenceError is raised if there are conflicting types                              |
 
 Currently, OpShin supports only Lists and Dicts. It does not support tuples and
 generic types, which we see as a limitation, as these can be really valuable
-when writing smart contracts. This limitation of not supporting tuples and
-generic types might require workarounds to achieve the desired functionality.
+when writing smart contracts. These limitations might require workarounds to achieve the desired functionality.
 
 ## Compilation and Execution
 
 As part of the compilation pipeline, there are a bunch of additional rewrites,
 all the types are resolved through aggressive types inference and some
 optimizations are performed, and finally the compiler gets the simplified type
-annotated AST, and then translates it to `pluto`, which is the intermediate
+annotated AST, and then translates it to `pluton`, which is the intermediate
 language and then compiled again to `UPLC`.
 
 OpShin provides a toolkit to evaluate the script in Python, compile the script
-to `UPLC`, and compile the script to `pluto`, an intermediate language for
+to `UPLC`, and compile the script to `pluthon`, an intermediate language for
 debugging purposes and to build artifacts.
 
 It offers a straightforward API to compile, load, apply parameters and evaluate
@@ -104,14 +98,14 @@ Because Opshin syntax is a subset of valid python syntax, Opshin uses the python
 
 Once an entrypoint is parsed into an AST, 27 distinct AST transformations are applied that weed out syntax and type errors, and gradually transform the AST into something that can easily be converted into _pluthon_. The last transformation step performs the actual conversion to a _pluthon_ AST. The conversion to the on-chain _UPLC_ format is handled by the _pluthon_ library and is out of scope of this library.
 
-Each of the following steps is implemented using a recursive top-down visitor pattern, where each visit is responsible for continuing the recursion of child nodes. This is the same approach as the python internals.
+Each of the following steps is implemented using a recursive top-down visitor pattern, where each visit is responsible for continuing the recursion of child nodes. This is the same approach that is used in the python internal codebase.
 
 1. Resolves `ImportFrom` statements respecting the `from <pkg> import *` format, mimicking the python module resolution behavior to get the module file path, then calling the standard `parse()` method, and recursively resolving nested `from <pkg> import *` statements in the imported modules. This step ignores imports of builtin modules. The `from <pkg> import *` AST node is transformed into a list of statements, all sharing the same scope.
 2. Throws an error when detecting a `return` statement outside a function definition.
 3. (Optional) Subexpressions that can be evaluated to constant python values are replaced by their `Constant(value)` equivalents.
-4. Removes a deprecated python 3.8 AST node
-5. Replaces augmented assignment by their simple assignment equivalents. Eg. `a += 1` is tranformed into `a = a + 1`
-6. Replaces comparison chains by a series of binary operations. Eg. `a < b < c` is transformed into `(a < b) and (b < c)`
+4. Removes a deprecated python 3.8 AST node.
+5. Replaces augmented assignment by their simple assignment equivalents. Eg. `a += 1` is tranformed into `a = a + 1`.
+6. Replaces comparison chains by a series of binary operations. Eg. `a < b < c` is transformed into `(a < b) and (b < c)`.
 7. Replaces tuple unpacking expressions in assignments and for-loops, by multiple single assignments. Eg. `(a, b) = <tuple-expr>` is transformed into:
 
    ```
@@ -121,13 +115,13 @@ Each of the following steps is implemented using a recursive top-down visitor pa
    ```
 
 8. Detects `from opshin.std.integrity import check_integrity` and `from opshin.std.integrity import check_integrity as <name>` statements and injects the `check_integrity` macro into the top-level scope.
-9. Ensures that all classes inherit `PlutusData` and that `PlutusData` is imported using `from pycardano import Datum as Anything, PlutusData`
+9. Ensures that all classes inherit `PlutusData` and that `PlutusData` is imported using `from pycardano import Datum as Anything, PlutusData`.
 10. Replaces hashlib functions (`sha256`, `sha3_256`, `blake2b`) imported using `from hashlib import <hash-fn> as <aname>` by raw _pluthon_ lambda function definitions.
 11. Detects classes with methods, ensures that `Self` is imported using `from typing import Self`, and changes adds a class reference to the `Self` AST nodes. Also ensures `List`, `Dict` and `Union` are imported using `from typing import Dict, List, Union`.
 12. Throws an error if some of the builtin symbols are shadowed.
 13. Ensures that classes are decorated with `@dataclass` and that `@dataclass` is imported using `from dataclasses import dataclass`.
 14. Injects the _pluthon_ implementations of a subset of python builtins before the main module body.
-15. Explicitly casts anything that should be boolean (eg. if-then-else conditions, comparison bin ops) by injecting `bool()`
+15. Explicitly casts anything that should be boolean (eg. if-then-else conditions, comparison bin ops) by injecting `bool()`.
 16. Sets the `orig_name` property of Name, FunctionDef and ClassDef AST nodes.
 17. Gives each variable a unique name by appending a scope id.
 18. Aggressive Type Inference: Visits each AST node to determine its type, setting its `.typ` property in the process.
@@ -135,28 +129,26 @@ Each of the following steps is implemented using a recursive top-down visitor pa
 20. Turns empty dicts into raw _pluthon_ expressions.
 21. Ensures that a function that is decorated with a single named decorator, is decorated with the `@wraps_builtin` decorator, which must be imported using `from opshin.bridge import wraps_builtin`. Such decorated functions are then converted into raw _pluthon_ expressions.
 22. Injects the `bytes()`, `int()`, `bool()` and `str()` cast builtins.
-23. Removes assignments of types, classes and polymorphic functions (eg. `MyList = List[int]`)
+23. Removes assignments of types, classes and polymorphic functions (eg. `MyList = List[int]`).
 24. (Optional) Iteratively collects all used variables and removes the unused variables. The iteration is stopped if the set of remaining used variables remains unchanged.
 25. (Optional) Removes constant statements.
 26. Removes Pass AST nodes.
-27. Generates the _pluthon_ AST
+27. Generates the _pluthon_ AST.
 
 # Quantitative Metrics
 
 ## Metrics using Gastronomy
 
-We analysed the `UPLC` code generated by OpShin for a sample validator which
-adds number 1 to the input that is passed, using `Gastronomy` as the `UPLC`
-debugger.We also examined the intermediate language, Pluto, during the process.
+We analyzed the _UPLC_ code generated by OpShin for a sample validator that increments an input by 1, using `Gastronomy` as the _UPLC_ debugger. This example highlights some concerns we identified, although it was just one of several tests we conducted to evaluate the compiler’s behavior. We also examined the intermediate language, Pluthon, during the process.
 
 ```python
 def validator(n : int)-> int:
     return n + 1
 ```
 
-Below is the Pluto output for the validator function:
+Below is the _Pluthon_ output for the validator function:
 
-```pluto
+```pluthon
 (\1val_param0 ->
   (let
     n_1 = (# (Error ((! Trace) 'NameError: n' ())));
@@ -183,7 +175,7 @@ The two variables `n_1` and `validator_0` represents the variable `n` and
 validator name `validator` in the function respectively and are not removed as
 part of the optimizations.
 
-Below is the UPLC output for the validator function:
+Below is the _UPLC_ output for the validator function:
 
 ```uplc
 (lam
@@ -325,7 +317,7 @@ TOTAL                                               4374    471   1802    152   
 
 # Manual Review Findings
 
-The document herein is provided as an interim update detailing the findings of
+This section is provided as an interim update detailing the findings of
 our ongoing audit process on the OpShin repository. It is crucial to understand
 that this document does not constitute the final audit report. The contents are
 meant to offer a preliminary insight into our findings up to this point and are
@@ -357,7 +349,7 @@ Category: _Security/Critical_
 
 In `AggressiveTypeInferencer.visit_BoolOp()`, type assertions performed on the left-hand-side don't result in Pluto AST nodes that convert UPLC data types to primitive types.
 
-Similar to finding 44, this leads to unexpected runtime type errors, and can potentially lead to smart contract dead-locks if the compiled validator isn't sufficiently unit-tested.
+This leads to unexpected runtime type errors, and can potentially lead to smart contract dead-locks if the compiled validator isn't sufficiently unit-tested.
 
 The following validator is an example of valid Opshin that will produce UPLC that will always fail if the left-hand-side of the `and` expression is true:
 
@@ -1812,7 +1804,48 @@ In `PlutoCompiler.visit_Subscript()` in `compiler.py`, a non user-friendly error
 
 Check out-of-range tuple indexing in `PlutoCompiler.visit_Subscript()` in order to throw a user-friendly error, instead of relying on the error thrown by the Pluto codebase.
 
-## Finding 80 - Attaching file name to title in '.json' file
+## Finding 80 - `opshin eval` command throws a misleading error message
+
+Category: _Usability/Minor_
+
+While evaluating the validator:
+
+```python
+def validator(x: bool) -> int:
+    return int(x)
+```
+
+using the command:
+
+`opshin eval any opshin/type_check.py '{"int":1}'`
+
+the following error occurs `int() argument must be a string, a bytes-like object or a real number, not 'NoneType'`
+
+After passing the argument according to the documentation, it says it's a not NoneType which means it is None.This error misleads about `eval` and also do not perform the python evaluation of the script which `eval` is supposed to do.
+
+### Recommendation
+
+We recommend using a two-phase validation process when working with `eval_uplc`. In the first phase, the compiler should check whether the code is a subset of Python by running `eval`. If this phase fails, it should throw an error indicating that the code is not a valid subset. If it succeeds, the second phase can proceed by running `eval_uplc`, which converts the arguments into PlutusData and performs the validation.
+
+## Finding 81 - Inability to Assign to List Elements in Validator Functions
+
+Category : _Usability/Minor_
+
+In the provided code, the validator function attempts to modify an element of a list (x[0] += 1). However, the compiler raises an error: "Can only assign to variable names, no type deconstruction". This restriction prevents list element assignment, which is a common and valid operation in Python and can be useful for on-chain code logic.
+
+```python
+def validator(x:List[int]) -> int:
+    x =[1,2,3,4]
+    x[0] += 1
+    return x
+```
+
+### Recommendation
+
+1. Extend the compiler to support assignments to list elements.
+2. If supporting list element assignment is not feasible,enhance the error message to explain the limitation and suggest possible workarounds.
+
+## Finding 82 - Attaching file name to title in '.json' file
 
 Category: _Usability/Informational_
 
@@ -1832,7 +1865,7 @@ purposes, adding the validator's file name or function name along with the
 keyword 'Validator' as a title (e.g., Validator/assert_sum) would be helpful for
 debugging and referencing during off-chain validation.
 
-## Finding 81 - Pretty Print generated UPLC and Pluto
+## Finding 83 - Pretty Print generated UPLC and Pluto
 
 Category: _Usability/Informational_
 
@@ -1855,7 +1888,7 @@ into a folder for each validator for easier interpretation and review.
 
 Variable names should be improved (e.g. the adhoc pattern can be made more compact smaller), and only the used builtins should be injected.
 
-## Finding 82 - Determinisim of Constructor Ids
+## Finding 84 - Determinisim of Constructor Ids
 
 Category: _Usability/Informational_
 
@@ -1877,7 +1910,7 @@ If `CONSTR_ID` values are not explicitly defined for PlutusData classes, they ar
 
 The current behavior of throwing an assertion error for duplicate `CONSTR_ID` values in Union types should be maintained. Additionally, it could be expanded to include a warning or error if no `CONSTR_ID` is provided, to alert developers about relying on automatically generated IDs.
 
-## Finding 83 - Function `to_cbor_hex()` not working
+## Finding 85 - Function `to_cbor_hex()` not working
 
 Category: _Usability/Informational_
 
@@ -1899,7 +1932,7 @@ def validator():
 TypeInferenceError: Type Employee_0 does not have attribute to_cbor_hex
 ```
 
-## Finding 84 - Nested Lists Not Handled Correctly
+## Finding 86 - Nested Lists Not Handled Correctly
 
 Category: _Usability/Informational_
 
@@ -1922,7 +1955,7 @@ Note that opshin errors may be overly restrictive as they aim to prevent code wi
 
 It fails for empty nested lists like [[]],[[],[]] likely due to issues with type inference or no support for handling of nested structures.
 
-## Finding 85 - Error Messages Are Not Descriptive in Rewrite transformers
+## Finding 87 - Error Messages Are Not Descriptive in Rewrite transformers
 
 Category: _Usability/Informational_
 
@@ -1959,25 +1992,7 @@ Note that opshin errors may be overly restrictive as they aim to prevent code wi
 - rewrite_import_dataclasses.py
 - rewrite_import_typing.py
 
-## Finding 86 - Inability to Assign to List Elements in Validator Functions
-
-Category : _Usability/Minor_
-
-In the provided code, the validator function attempts to modify an element of a list (x[0] += 1). However, the compiler raises an error: "Can only assign to variable names, no type deconstruction". This restriction prevents list element assignment, which is a common and valid operation in Python and can be useful for on-chain code logic.
-
-```python
-def validator(x:List[int]) -> int:
-    x =[1,2,3,4]
-    x[0] += 1
-    return x
-```
-
-### Recommendation
-
-1. Extend the compiler to support assignments to list elements.
-2. If supporting list element assignment is not feasible,enhance the error message to explain the limitation and suggest possible workarounds.
-
-## Finding 87 - Unclear Error for Unimplemented Bitwise XOR
+## Finding 88 - Unclear Error for Unimplemented Bitwise XOR
 
 Category: _Usability/Informational_
 
