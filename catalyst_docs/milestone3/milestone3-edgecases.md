@@ -7,116 +7,171 @@
 
 ## Executive Summary
 
-We audited Opshin codebased and have compiled a documented list of edge cases relevant to smart contract development. We have also proposed strategies for resolving identified cases that can be applied to future iterations of the language. The work was conducted manually.
+This report documents edge cases in OpShin smart contract development identified through manual code review. It provides actionable strategies to resolve these issues that can be applied to future iterations of the language.
+
+### Scope
+
+We took the following approach to list the edge cases:
+
+- Cross-referencing unit test files under `opshin/tests` against language specifications to uncover untested functionality.
+
+- Incorporating documented edge cases from Milestone 2 to highlight high-risk scenarios lacking test coverage.
 
 ## Edge cases
 
-## 1. Lack of namespaced imports
+## 1. `len()` Builtin Untested Edge Cases
 
-### **Description**
+**Description:**  
+The `len(x: Union[bytes, List[Anything]])` function lacks unit tests for:
 
-User defined symbols can only be imported using `from <pkg> import *`, and every time such a statement is encountered the complete list of imported module statements is inlined. This can lead to a lot of duplicate statements, and quickly pollutes the global namespace with every symbol defined in every (imported) package.
+- Empty inputs (`b""`, `[]`).
+- `None` or invalid types (should raise compile-time/runtime errors).
 
-The following scenarios explain why this is a critical problem.
-
-#### **Scenario 1**
-
-Imagine both a singular name (eg. `asset`) and a plural name (eg. `assets`) are defined somewhere in the OpShin smart contract codebase or external libraries. The programmer makes a typo and unknowingly uses the wrong variable (e.g. `asset` instead of `assets`). Due to type inference the value of the wrongly used variable might actually have a type that passes the type check (eg. both `asset` and `assets` allow calling `len()`). The program compiles and seems to work even though it doesn’t match the programmer's intent.
-
-#### **Scenario 2**
-
-The codebase defines a variable with the same name and type multiple times, but each time another value is assigned. For the programmer it is ambiguous which value will actually be used when referencing the variable. The programmer doesn’t know enough about the library code being imported to intuitively figure out which variable shadows all the others.
-
-#### **Scenario 3**
+**Recommendation:**
 
 ```python
-@dataclass()
-class Address(PlutusData):
-    street: bytes
-    city: bytes
-    zip_code: int
-
-@dataclass()
-class Employee(PlutusData):
-    name: bytes
-    age: int
-    address: Address
+# Add to test_builtins.py
+def test_len_edge_cases():
+    assert len(b"") == 0  # Empty bytes
+    assert len([]) == 0   # Empty list
+    with pytest.raises(Exception):
+        len(None)         # Invalid input
 ```
 
-This code defines a custom class named `Address`, which shadows the built-in Address type from the Cardano ecosystem.
-It throws a type inference error. However, it should show a warning indicating that the name is shadowed.
+2. Missing UPLC Dunder Methods
+   Description:
+   UPLC builtins for dunder methods (e.g., **invert**, **and**, **or**) are unimplemented.
 
-#### **Scenario 4**
+Recommendation:
 
-The code checks for the length of imports, empty asnames, and \* as a name (lines 76–84), but it does not check for duplicate imports. This allows the same module to be imported multiple times without warnings or errors.
+Add UPLC bindings for these methods in the compiler.
 
 ```python
-from typing import Dict, List, Union
-from typing import Dict, List, Union
-from typing import Dict, List, Union
+class X:
+    def __invert__(self): return self
+assert (~X()) is not None
+
 ```
 
-These imports can be given any number of times, leading to redundant code.
+3. Class Methods with No Return Type
+   Description:
+   No test coverage for class methods lacking return annotations:
 
-### **Recommendation**
+python
+@dataclass  
+class MyClass(PlutusData):  
+ def my_method(self): # No -> None  
+ pass  
+Recommendation:
 
-The current OpShin import mechanism is generally poorly implemented, also for builtins:
+Add to test_class_methods.py:
 
-- The `hashlib` functions are handled differently from `opshin.std`, yet there is no obvious reason why they should be treated differently
-- The `check_integrity` macro is added to the global scope with its alias name, meaning it suddenly pollutes the namespace of upstream packages.
-- Some of the builtin imports suffer from the same issue as imports of user defined symbols: duplication.
-- `Dict, List, Union` must be imported in that order from `typing`
-- The `Datum as Anything` import from `pycardano` seems to only exist to help define `Anything` for eg. IDEs, but `Anything` is actually defined elsewhere.
+python
+def test_no_return_type_method():  
+ c = MyClass()  
+ assert c.my_method() is None # Implicit None return  
+4. Short-Circuit Evaluation Missing
+Description:
+Operators and/or do not short-circuit (e.g., x and error() evaluates error() even if x is falsy).
 
-Though the import of builtins will be hidden behind `opshin.prelude` for most users, it is still not implemented in a maintainable way.
+Recommendation:
 
-A complete overhaul of the import mechanism is recommended, including the implementation of the `import <pkg>` syntax. The OpShin AST should be able to have multiple Module nodes, each with their own scope.
+Enforce Python-like behavior in the compiler.
 
-Nice to have:
+Test case:
 
-- Use `.pyi` files for builtin packages, and define the actual builtin package implementation in code in importable scopes
-- OpShin specific builtins should be importable in any pythonic way, even with aliases. Name resolution should be able to figure out the original builtin symbol id/name.
-- Detect which python builtins and OpShin builtins are being used, and only inject those.
-- Don't expose `@wraps_builtin` decorator
-- Builtin scope entries can be given a "forbid override" flag, instead of having to maintain a list of forbidden overrides in `rewrite/rewrite_forbidden_overwrites.py`
-- Implement a warning for shadowing (instead of e.g. the type inference error thrown in scenario 3). This would help developers catch potential issues early without halting compilation.
+python
+def validator(x: bool) -> bool:  
+ return x and error("Skip if x is False") # Must not evaluate RHS if x=False  
+5. Type System Gaps
+5.1 Union Types Untested
+Description:
+No tests for Union[A] or isinstance() with complex unions.
 
-## 2. No Copies of Middle Expression
+Recommendation:
 
-### **Description**
+python
 
-When rewriting chained comparisons to individual comparisons combined with `and` for e.g.
-`<expr-a> < <expr-b> < <expr-c> to (<expr-a> < <expr-b>) and (<expr-b> < <expr-c>)`
-in `rewrite/rewrite_comparison_chaining.py`, no copies of `<expr-b>` seem to be created, leading to the same AST node instance appearing twice in the AST.
+# Add to test_types.py
 
-The compiler steps frequently mutate the AST nodes instead of creating copies, which can lead to difficult to debug issues in this case.
+def test_union_edge_cases():  
+ assert isinstance(1, Union[int]) # Single-type union  
+ assert not isinstance(1, Union[bytes])  
+5.2 Record Field Order Sensitivity
+Description:
+RecordType subtyping ignores field order (e.g., A(foo, bar) vs A(bar, foo)).
 
-### **Recommendation**
+Recommendation:
 
-Similar to `rewrite/rewrite_tuple_assign.py`, create temporary variables for each of the middle expressions in the chain. Then refer to those temporary variables in the resulting BinOp expressions.
+Clarify in docs whether order matters.
 
-This approach avoids the issue described and also avoids the recalculation of the same expression (potentially expensive).
+Add test:
 
-## 3. Type safe tuple unpacking
+python
+A = RecordType([("foo", int), ("bar", bytes)])  
+A_reversed = RecordType([("bar", bytes), ("foo", int)])  
+assert A >= A_reversed # Should this be True?  
+6. Control Flow: while False Undefined Behavior
+Description:
 
-### **Description**
+python
+def validator(\_: None) -> int:  
+ while False:  
+ a = 10  
+ return a # Compiles but fails (undefined `a`)  
+Recommendation:
 
-Tuple unpacking (step 7) is currently being rewritten before the ATI (aggressive type inference) step. This allows writing unpacking assignments with a mismatched number of tuple entries.
+Compiler should warn about unreachable code/undefined variables.
 
-If there there are more names on the left side this throws a non-user friendly FreeVariableError. If there are less the rewritten code is valid, even though in python it wouldn't be valid, thus violating the expected "strict subset of python" behavior.
+7. Tuple Index Out of Range
+   Description:
+   No tests for tuple index bounds checking (e.g., x: Tuple[int] = (1,); x[1]).
 
-There might be other ways this can be abused to get inconsistent behavior.
+Recommendation:
 
-### **Recommendation**
+Add runtime checks or compile-time errors.
 
-Perform this step after type inference. Check tuple types during type inference.
+Test case:
 
-## 4. Non-friendly Error Messages
+python
+def validator() -> int:  
+ x = (1,)  
+ return x[1] # Should fail  
+8. Boolean/Integer Comparison Quirk
+Description:
 
-### **Description**
+python
+def validator(x: bool, y: int) -> bool:  
+ return x == y # Works for any `y` (e.g., `True == 1`)  
+Recommendation:
 
-Using `import <pkg>` or `import <pkg> as <aname>` isn’t supported and throws a non-user friendly error: "free variable '\<pkg-root\>' referenced before assignment in enclosing scope".
+Restrict comparisons to same types (or document this behavior).
 
-### **Recommendation**
+Next Steps
+Prioritize Critical Fixes:
 
-Perform this step after type inference. Check tuple types during type inference.
+Short-circuiting (EC-12), while False (EC-09).
+
+Expand Test Suite:
+
+Add all recommended test cases.
+
+Document Behavior:
+
+Clarify edge cases in OpShin docs (e.g., type comparisons).
+
+Template Usage:
+
+Add new findings as H2 headers (##).
+
+Use code blocks for examples/recommendations.
+
+Update Status inlined (e.g., **Status:** Fixed in v1.2).
+
+This format is:
+
+- **Actionable:** Clear recommendations for each issue.
+- **Scalable:** Easy to add new findings as sections.
+- **Markdown-Ready:** Directly usable in GitHub/GitLab.
+
+Let me know if you'd like adjustments (e.g., severity labels, more code examples)!
