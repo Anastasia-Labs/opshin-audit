@@ -21,157 +21,199 @@ We took the following approach to list the edge cases:
 
 ## 1. `len()` Builtin Untested Edge Cases
 
-**Description:**  
-The `len(x: Union[bytes, List[Anything]])` function lacks unit tests for:
+- **File Reference**: `opshin/tests/test_builtins.py`
 
-- Empty inputs (`b""`, `[]`).
-- `None` or invalid types (should raise compile-time/runtime errors).
-
-**Recommendation:**
+- **Edge case**: `len(x: Union[bytes, List[Anything]]) -> int`
 
 ```python
-# Add to test_builtins.py
-def test_len_edge_cases():
-    assert len(b"") == 0  # Empty bytes
-    assert len([]) == 0   # Empty list
-    with pytest.raises(Exception):
-        len(None)         # Invalid input
+len(x: Union[bytes, List[Anything]]) -> int
 ```
 
-2. Missing UPLC Dunder Methods
-   Description:
-   UPLC builtins for dunder methods (e.g., **invert**, **and**, **or**) are unimplemented.
+### **Description:**
 
-Recommendation:
+The `test_builtins.py` file currently lacks unit tests for the `len(x: Union[bytes, List[Any]])` function, which is documented
+in the OpShin book as part of the supported Python built-in functions being implemented in OpShin.
 
-Add UPLC bindings for these methods in the compiler.
+### **Recommendation:**
+
+Add test cases for the builtin function for differest test inputs including empty bytes and lists.
+
+## 2. Missing test cases for Dunder Methods
+
+- **File Reference**: `opshin/tests/test_classmethods.py`
+
+- **Edge case**: `__invert__, __and__, __or__`
+
+### Description:
+
+While most of the dunder methods used and mentioned in type inference are tested in
+`test_classmethods.py`, the following three methods are not tested.
+
+- "**invert**",
+- "**and**",
+- "**or**",
+
+### Recommendation:
+
+Add test cases to verify the behavior of the **invert**,**and**, **or** dunder methods
+in a PlutusData class.
+
+## 3. Class Methods with No Return Type
+
+- **File Reference**: `opshin/tests/test_classmethods.py`
+
+- **Edge case**:
 
 ```python
-class X:
-    def __invert__(self): return self
-assert (~X()) is not None
+from opshin.prelude import *
 
+@dataclass()
+class MyClass(PlutusData):
+    def my_method(self):
+        pass
+
+def validator(_: None) -> None:
+    c = MyClass()
+    c.my_method()
 ```
 
-3. Class Methods with No Return Type
-   Description:
-   No test coverage for class methods lacking return annotations:
+### Description:
 
-python
-@dataclass  
-class MyClass(PlutusData):  
- def my_method(self): # No -> None  
- pass  
-Recommendation:
+The above code fails to compile with the error `AssertionError: Invalid Python, class name is undefined at this stage`. The method `my_method` defined inside the class `MyClass` is missing return type but the error message doesn't help the user understand what is wrong with the code.
 
-Add to test_class_methods.py:
+### Recommendation:
 
-python
-def test_no_return_type_method():  
- c = MyClass()  
- assert c.my_method() is None # Implicit None return  
-4. Short-Circuit Evaluation Missing
-Description:
-Operators and/or do not short-circuit (e.g., x and error() evaluates error() even if x is falsy).
+Detect class methods missing return types and throw an explicit error and add a failing test case for this scenario.
 
-Recommendation:
+## 4. Tuple ...
 
-Enforce Python-like behavior in the compiler.
+Though tuples don’t yet have a type syntax, user-defined functions can’t be created that take tuple arguments and tuples can still be used in other ways that lead to compilation succeeding but runtime failures, for example:
 
-Test case:
+```python
+def validator(a: int) -> int:
+   t1 = (a, a, a)
+   t2 = (a, a)
 
-python
-def validator(x: bool) -> bool:  
- return x and error("Skip if x is False") # Must not evaluate RHS if x=False  
-5. Type System Gaps
-5.1 Union Types Untested
-Description:
-No tests for Union[A] or isinstance() with complex unions.
+   t3 = t1 if False else t2
+
+   return t3[2]
+```
 
 Recommendation:
 
-python
+In `TupleType.__ge__` in type_impls.py, the Python builtin zip function is used without checking that the lengths of its arguments are the same. This means a shorter length tuple can potentially be passed into a function whose argument expects a longer length tuple.So ensure the lengths of the TupleTypes are the same when comparing them in `TupleType.__ge__`.
 
-# Add to test_types.py
+Add test cases for different scenarios related to tuple assignments.
 
-def test_union_edge_cases():  
- assert isinstance(1, Union[int]) # Single-type union  
- assert not isinstance(1, Union[bytes])  
-5.2 Record Field Order Sensitivity
-Description:
-RecordType subtyping ignores field order (e.g., A(foo, bar) vs A(bar, foo)).
+## 5. Subtypes Record and Union
 
-Recommendation:
+- **File Reference**: `opshin/tests/test_types.py`
+  Test cases missing
 
-Clarify in docs whether order matters.
+1. Empty = `RecordType(Record("Empty", "Empty", 0, []))`
+2. Reversed field order : `A = RecordType(Record("A", "A", 0, [("foo", IntegerInstanceType), ("bar", ByteStringInstanceType)]))
+A_reversed = RecordType(Record("A", "A", 0, [("bar", ByteStringInstanceType), ("foo", IntegerInstanceType)]))`
+3. same fields and different constructor id
 
-Add test:
+## 6. test_Unions.py
 
-python
-A = RecordType([("foo", int), ("bar", bytes)])  
-A_reversed = RecordType([("bar", bytes), ("foo", int)])  
-assert A >= A_reversed # Should this be True?  
-6. Control Flow: while False Undefined Behavior
-Description:
+The following edge cases was identified
+Duplicate entries in Unions give compiler errors, but duplicate entries in nested Unions don't.
 
-python
-def validator(\_: None) -> int:  
- while False:  
- a = 10  
- return a # Compiles but fails (undefined `a`)  
-Recommendation:
+```python
+from opshin.prelude import *
 
-Compiler should warn about unreachable code/undefined variables.
+@dataclass()
+class A(PlutusData):
+    CONSTR_ID = 1
+    a: bytes
 
-7. Tuple Index Out of Range
-   Description:
-   No tests for tuple index bounds checking (e.g., x: Tuple[int] = (1,); x[1]).
+@dataclass()
+class B(PlutusData):
+    CONSTR_ID = 2
+    a: int
+    b: int
 
-Recommendation:
+@dataclass()
+class C(PlutusData):
+    CONSTR_ID = 2
+    a: int
+    b: int
 
-Add runtime checks or compile-time errors.
+def validator(_: Union[Union[A, B], C]) -> None:
+    pass
+```
 
-Test case:
+```python
+from opshin.prelude import *
 
-python
-def validator() -> int:  
- x = (1,)  
- return x[1] # Should fail  
-8. Boolean/Integer Comparison Quirk
-Description:
+@dataclass()
+class A(PlutusData):
+    x: int
 
-python
-def validator(x: bool, y: int) -> bool:  
- return x == y # Works for any `y` (e.g., `True == 1`)  
-Recommendation:
+def validator(a: Union[A]) -> None:
+    assert isinstance(a, A)
+```
 
-Restrict comparisons to same types (or document this behavior).
+```python
+from opshin.prelude import *
 
-Next Steps
-Prioritize Critical Fixes:
+def validator(d: Dict[Union[int, bytes], int]) -> int:
+    key: Union[bytes, int] = 0
+    return d[key]
+```
 
-Short-circuiting (EC-12), while False (EC-09).
+## 7. test bitmap - to be checked
 
-Expand Test Suite:
+Empty bitmap (b"") not included while creating a sample
 
-Add all recommended test cases.
+## 8. test_Stdlib.py
 
-Document Behavior:
+Attribute of listtype "index" is only tested for integers, missing other types which leads to an edge case
 
-Clarify edge cases in OpShin docs (e.g., type comparisons).
+```python
+from opshin.prelude import *
 
-Template Usage:
+def validator(a: Anything, b: Anything) -> int:
+   l: List[Anything] = [a, b]
 
-Add new findings as H2 headers (##).
+   return l.index(b)
+```
 
-Use code blocks for examples/recommendations.
+## 9. CONSTR_ID attribute for
 
-Update Status inlined (e.g., **Status:** Fixed in v1.2).
+No test cases for analysing the behaviour of CONSTR_ID attribute
 
-This format is:
+```python
+from opshin.prelude import
 
-- **Actionable:** Clear recommendations for each issue.
-- **Scalable:** Easy to add new findings as sections.
-- **Markdown-Ready:** Directly usable in GitHub/GitLab.
+def validator(u: Union[int, bytes]) -> int:
+return u.CONSTR_ID
+```
 
-Let me know if you'd like adjustments (e.g., severity labels, more code examples)!
+## 10. Type inference of list and dicts to be tested
+
+The type inferred for lists and dicts should be tested. The following is a edge case which lead to the fact that the type
+of lists and dicts are inferred by the first entry
+
+```python
+a: Union[int, bytes] = 10
+l = [a, 10, b'abcd']
+
+a: Union[int, bytes] = 10
+l = [10, a, b'abcd']
+```
+
+## 11 . Function `to_cbor_hex` not tested
+
+```python
+@dataclass()
+class Employee(PlutusData):
+    name: bytes
+    age: int
+
+employee = Employee(b"Alice", 30)
+
+def validator():
+    print(employee.to_cbor_hex())
+```
