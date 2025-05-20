@@ -1,7 +1,8 @@
-# OpShin Edge Case Audit Report
+# OpShin Edge Case Identification Report
 
+**Project**: OpShin Audit
 **Milestone Title** : Milestone3 - Edge Case Identification  
-**Submission Date** :
+**Submission Date** : 23-May-2025  
 **Audit Team** : Anastasia Labs  
 **Repository** : [Opshin Repository](https://github.com/OpShin/opshin)
 
@@ -17,13 +18,13 @@ We took the following approach to list the edge cases:
 
 - Incorporating documented edge cases from Milestone 2 to highlight high-risk scenarios lacking test coverage.
 
-## Edge cases
+# Edge cases
 
-## 1. `len()` Builtin Untested Edge Cases
+## 1. Untested builtin `len()`
 
 - **File Reference**: `opshin/tests/test_builtins.py`
 
-- **Edge case**: `len(x: Union[bytes, List[Anything]]) -> int`
+- **Edge case**:
 
 ```python
 len(x: Union[bytes, List[Anything]]) -> int
@@ -85,9 +86,9 @@ The above code fails to compile with the error `AssertionError: Invalid Python, 
 
 Detect class methods missing return types and throw an explicit error and add a failing test case for this scenario.
 
-## 4. Tuple ...
+## 4. Missing Test Cases for Tuple Assignments
 
-Though tuples don’t yet have a type syntax, user-defined functions can’t be created that take tuple arguments and tuples can still be used in other ways that lead to compilation succeeding but runtime failures, for example:
+- **Edge case**:
 
 ```python
 def validator(a: int) -> int:
@@ -99,26 +100,61 @@ def validator(a: int) -> int:
    return t3[2]
 ```
 
-Recommendation:
+### Description:
 
-In `TupleType.__ge__` in type_impls.py, the Python builtin zip function is used without checking that the lengths of its arguments are the same. This means a shorter length tuple can potentially be passed into a function whose argument expects a longer length tuple.So ensure the lengths of the TupleTypes are the same when comparing them in `TupleType.__ge__`.
+Though tuples don’t yet have a type syntax (and therefore user-defined functions can’t be created to take tuple arguments), tuples can still be used in other ways that may lead to successful compilation but result in runtime failures, as shown in the example above.
+
+### Recommendation:
+
+In `TupleType.__ge__` in `type_impls.py`, the Python builtin `zip` function is used without checking that the lengths of its arguments are the same. This means a shorter length tuple can potentially be passed into a function whose argument expects a longer length tuple.So ensure the lengths of the TupleTypes are the same when comparing them in `TupleType.__ge__`.
 
 Add test cases for different scenarios related to tuple assignments.
 
-## 5. Subtypes Record and Union
+## 5. Test cases for different scenarios of Subtypes in Record
 
 - **File Reference**: `opshin/tests/test_types.py`
-  Test cases missing
+- **Edge Case**:
 
-1. Empty = `RecordType(Record("Empty", "Empty", 0, []))`
-2. Reversed field order : `A = RecordType(Record("A", "A", 0, [("foo", IntegerInstanceType), ("bar", ByteStringInstanceType)]))
-A_reversed = RecordType(Record("A", "A", 0, [("bar", ByteStringInstanceType), ("foo", IntegerInstanceType)]))`
-3. same fields and different constructor id
+1. Empty records are not included in the test cases, which leads to a lack of validation for subtyping behavior with empty records.
 
-## 6. test_Unions.py
+2. There are no test cases for records with fields in a different order.
 
-The following edge cases was identified
-Duplicate entries in Unions give compiler errors, but duplicate entries in nested Unions don't.
+3. There are no test cases for records that have the same fields but different constructor IDs.
+
+### Recommendation:
+
+We recommend to add similar tests for the above mentioned edge cases
+
+1. Empty Records:
+
+```
+Empty = RecordType(Record("Empty", "Empty", 0, []))
+```
+
+2. Reversed field order:
+
+```
+A = RecordType(Record("A", "A", 0, [("foo", IntegerInstanceType), ("bar", ByteStringInstanceType)]))
+
+A_reversed = RecordType(Record("A", "A", 0, [("bar", ByteStringInstanceType), ("foo", IntegerInstanceType)]))
+```
+
+3. `Records` having same fields but different constructor ids.
+
+```
+A = RecordType(Record("A", "A", 0, [("foo", IntegerInstanceType), ("bar", ByteStringInstanceType)]))
+
+A_diff_constr = RecordType(Record("A", "A", 1, [("foo", IntegerInstanceType),("bar", ByteStringInstanceType)]))
+
+```
+
+## 6. Uncovered Scenarios in `Union` Type Behavior
+
+- **File Reference**: `opshin/tests/test_Unions.py`
+- **Edge Cases**:
+  The following edge cases were not included in the test suite
+
+  1.Duplicate entries in `Unions` give compiler errors, but duplicate entries in nested `Unions` don't.
 
 ```python
 from opshin.prelude import *
@@ -144,6 +180,14 @@ def validator(_: Union[Union[A, B], C]) -> None:
     pass
 ```
 
+### Recommendation :
+
+It is recommended to detect duplicate `CONSTR_ID`s after flattening the union in `union_types()` within `type_inference.py`.
+Duplicates should be identified based on `CONSTR_ID`, regardless of data field equivalence.
+
+2. Unions with no entry and only one entry are not tested.
+   Compiling the following code throws an unrelated error message: `'Name' object has no attribute 'elts'`.
+
 ```python
 from opshin.prelude import *
 
@@ -155,6 +199,12 @@ def validator(a: Union[A]) -> None:
     assert isinstance(a, A)
 ```
 
+### Recommendation:
+
+The compiler should detect `Union`s containing only a single entry, and throw an explicit error.
+
+3. Dict with Union type key, can't be accessed with a Union type which has the same entries but in a different order
+
 ```python
 from opshin.prelude import *
 
@@ -163,13 +213,33 @@ def validator(d: Dict[Union[int, bytes], int]) -> int:
     return d[key]
 ```
 
-## 7. test bitmap - to be checked
+### Recommendation:
 
-Empty bitmap (b"") not included while creating a sample
+We recommend to sort the Union entries in an unambiguous manner within the `union_types()` function in `type_inference.py`.
 
-## 8. test_Stdlib.py
+## 7. Explicit testing for edge cases in bitmap and fractions
 
-Attribute of listtype "index" is only tested for integers, missing other types which leads to an edge case
+- **File Reference**: `opshin/tests/test_bitmap.py`,`opshin/tests/test_fractions.py`
+- **Edge Case**:
+
+`test_fractions.py`: The existing sample cases exclude scenarios where the denominator is zero.
+
+`test_bitmap.py`: Similar oversight with excluding empty bytestrings and negative values,these should also be tested to ensure robustness.
+
+### Recommendation:
+
+Add explicit test cases for
+
+- Denominator = 0 in fractions (to check handling of division by zero).
+- Empty bytestrings and negative index values in bitmap operations.
+
+## 8. Index type not tested for different types
+
+- **File Reference**: `opshin/tests/test_stdlib.py`
+
+- **Edge Case**:
+
+Attribute of listtype "index" is only tested for integers, missing other types which leads to the following edge case that wasn't tested.
 
 ```python
 from opshin.prelude import *
@@ -180,9 +250,23 @@ def validator(a: Anything, b: Anything) -> int:
    return l.index(b)
 ```
 
-## 9. CONSTR_ID attribute for
+### Recommendation:
 
-No test cases for analysing the behaviour of CONSTR_ID attribute
+In the `index` method, defined in `ListType.attribute()` in `type_impls.py`, change the check to `EqualsData(transform_output_map(itemType)(x), transform_output_map(itemType)(HeadList(xs)))`.
+
+## 9. No test cases for `CONSTR_ID` attribute.
+
+- **Edge Case**:
+
+No test cases for analysing the behaviour of `CONSTR_ID` attribute.
+The following edge cases are valid opshin, but isn't consistent with how attributes are exposed of regular `Union`s (they must exist on each subtype), and can lead to unexpected runtime errors.
+
+```python
+from opshin.prelude import *
+
+def validator(l: List[Anything]) -> int:
+    return l[0].CONSTR_ID
+```
 
 ```python
 from opshin.prelude import
@@ -191,29 +275,21 @@ def validator(u: Union[int, bytes]) -> int:
 return u.CONSTR_ID
 ```
 
-## 10. Type inference of list and dicts to be tested
+### Recommendation:
 
-The type inferred for lists and dicts should be tested. The following is a edge case which lead to the fact that the type
-of lists and dicts are inferred by the first entry
+1. Remove the `CONSTR_ID` attribute for `Anything`.
+2. Don't expose the `CONSTR_ID` attribute of `Union`s which contain some non-`ConstrData` types.
 
-```python
-a: Union[int, bytes] = 10
-l = [a, 10, b'abcd']
+## Summary
 
-a: Union[int, bytes] = 10
-l = [10, a, b'abcd']
-```
+This report identifies and analyzes 9 edge cases across the OpShin codebase and test suite.
+Each case highlights a gap in either functionality coverage or robustness in the current implementation of the language.
 
-## 11 . Function `to_cbor_hex` not tested
+For each edge case, we have proposed actionable recommendations, such as test coverage expansion,and improvements to type checking logic.
+Implementing these changes will improve OpShin’s reliability, developer experience, and readiness for production smart contract development.
 
-```python
-@dataclass()
-class Employee(PlutusData):
-    name: bytes
-    age: int
+## Validation by OpShin Team
 
-employee = Employee(b"Alice", 30)
-
-def validator():
-    print(employee.to_cbor_hex())
-```
+**Reviewers**:[]  
+**Date Reviewed**: []  
+**Feedback Summary**:[]
