@@ -1,6 +1,6 @@
 # OpShin Edge Case Identification Report
 
-**Project**: OpShin Audit
+**Project**: OpShin Audit  
 **Milestone Title** : Milestone3 - Edge Case Identification  
 **Submission Date** : 23-May-2025  
 **Audit Team** : Anastasia Labs  
@@ -152,7 +152,7 @@ A_diff_constr = RecordType(Record("A", "A", 1, [("foo", IntegerInstanceType),("b
 
 - **File Reference**: `opshin/tests/test_Unions.py`
 - **Edge Cases**:
-  The following edge cases were not included in the test suite
+  The following edge cases were not included in the test suite.
 
   1.Duplicate entries in `Unions` give compiler errors, but duplicate entries in nested `Unions` don't.
 
@@ -182,10 +182,10 @@ def validator(_: Union[Union[A, B], C]) -> None:
 
 ### Recommendation :
 
-It is recommended to detect duplicate `CONSTR_ID`s after flattening the union in `union_types()` within `type_inference.py`.
+It is recommended to detect duplicate `CONSTR_ID`s after flattening the `Union` in `union_types()` within `type_inference.py`.
 Duplicates should be identified based on `CONSTR_ID`, regardless of data field equivalence.
 
-2. Unions with no entry and only one entry are not tested.
+2. `Union`s with no entries or only one entry are not tested.
    Compiling the following code throws an unrelated error message: `'Name' object has no attribute 'elts'`.
 
 ```python
@@ -203,7 +203,7 @@ def validator(a: Union[A]) -> None:
 
 The compiler should detect `Union`s containing only a single entry, and throw an explicit error.
 
-3. Dict with Union type key, can't be accessed with a Union type which has the same entries but in a different order
+3. `Dict` with `Union` type key, can't be accessed with a `Union` type which has the same entries but in a different order.
 
 ```python
 from opshin.prelude import *
@@ -215,7 +215,7 @@ def validator(d: Dict[Union[int, bytes], int]) -> int:
 
 ### Recommendation:
 
-We recommend to sort the Union entries in an unambiguous manner within the `union_types()` function in `type_inference.py`.
+We recommend to sort the `Union` entries in an unambiguous manner within the `union_types()` function in `type_inference.py`.
 
 ## 7. Explicit testing for edge cases in bitmap and fractions
 
@@ -259,7 +259,7 @@ In the `index` method, defined in `ListType.attribute()` in `type_impls.py`, cha
 - **Edge Case**:
 
 No test cases for analysing the behaviour of `CONSTR_ID` attribute.
-The following edge cases are valid opshin, but isn't consistent with how attributes are exposed of regular `Union`s (they must exist on each subtype), and can lead to unexpected runtime errors.
+The following edge cases are valid OpShin, but isn't consistent with how attributes are exposed of regular `Union`s (they must exist on each subtype), and can lead to unexpected runtime errors.
 
 ```python
 from opshin.prelude import *
@@ -280,7 +280,7 @@ return u.CONSTR_ID
 1. Remove the `CONSTR_ID` attribute for `Anything`.
 2. Don't expose the `CONSTR_ID` attribute of `Union`s which contain some non-`ConstrData` types.
 
-## Summary
+# Summary
 
 This report identifies and analyzes 9 edge cases across the OpShin codebase and test suite.
 Each case highlights a gap in either functionality coverage or robustness in the current implementation of the language.
@@ -288,7 +288,7 @@ Each case highlights a gap in either functionality coverage or robustness in the
 For each edge case, we have proposed actionable recommendations, such as test coverage expansion,and improvements to type checking logic.
 Implementing these changes will improve OpShin’s reliability, developer experience, and readiness for production smart contract development.
 
-## Validation by OpShin Team
+# Validation by OpShin Team
 
 **Reviewers**:[]  
 **Date Reviewed**: []  
