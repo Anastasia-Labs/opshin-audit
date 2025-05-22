@@ -58,7 +58,7 @@ While most of the dunder methods used and mentioned in type inference are tested
 ### Recommendation:
 
 Add test cases to verify the behavior of the **invert**,**and**, **or** dunder methods
-in a PlutusData class.
+in the PlutusData class.
 
 ## 3. Class Methods with No Return Type
 
