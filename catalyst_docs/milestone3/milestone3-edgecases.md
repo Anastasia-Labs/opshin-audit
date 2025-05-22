@@ -224,7 +224,7 @@ We recommend to sort the `Union` entries in an unambiguous manner within the `un
 - **File Reference**: `opshin/tests/test_bitmap.py`,`opshin/tests/test_fractions.py`
 - **Edge Case**:
 
-`test_fractions.py`: The existing sample cases exclude scenarios where the denominator is zero.
+`test_fractions.py`: The existing sample cases does not include scenarios where the denominator is zero.
 
 `test_bitmap.py`: Similar oversight with excluding empty bytestrings and negative values,these should also be tested to ensure robustness.
 
