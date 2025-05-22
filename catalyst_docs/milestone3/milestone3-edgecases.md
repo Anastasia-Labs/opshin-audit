@@ -8,7 +8,8 @@
 
 ## Executive Summary
 
-This report documents edge cases in OpShin smart contract development identified through manual code review. It provides actionable strategies to resolve these issues that can be applied to future iterations of the language.
+This report documents untested edge cases in the OpShin compiler code base identified through manual code review.
+We also aim to provide actionable strategies to resolve these issues that can be applied to future iterations of the language.
 
 ### Scope
 
