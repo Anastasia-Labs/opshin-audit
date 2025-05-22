@@ -104,7 +104,7 @@ def validator(a: int) -> int:
 
 ### Description:
 
-Though tuples don’t yet have a type syntax (and therefore user-defined functions can’t be created to take tuple arguments), tuples can still be used in other ways that may lead to successful compilation but result in runtime failures, as shown in the example above.
+Though tuples don’t yet have a type declaration syntax (and therefore user-defined functions can’t be created to take tuple arguments), tuples can still be used in other ways that may lead to successful compilation but result in runtime failures, as shown in the example above.
 
 ### Recommendation:
 
