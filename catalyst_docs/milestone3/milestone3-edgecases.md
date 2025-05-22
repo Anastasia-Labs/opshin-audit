@@ -44,7 +44,7 @@ Add test cases for the builtin function for differest test inputs including empt
 
 - **File Reference**: `opshin/tests/test_classmethods.py`
 
-- **Edge case**: `__invert__, __and__, __or__`
+- **Edge case(s)**: `__invert__, __and__, __or__`
 
 ### Description:
 
