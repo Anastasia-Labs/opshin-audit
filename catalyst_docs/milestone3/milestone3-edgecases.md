@@ -241,7 +241,7 @@ Add explicit test cases for
 
 - **Edge Case**:
 
-Attribute of listtype "index" is only tested for integers, missing other types which leads to the following edge case that wasn't tested.
+Attribute of listtype "index" is only tested for integers, missing other types, for example:
 
 ```python
 from opshin.prelude import *
