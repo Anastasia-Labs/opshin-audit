@@ -226,7 +226,7 @@ We recommend to sort the `Union` entries in an unambiguous manner within the `un
 
 `test_fractions.py`: The existing sample cases does not include scenarios where the denominator is zero.
 
-`test_bitmap.py`: Similar oversight with excluding empty bytestrings and negative values,these should also be tested to ensure robustness.
+`test_bitmap.py`: Similarly there are no test cases covering empty bytestring inputs and negative input values (e.g. creating a bitmap with a negative length).
 
 ### Recommendation:
 
