@@ -261,7 +261,7 @@ In the `index` method, defined in `ListType.attribute()` in `type_impls.py`, cha
 - **Edge Case**:
 
 No test cases for analysing the behaviour of `CONSTR_ID` attribute.
-The following edge cases are valid OpShin, but isn't consistent with how attributes are exposed of regular `Union`s (they must exist on each subtype), and can lead to unexpected runtime errors.
+The following edge cases are valid in OpShin, but isn't consistent with how attributes are used in other types (e.g. `Union`s).
 
 ```python
 from opshin.prelude import *
