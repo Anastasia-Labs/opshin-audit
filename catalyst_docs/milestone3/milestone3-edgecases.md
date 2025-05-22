@@ -274,7 +274,7 @@ def validator(l: List[Anything]) -> int:
 from opshin.prelude import
 
 def validator(u: Union[int, bytes]) -> int:
-return u.CONSTR_ID
+    return u.CONSTR_ID
 ```
 
 ### Recommendation:
