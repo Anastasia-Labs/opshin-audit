@@ -280,7 +280,7 @@ def validator(u: Union[int, bytes]) -> int:
 ### Recommendation:
 
 1. Remove the `CONSTR_ID` attribute for `Anything`.
-2. Don't expose the `CONSTR_ID` attribute of `Union`s which contain some non-`ConstrData` types.
+2. Do not expose the `CONSTR_ID` attribute of `Union`s which contain some non-`ConstrData` types.
 
 # Summary
 
