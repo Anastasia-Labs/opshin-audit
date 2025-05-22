@@ -81,7 +81,8 @@ def validator(_: None) -> None:
 
 ### Description:
 
-The above code fails to compile with the error `AssertionError: Invalid Python, class name is undefined at this stage`. The method `my_method` defined inside the class `MyClass` is missing return type but the error message doesn't help the user understand what is wrong with the code.
+The above code fails to compile with the error `AssertionError: Invalid Python, class name is undefined at this stage`.
+The method `my_method` defined inside the class `MyClass` is missing return type but the error message doesn't help the user understand what is wrong with the code.
 
 ### Recommendation:
 
