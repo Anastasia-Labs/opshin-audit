@@ -49,7 +49,7 @@ Add test cases for the builtin function for differest test inputs including empt
 ### Description:
 
 While most of the dunder methods used and mentioned in type inference are tested in
-`test_classmethods.py`, the following three methods are not tested.
+`test_classmethods.py`, the following three methods are missing relevant test cases.
 
 - "**invert**",
 - "**and**",
