@@ -117,7 +117,7 @@ Add test cases for different scenarios related to tuple assignments.
 - **File Reference**: `opshin/tests/test_types.py`
 - **Edge Case**:
 
-1. Empty records are not included in the test cases, which leads to a lack of validation for subtyping behavior with empty records.
+1. Empty records are not included in the test cases, which can lead to unexpected/unspecified behaviour.
 
 2. There are no test cases for records with fields in a different order.
 
