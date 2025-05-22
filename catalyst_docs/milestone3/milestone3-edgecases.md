@@ -233,7 +233,7 @@ We recommend to sort the `Union` entries in an unambiguous manner within the `un
 Add explicit test cases for
 
 - Denominator = 0 in fractions (to check handling of division by zero).
-- Empty bytestrings and negative index values in bitmap operations.
+- Empty bytestrings and negative index/length values in bitmap operations.
 
 ## 8. Index type not tested for different types
 
