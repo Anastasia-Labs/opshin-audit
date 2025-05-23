@@ -8,10 +8,12 @@
 
 ## Executive Summary
 
-This report documents untested edge cases in the OpShin compiler code base identified through manual code review.
-We also aim to provide actionable strategies to resolve these issues that can be applied to future iterations of the language.
+This report documents 9 edge cases across the OpShin compiler codebase and test suite, identified through manual code review. Each case highlights a gap in either functionality coverage or robustness in the current implementation of the language.
 
-### Scope
+For each edge case, we have provided actionable strategies, such as expanding test coverage, improving type-checking logic, and refining error handling.
+Implementing these changes will enhance OpShin’s reliability, improve the developer experience, and strengthen its overall readiness for production-level smart contract development.
+
+## Scope
 
 We took the following approach to list the edge cases:
 
@@ -19,34 +21,34 @@ We took the following approach to list the edge cases:
 
 - Incorporating documented edge cases from Milestone 2 to highlight high-risk scenarios lacking test coverage.
 
-# Edge cases
+## Edge cases
 
-## 1. Untested builtin `len()`
+### 1. Untested builtin `len()`
 
-- **File Reference**: `opshin/tests/test_builtins.py`
+- File Reference: `opshin/tests/test_builtins.py`
 
-- **Edge case**:
+- Edge case:
 
 ```python
 len(x: Union[bytes, List[Anything]]) -> int
 ```
 
-### **Description:**
+#### Description:
 
 The `test_builtins.py` file currently lacks unit tests for the `len(x: Union[bytes, List[Any]])` function, which is documented
 in the OpShin book as part of the supported Python built-in functions being implemented in OpShin.
 
-### **Recommendation:**
+#### Recommendation:
 
 Add test cases for the builtin function for differest test inputs including empty bytes and lists.
 
-## 2. Missing test cases for Dunder Methods
+### 2. Missing test cases for Dunder Methods
 
-- **File Reference**: `opshin/tests/test_classmethods.py`
+- File Reference: `opshin/tests/test_classmethods.py`
 
-- **Edge case(s)**: `__invert__, __and__, __or__`
+- Edge case(s): `__invert__, __and__, __or__`
 
-### Description:
+#### Description:
 
 While most of the dunder methods used and mentioned in type inference are tested in
 `test_classmethods.py`, the following three methods are missing relevant test cases.
@@ -55,16 +57,16 @@ While most of the dunder methods used and mentioned in type inference are tested
 - "**and**",
 - "**or**",
 
-### Recommendation:
+#### Recommendation:
 
 Add test cases to verify the behavior of the **invert**,**and**, **or** dunder methods
 in the PlutusData class.
 
-## 3. Class Methods with No Return Type
+### 3. Class Methods with No Return Type
 
-- **File Reference**: `opshin/tests/test_classmethods.py`
+- File Reference: `opshin/tests/test_classmethods.py`
 
-- **Edge case**:
+- Edge case:
 
 ```python
 from opshin.prelude import *
@@ -79,18 +81,18 @@ def validator(_: None) -> None:
     c.my_method()
 ```
 
-### Description:
+#### Description:
 
 The above code fails to compile with the error `AssertionError: Invalid Python, class name is undefined at this stage`.
 The method `my_method` defined inside the class `MyClass` is missing return type but the error message doesn't help the user understand what is wrong with the code.
 
-### Recommendation:
+#### Recommendation:
 
 Detect class methods missing return types and throw an explicit error and add a failing test case for this scenario.
 
-## 4. Missing Test Cases for Tuple Assignments
+### 4. Missing Test Cases for Tuple Assignments
 
-- **Edge case**:
+- Edge case:
 
 ```python
 def validator(a: int) -> int:
@@ -102,20 +104,23 @@ def validator(a: int) -> int:
    return t3[2]
 ```
 
-### Description:
+#### Description:
 
 Though tuples don’t yet have a type declaration syntax (and therefore user-defined functions can’t be created to take tuple arguments), tuples can still be used in other ways that may lead to successful compilation but result in runtime failures, as shown in the example above.
 
-### Recommendation:
+#### Recommendation:
 
-In `TupleType.__ge__` in `type_impls.py`, the Python builtin `zip` function is used without checking that the lengths of its arguments are the same. This means a shorter length tuple can potentially be passed into a function whose argument expects a longer length tuple.So ensure the lengths of the TupleTypes are the same when comparing them in `TupleType.__ge__`.
+We recommend adding test cases to cover various tuple-related scenarios for example:
 
-Add test cases for different scenarios related to tuple assignments.
+- Assigning a tuple of one length to a variable expected to have a different length.
+- Unpacking a tuple into variables where the number of variables doesn't match the tuple length.
+- Comparing tuples of different lengths.
+- Accessing indices or slices that are out of bounds for a tuple.
 
-## 5. Test cases for different scenarios of Subtypes in Record
+### 5. Test cases for different scenarios of Subtypes in Record
 
-- **File Reference**: `opshin/tests/test_types.py`
-- **Edge Case**:
+- File Reference: `opshin/tests/test_types.py`
+- Edge Case:
 
 1. Empty records are not included in the test cases, which can lead to unexpected/unspecified behaviour.
 
@@ -123,7 +128,7 @@ Add test cases for different scenarios related to tuple assignments.
 
 3. There are no test cases for records that have the same fields but different constructor IDs.
 
-### Recommendation:
+#### Recommendation:
 
 We recommend to add similar tests for the above mentioned edge cases
 
@@ -150,13 +155,13 @@ A_diff_constr = RecordType(Record("A", "A", 1, [("foo", IntegerInstanceType),("b
 
 ```
 
-## 6. Uncovered Scenarios in `Union` Type Behavior
+### 6. Uncovered Scenarios in `Union` Type Behavior
 
-- **File Reference**: `opshin/tests/test_Unions.py`
-- **Edge Cases**:
+- File Reference: `opshin/tests/test_Unions.py`
+- Edge Cases:
   The following edge cases were not included in the test suite.
 
-  1.Duplicate entries in `Unions` give compiler errors, but duplicate entries in nested `Unions` don't.
+  1.Duplicate entries in `Union`s give compiler errors, but duplicate entries in nested `Union`s don't.
 
 ```python
 from opshin.prelude import *
@@ -182,11 +187,6 @@ def validator(_: Union[Union[A, B], C]) -> None:
     pass
 ```
 
-### Recommendation :
-
-It is recommended to detect duplicate `CONSTR_ID`s after flattening the `Union` in `union_types()` within `type_inference.py`.
-Duplicates should be identified based on `CONSTR_ID`, regardless of data field equivalence.
-
 2. `Union`s with no entries or only one entry are not tested.
    Compiling the following code throws an unrelated error message: `'Name' object has no attribute 'elts'`.
 
@@ -201,10 +201,6 @@ def validator(a: Union[A]) -> None:
     assert isinstance(a, A)
 ```
 
-### Recommendation:
-
-The compiler should detect `Union`s containing only a single entry, and throw an explicit error.
-
 3. `Dict` with `Union` type key, can't be accessed with a `Union` type which has the same entries but in a different order.
 
 ```python
@@ -215,31 +211,38 @@ def validator(d: Dict[Union[int, bytes], int]) -> int:
     return d[key]
 ```
 
-### Recommendation:
+#### Recommendation:
 
-We recommend to sort the `Union` entries in an unambiguous manner within the `union_types()` function in `type_inference.py`.
+1. It is recommended to detect duplicate `CONSTR_ID`s after flattening the `Union` in `union_types()` within `type_inference.py`.
+   Duplicates should be identified based on `CONSTR_ID`, regardless of data field equivalence.
 
-## 7. Explicit testing for edge cases in bitmap and fractions
+2. The compiler should detect `Union`s containing only a single entry, and throw an explicit error.
 
-- **File Reference**: `opshin/tests/test_bitmap.py`,`opshin/tests/test_fractions.py`
-- **Edge Case**:
+3. We recommend to sort the `Union` entries in an unambiguous manner within the `union_types()` function in `type_inference.py`.
+
+Corresponding test cases should be added to cover each of the scenarios described above.
+
+### 7. Explicit testing for edge cases in bitmap and fractions
+
+- File Reference: `opshin/tests/test_bitmap.py`,`opshin/tests/test_fractions.py`
+- Edge Case:
 
 `test_fractions.py`: The existing sample cases does not include scenarios where the denominator is zero.
 
 `test_bitmap.py`: Similarly there are no test cases covering empty bytestring inputs and negative input values (e.g. creating a bitmap with a negative length).
 
-### Recommendation:
+#### Recommendation:
 
 Add explicit test cases for
 
 - Denominator = 0 in fractions (to check handling of division by zero).
 - Empty bytestrings and negative index/length values in bitmap operations.
 
-## 8. Index type not tested for different types
+### 8. Index type not tested for different types
 
-- **File Reference**: `opshin/tests/test_stdlib.py`
+- File Reference: `opshin/tests/test_stdlib.py`
 
-- **Edge Case**:
+- Edge Case:
 
 Attribute of listtype "index" is only tested for integers, missing other types, for example:
 
@@ -252,13 +255,13 @@ def validator(a: Anything, b: Anything) -> int:
    return l.index(b)
 ```
 
-### Recommendation:
+#### Recommendation:
 
-In the `index` method, defined in `ListType.attribute()` in `type_impls.py`, change the check to `EqualsData(transform_output_map(itemType)(x), transform_output_map(itemType)(HeadList(xs)))`.
+In the `index` method defined in `ListType.attribute()` in `type_impls.py`, update the check to accommodate other primitive types, and add corresponding test cases to ensure coverage.
 
-## 9. No test cases for `CONSTR_ID` attribute.
+### 9. No test cases for `CONSTR_ID` attribute.
 
-- **Edge Case**:
+- Edge Case:
 
 No test cases for validating the computation of `CONSTR_ID` attributes.
 The following edge cases are valid in OpShin, but isn't consistent with how attributes are used in other types (e.g. `Union`s).
@@ -277,21 +280,7 @@ def validator(u: Union[int, bytes]) -> int:
     return u.CONSTR_ID
 ```
 
-### Recommendation:
+#### Recommendation:
 
 1. Remove the `CONSTR_ID` attribute for `Anything`.
 2. Do not expose the `CONSTR_ID` attribute of `Union`s which contain some non-`ConstrData` types.
-
-# Summary
-
-This report identifies and analyzes 9 edge cases across the OpShin codebase and test suite.
-Each case highlights a gap in either functionality coverage or robustness in the current implementation of the language.
-
-For each edge case, we have proposed actionable recommendations, such as test coverage expansion,and improvements to type checking logic.
-Implementing these changes will improve OpShin’s reliability, developer experience, and readiness for production smart contract development.
-
-# Validation by OpShin Team
-
-**Reviewers**:[]  
-**Date Reviewed**: []  
-**Feedback Summary**:[]
