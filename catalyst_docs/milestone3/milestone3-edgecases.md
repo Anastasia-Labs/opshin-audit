@@ -123,7 +123,7 @@ We recommend adding test cases to cover various tuple-related scenarios for exam
 - File Reference: `opshin/tests/test_types.py`
 - Edge Case:
 
-1. Empty records are not included in the test cases, which can lead to unexpected/unspecified behaviour.
+1. Empty records are not included in the test cases, which can lead to unexpected/unspecified behavior.
 
 2. There are no test cases for records with fields in a different order.
 
