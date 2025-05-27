@@ -12,7 +12,7 @@ This report documents 9 edge cases across the OpShin compiler codebase and test 
 Each case highlights a gap in either functionality coverage or robustness in the current implementation of the language.
 
 For each edge case, we have provided actionable strategies, such as expanding test coverage, improving type-checking logic, and refining error handling.
-Implementing these changes will enhance OpShin’s reliability, improve the developer experience, and strengthen its overall readiness for production-level smart contract development.
+Implementing these changes will enhance OpShin’s reliability, improve the developer experience and strengthen its overall readiness for production-level smart contract development.
 
 ## Scope
 
