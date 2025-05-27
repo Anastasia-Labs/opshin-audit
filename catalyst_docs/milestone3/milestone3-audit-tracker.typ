@@ -671,7 +671,9 @@ to wrap the builtin?
 = Milestone3 - Edge Cases Identification
 
 1. [SR] - test_builtins.py Test case for len function not tested `len(x:
-  Union[bytes, List[Anything]]) -> int` - but available in opshin book
+1. [SR] - test_builtins.py
+  Test case for len function not tested
+  `len(x: Union[bytes, List[Anything]]) -> int` - but available in opshin book.
 
 2. [SR] - test_hashlib.py - all cases tested
 
