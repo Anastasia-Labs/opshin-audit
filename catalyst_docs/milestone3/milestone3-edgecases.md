@@ -24,7 +24,7 @@ We took the following approach to list the edge cases:
 
 ## Edge cases
 
-### 1. Untested builtin `len()`
+### 1. Untested builtin `len()`for some types of `List[Anything]`
 
 - File Reference: `opshin/tests/test_builtins.py`
 
@@ -36,12 +36,12 @@ len(x: Union[bytes, List[Anything]]) -> int
 
 #### Description:
 
-The `test_builtins.py` file currently lacks unit tests for the `len(x: Union[bytes, List[Any]])` function, which is documented
-in the OpShin book as part of the supported Python built-in functions being implemented in OpShin.
+The `test_builtins.py` file includes unit tests for len(x) with bytes, tuples, dicts, and List[int]. However, it appears that tests for `List[Anything]` with other valid types (e.g., List[bytes], List[bool], etc.) are missing.
 
 #### Recommendation:
 
-Add test cases for the builtin function for differest test inputs including empty bytes and lists.
+We recommend to add additional test cases for the `len` built-in function to cover more variations of
+`List[Anything]`, other than `List[int]`. Also include edge cases like empty bytes and empty lists.
 
 ### 2. Missing test cases for Dunder Methods
 
