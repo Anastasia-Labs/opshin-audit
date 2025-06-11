@@ -22,7 +22,7 @@
   columns: 2,
   stroke: none,
   [*Date*],
-  [April, 2025],
+  [June, 2025],
   [*Project*],
   [OpShin Audit],
   [*Version*],
@@ -193,12 +193,9 @@ but not limited to:
 = Executive summary
 #v(40pt)
 
-OpShin is a programming language designed to simplify smart contract development
-on the Cardano blockchain. By leveraging valid Python syntax, OpShin lowers the
-barrier to entry for developers familiar with Python, enabling them to write
-smart contracts in a language they already know. However, OpShin is a restricted
-subset of Python, tailored specifically for the constraints and requirements of
-blockchain development.
+OpShin is a programming language for developing smart contracts on the Cardano
+blockchain. 
+It uses valid Python syntax, so developers who know Python can quickly get started. However, OpShin is a simplified, limited version of Python, designed to meet the special needs of blockchain development.
 #v(15pt)
 - *Key Components:*
   - *Type System:* OpShin introduces an `aggressive static type inferencer` to
@@ -217,8 +214,8 @@ blockchain development.
 The audit focused on the Opshin codebase, ensuring its correctness, security,
 and efficiency. The scope included the Opshin compiler and its ability to
 enforce strict Python compliance while generating secure and optimized on-chain
-code. Notably, the Pluto to UPLC (Untyped Plutus Core) compilation process was
-explicitly out of scope for this audit.
+code. Notably, the *Pluto to UPLC* (Untyped Plutus Core) compilation process was
+explicitly *out of scope* for this audit.
 
 #pagebreak()
 
@@ -230,48 +227,20 @@ explicitly out of scope for this audit.
 https://github.com/OpShin/opshin
 == Commit
 #v(10pt)
-d657a227f02670e6b6eed9cac77c0f8a25d51423== Files Audited
-#v(10pt)
-
-#table(
-  columns: (1fr, 1fr),
-  align: center,
-  table.header[*SHA256 Checksum*][*Files*],
-  [-1stHASH-],
-  [-1stFILE-PATH-],
-  [-2ndHASH-],
-  [-2ndFILE-PATH-],
-  [-HASH-],
-  [-FILE-PATH-],
-  [-HASH-],
-  [-FILE-PATH-],
-  [-HASH-],
-  [-FILE-PATH-],
-)
+d657a227f02670e6b6eed9cac77c0f8a25d51423
 #pagebreak()
 
 #v(100pt)
 = Category Classification
 #v(50pt)
 
-- #text[*[S]-Security*]: This vulnerability has the potential to result
-  in significant financial losses to the protocol. They often enable attackers to
-  directly steal assets from contracts or users, or permanently lock funds within
-  the contract.
+- #text[*[S]-Security*]: Security focuses on risks that undermine the correctness or safety of programs compiled with the language, where flaws in type systems, serialization logic, or runtime errors could lead to fund loss, lockups, or invalid transactions.
 
-- #text[*[P]-Performance*]: Can lead to damage to the user or protocol,
-  although the impact may be restricted to specific functionalities or temporal
-  control. Attackers exploiting major vulnerabilities may cause harmor disrupt
-  certain aspects of the protocol.
+- #text[*[P]-Performance*]: Performance examines inefficiencies that inflate transaction fees or breach execution limits, such as unbounded loops or O(n²) algorithms in generated code, excessive Force/Delay wrapping in UPLC output, or missed compile-time optimizations.
 
-- #text[*[M]-Maintainability*]: May not directly result in financial losses, but
-  they can temporarily impair the protocol’s functionality. Examples include
-  susceptibility to front-running attacks,which can undermine the integrity of
-  transactions.
+- #text[*[M]-Maintainability*]: Maintainability evaluates the language implementation’s long-term viability, highlighting fragile AST transformations, dead code, or duplicated logic that complicate debugging or feature additions.
 
-- #text[*[U]-Usability*]: Minor vulnerabilities do not typically result in
-  financial losses or significant harm to users or the protocol. The attack vector
-  may be inconsequential or the attacker’s incentive to exploit it may be minimal.
+- #text[*[U]-Usability*]: Usability targets developer experience gaps, from cryptic error messages to inconsistent behaviors in compiled output.
 
 
 #pagebreak()
@@ -322,23 +291,23 @@ throughout the document to assess vulnerability and risk impact
     table.cell(fill: rgb("c00000"))[],
     [5],
     [Critical],
-    [-NUMBER-],
+    [11],
     table.cell(fill: rgb("ff0000"))[],
     [4],
     [Major],
-    [-NUMBER-],
+    [16],
     table.cell(fill: rgb("ffc000"))[],
     [3],
     [Medium],
-    [-NUMBER-],
+    [0],
     table.cell(fill: rgb("ffff00"))[],
     [2],
     [Minor],
-    [-NUMBER-],
+    [39],
     table.cell(fill: rgb("5eb9ff"))[],
     [1],
     [Informational],
-    [-NUMBER-],
+    [24],
   )]
 #pagebreak()
 
@@ -348,7 +317,7 @@ throughout the document to assess vulnerability and risk impact
 
 #v(10pt)
 = Findings by Security
-== ID-501 list and dict comprehensions don't check that filters evaluate to boolean types
+== ID-S501 `List` and `Dict` Comprehension Filters Skip Boolean Type Checks
 #v(10pt)
 
 #table(
@@ -368,7 +337,7 @@ throughout the document to assess vulnerability and risk impact
 #v(10pt)
 The list comprehension type checks in `AggressiveTypeInferencer.list_comprehension()` doesn't check that the comprehension ifs filter expressions are of boolean type.
 
-If the user inadvertently uses a comprehension filter expression that doesn't evaluate to a bool, a runtime error will always by thrown if the comprehension generator returns a non-empty list. This can lead to a dead-lock of user funds if a validator hasn't been sufficiently tested.
+If the user inadvertently uses a comprehension filter expression that doesn't evaluate to a bool, a runtime error will always be thrown if the comprehension generator returns a non-empty list. This can lead to a dead-lock of user funds if a validator hasn't been sufficiently tested.
 
 As an example, the following validator will compile without errors, but will always throw a runtime error when the argument is a non-empty list:
 
@@ -380,12 +349,14 @@ def validator(a: List[int]) -> None:
 
 === Recommendation
 #v(5pt)
-Wrap list comprehension ifs with Bool casts in rewrite_cast_condition.py.
+We recommend to wrap list comprehension ifs with `Bool` casts in `rewrite_cast_condition.py`.
 
 === Resolution
+#v(5pt)
+Pending
 #pagebreak()
   #v(10pt)
-== ID-502 Type assertion wrappers not applied on the right-hand-side of BoolOp
+== ID-S502 Type Assertion Wrappers Not Applied on the RHS of BoolOp
 #v(10pt)
 
 #table(
@@ -403,11 +374,11 @@ Wrap list comprehension ifs with Bool casts in rewrite_cast_condition.py.
 #v(10pt)
 === Description
 #v(10pt)
-In `AggressiveTypeInferencer.visit_BoolOp()`, type assertions performed on the left-hand-side don't result in Pluthon AST nodes that convert UPLC data types to primitive types.
+In `AggressiveTypeInferencer.visit_BoolOp()`, type assertions performed on the left-hand-side don't result in Pluthon AST nodes that convert _UPLC_ data types to primitive types.
 
 This leads to unexpected runtime type errors, and can potentially lead to smart contract dead-locks if the compiled validator isn't sufficiently unit-tested.
 
-The following validator is an example of valid Opshin that will produce UPLC that will always fail if the left-hand-side of the and expression is true:
+The following validator is an example of valid OpShin that will produce _UPLC_ that will always fail if the left-hand-side of the and expression is true:
 
 ```python
 from opshin.prelude import *
@@ -417,13 +388,15 @@ def validator(a: Union[int, bytes]) -> None:
 ```
 === Recommendation
 
-Reuse logic related to self.wrapped from AggressiveTypeInferencer.visit_If().
+Reuse logic related to `self.wrapped` from `AggressiveTypeInferencer.visit_If()`.
 #v(5pt)
 
 === Resolution
+#v(5pt)
+Pending
 #pagebreak()
-  #v(10pt)
-== ID-503 Type assertion wrappers not applied in while statement bodies
+#v(10pt)
+== ID-S503 Type Assertion Wrappers Not Applied in `while` Statement Bodies
 #v(10pt)
 
 #table(
@@ -441,11 +414,11 @@ Reuse logic related to self.wrapped from AggressiveTypeInferencer.visit_If().
 #v(10pt)
 === Description
 #v(10pt)
-In `AggressiveTypeInferencer.visit_While()`, type assertions performed in the while statement condition don't result in the addition of Pluthon AST nodes that convert UPLC data types to primitive types.
+In `AggressiveTypeInferencer.visit_While()`, type assertions performed in the `while` statement condition don't result in the addition of Pluthon AST nodes that convert _UPLC_ data types to primitive types.
 
 This leads to unexpected runtime type errors, and can potentially lead to smart contract dead-locks if the compiled validator isn't sufficiently unit-tested.
 
-The following validator is an example of valid Opshin that will produce UPLC that will always fail if the while body is entered:
+The following validator is an example of valid OpShin that will produce _UPLC_ that will always fail if the `while` body is entered:
 
 ```python
 from opshin.prelude import *
@@ -460,9 +433,11 @@ def validator(a: Union[int, bytes]) -> None:
 Reuse logic related to `self.wrapped` from `AggressiveTypeInferencer.visit_If()`.
 
 === Resolution
+#v(5pt)
+Pending
 #pagebreak()
   #v(10pt)
-== ID-504 `UnionType` not implicitly converted 
+== ID-S504 `UnionType` Not Implicitly Converted 
 #v(10pt)
 
 #table(
@@ -507,9 +482,11 @@ Similarly, these implicit conversions of `Union` values is missing in `PlutoComp
 In `compiler.py`, refactor the `isinstance(typ, AnyType) or isinstance(typ, UnionType)` logic used in `PlutoCompiler.visit_Call()`, and reuse it to check for implicit conversion to data in `PlutoCompiler.visit_Return()` and `PlutoCompiler.visit_AnnAssign()`.
 
 === Resolution
+#v(5pt)
+Pending
 #pagebreak()
   #v(10pt)
-== ID-505 `ListType.copy_only_attributes()` wrongly applies data conversion to items
+== ID-S505 Incorrect Data Conversion to items in `ListType.copy_only_attributes()`
 #v(10pt)
 
 #table(
@@ -548,24 +525,26 @@ Similarly, this compiles successfully for Dicts nested in Lists, but throws an e
 
 === Recommendation
 #v(5pt)
-Remove the conversion to/from data in `ListType.copy_only_attributes()` (i.e. the `transform_ext_params_map(self.typ)(...)` and `transform_output_map(self.typ)(...)` calls).
+We recommend to remove the conversion to/from data in `ListType.copy_only_attributes()` (i.e. the `transform_ext_params_map(self.typ)(...)` and `transform_output_map(self.typ)(...)` calls).
 
 The `copy_only_attributes()` method of each type should be responsible for its own conversion to/from data. This means the `AtomicType`s (`IntegerType`, `BoolType` etc.) should implement `copy_only_attributes()` to perform the relevant checks, instead of returning the identity function.
 
 This way the `copy_only_attributes()` implementations of `ListType`, `DictType` and `RecordType` don't have to perform explicit conversions of their content, improving maintainability of the codebase.
 
 === Resolution
+#v(5pt)
+Pending
 #pagebreak()
 
   #v(10pt)
-== ID-506 `zip` is used without checking equality of lengths
+== ID-S506 Missing Length Check in `zip()` Usage
 #v(10pt)
 
 #table(
-  columns: (25pt, 10%, 20%, 20%),
+  columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("c00000"))[],
   [5],
   [Security],
@@ -594,20 +573,21 @@ This example validator will compile successfully but will always fail to run.
 
 === Recommendation
 #v(5pt)
-
 Ensure the lengths of the `TupleType`s are the same when comparing them in `TupleType.__ge__`.
 
 === Resolution
+#v(5pt)
+Pending
 #pagebreak()
   #v(10pt)
-== ID-507 `index` method of `ListType` is incorrectly implemented
+== ID-S507 Incorrect implementation of `index` method of `ListType`
 #v(10pt)
 
 #table(
-  columns: (25pt, 10%, 20%, 20%),
+  columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("c00000"))[],
   [5],
   [Security],
@@ -633,13 +613,17 @@ def validator(a: Anything, b: Anything) -> int:
 
 === Recommendation
 #v(5pt)
-Change the check to 
+We recommend to change the check to 
+
 `EqualsData(transform_output_map(itemType)(x), transform_output_map(itemType)(HeadList(xs)))`.
 
 === Resolution
+#v(5pt)
+Pending
+
 #pagebreak()
   #v(10pt)
-== ID-508 `CONSTR_ID` attribute is defined for `Anything` and `Union` of primitives
+== ID-S508 `CONSTR_ID` attribute is defined for `Anything` and `Union` of primitives
 #v(10pt)
 
 #table(
@@ -657,7 +641,7 @@ Change the check to
 #v(10pt)
 === Description
 #v(10pt)
-The following is valid Opshin, but is conceptually strange as it isn't consistent with how attributes are exposed of regular `Union`s (they must exist on each subtype), and can lead to unexpected runtime errors:
+The following is valid OpShin, but is conceptually strange as it isn't consistent with how attributes are exposed of regular `Union`s (they must exist on each subtype), and can lead to unexpected runtime errors:
 Both these validators compiles successfully, but will always fail to run.
 
 ```python
@@ -680,9 +664,11 @@ def validator(u: Union[int, bytes]) -> int:
 - Avoid exposing the `CONSTR_ID` attribute of `Union`s which contain some `non-ConstrData` types.
 
 === Resolution
+#v(5pt)
+Pending
 #pagebreak()
   #v(10pt)
-== ID-509 `FalseData` and `TrueData` uses the wrong `CONSTR_ID`
+== ID-S509 `FalseData` and `TrueData` uses the wrong `CONSTR_ID`
 #v(10pt)
 
 #table(
@@ -715,10 +701,12 @@ This mismatch changes the expected behavior of the functions operating on time r
 Change the `CONSTR_ID` of `FalseData` to 0, and change the `CONSTR_ID` of `TrueData` to 1.
 
 === Resolution
+#v(5pt)
+Pending
 #pagebreak()
 
 #v(10pt)
-== ID-401 Lack of namespaced imports
+== ID-S401 Lack of Namespaced Imports
 #v(10pt)
 
 #table(
@@ -740,15 +728,15 @@ User defined symbols can only be imported using `from <pkg> import *`, and every
 
 The following two scenarios explain why this is a critical problem.
 
-Scenario 1
+- Scenario 1
 
 Imagine both a singular name (eg. `asset`) and a plural name (eg. `assets`) are defined somewhere in the OpShin smart contract codebase or external libraries. The programmer makes a typo and unknowingly uses the wrong variable (e.g. `asset` instead of `assets`). Due to type inference the value of the wrongly used variable might actually have a type that passes the type check (eg. both `asset` and `assets` allow calling `len()`). The program compiles and seems to work even though it doesn’t match the programmer's intent.
 
-Scenario 2
+- Scenario 2
 
 The codebase defines a variable with the same name and type multiple times, but each time another value is assigned. For the programmer it is ambiguous which value will actually be used when referencing the variable. The programmer doesn’t know enough about the library code being imported to intuitively figure out which variable shadows all the others.
 
-Scenario 3
+- Scenario 3
 
 ```python
 @dataclass()
@@ -797,7 +785,7 @@ An additional advantage of having multiple independent Module AST nodes is that 
 Pending
 #pagebreak()
   #v(10pt)
-== ID-201 Custom Function declarartions are Overridden
+== ID-S201 Custom Function Declarartions are Overridden
 #v(10pt)
 
 #table(
@@ -843,19 +831,20 @@ The code checks for the presence of the `@dataclass` decorator and validates dat
 2. Raise a descriptive warning if any custom definitions are detected, e.g., In this case "The dataclass function can't override the exisitng import".
 
 === Resolution
+#v(5pt)
 Pending
 #pagebreak()
 #v(10pt)
 = Findings by Performance
 #v(5pt)
-== ID-401 Redundant passing of all possible bound external variables when calling functions
+== ID-P401 Redundant Bound External Variables Passing in  Function Calls
 #v(10pt)
 
 #table(
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("ff0000"))[],
   [4],
   [Performance],
@@ -927,23 +916,24 @@ Note the redundant passing around of `add_0` as the first argument of `validator
 
 === Recommendation
 #v(5pt)
-Opshin doesn't seem to support mutual recursion, so it might not even be necessary to pass all bound vars as arguments to the functions if the functions simply maintain their order in the final _UPLC_.
+OpShin doesn't seem to support mutual recursion, so it might not even be necessary to pass all bound vars as arguments to the functions if the functions simply maintain their order in the final _UPLC_.
 
 Alternatively, if the order of the functions changes in the final _UPLC_, filter out the bound vars that are naturally available as part of the outer scope of the function.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-402 Almost every user-defined variable requires `Force`/`Delay`
+== ID-P402 Excessive `Force`/`Delay` Use for User-Defined Variables
 #v(10pt)
 
 #table(
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("ff0000"))[],
   [4],
   [Performance],
@@ -953,30 +943,30 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Notably in `PlutoCompiler.visit_ClassDef()` in `compiler.py`, the class constructor function is wrapped in a `Delay` term. This is unnecessary as it simple a `Lambda` term, and doesn't throw an error nor incur a cost when evaluated by the _UPLC_ CEK machine.
+Notably in `PlutoCompiler.visit_ClassDef()` in `compiler.py`, the class constructor function is wrapped in a `Delay` term. This is unnecessary as it a simple `Lambda` term, and doesn't throw an error nor incur a cost when evaluated by the _UPLC_ CEK machine.
 
-The architecture of the Opshin compiler currently requires every user-defined variable to be wrapped with `Delay`. Upon referencing those variables, a `Force` term is added. This leads to a small amount overhead almost everywhere in the Opshin generated _UPLC_.
+The architecture of the OpShin compiler currently requires every user-defined variable to be wrapped with `Delay`. Upon referencing those variables, a `Force` term is added. This leads to a small amount of overhead almost everywhere in the OpShin generated _UPLC_.
 
 
 === Recommendation
 #v(5pt)
-Don't require wrapping with `Delay`/`Force` for _UPLC_ variables containing Lambda functions. The Opshin AST should contain enough type information to be able to detect when a user-defined variable refers to a Lambda function or not.
-
+We recommend updating the compiler to automatically detect when user-defined variables refer to Lambda functions using the type information available in the OpShin AST, so that explicit `Delay`/`Force` wrapping is no longer required for UPLC variables.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-403 `NameError` expressions are added for each loaded variable
+== ID-P403 `NameError` Expressions Added to Each Loaded Variable
 #v(10pt)
 
 #table(
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("ff0000"))[],
   [4],
   [Performance],
@@ -986,23 +976,22 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-During the code generation step, in `PlutoCompiler.visit_Module()` in `compiler.py`, a `NameError` expression is added for each loaded variable. This set of variables potentially includes each and every variable defined in the program, and thus significantly bloats the generated code. The optimizations built into Opshin don't seem to be able to eliminate this bloat.
+During the code generation step, in `PlutoCompiler.visit_Module()` in `compiler.py`, a `NameError` expression is added for each loaded variable. This set of variables potentially includes each and every variable defined in the program, and thus significantly bloats the generated code. The optimizations built into OpShin don't seem to be able to eliminate this bloat.
 
 The benefit of these `NameError` expressions is that runtime debugging is easier in the case a variable is referenced that doesn't actually exist. But the compiler should be able to detect such situations beforehand anyway, thus this should never actually occur during runtime.
 
-The Opshin _Pluthon_->_UPLC_ compilation step isn't able to eliminate these `NameError` expressions, even at optimization level 3.
-
+The OpShin _Pluthon_->_UPLC_ compilation step isn't able to eliminate these `NameError` expressions, even at optimization level 3.
 
 === Recommendation
 #v(5pt)
-
-A compiler flag so that these `NameError` expressions aren't added to the generated _UPLC_ code.
+Add a compiler flag so that these `NameError` expressions aren't added to the generated _UPLC_ code.
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-201 Redundant Explicit Cast to Boolean
+== ID-P201 Redundant Explicit Cast to Boolean
 #v(10pt)
 
 #table(
@@ -1031,12 +1020,13 @@ In such cases, adding an explicit cast to bool is unnecessary and can degrade pe
 Modify the `RewriteConditions` transformer in `rewrite/rewrite_cast_condition.py` to skip the explicit cast to bool when the condition is already a boolean and a constant node.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-202 Irrelevant UPLC builtins in output
+== ID-P202 Irrelevant _UPLC_ builtins in Output
 #v(10pt)
 
 #table(
@@ -1058,7 +1048,7 @@ def validator(datum: bytes, redeemer: None, context: ScriptContext) -> None:
     assert datum[0] == 0, "Datum must start with null byte"
 ```
 
-Compiling this Opshin code using both the default optimiser and the aggressive optimiser (-O3 optimization flag) resulted in the same output. It includes built-in functions like addInteger, lessThanInteger, and lengthOfByteString, which seems irrelevant while the logic is to access the first byte of the datum( `ByteString` ) and to check if its equal to 0.
+Compiling this OpShin code using both the default optimiser and the aggressive optimiser (-O3 optimization flag) resulted in the same output. It includes built-in functions like `addInteger`, `lessThanInteger`, and `lengthOfByteString`, which seems irrelevant while the logic is to access the first byte of the datum( `ByteString` ) and to check if its equal to 0.
 
 === Recommendation
 #v(5pt)
@@ -1067,7 +1057,7 @@ Pending
 
 #pagebreak()
 #v(10pt)
-== ID-203 key data value conversion is loop invariant
+== ID-P203 Key Data Value Conversion is Loop Invariant
 #v(10pt)
 
 #table(
@@ -1090,6 +1080,7 @@ In `PlutoCompiler.visit_Subscript()` in `compiler.py`, in the Pluthon code gener
 #v(5pt)
 Assign `transform_output_map(dict_typ.key_typ)(OVar("key"))` to a temporary variable and move it out of the loop.
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
@@ -3214,7 +3205,7 @@ requirement.
 
 === Recommendation
 #v(5pt)
-The idea behind different Optimization levels(O1,O2,O3) and how the `UPLC`
+The idea behind different Optimization levels(O1,O2,O3) and how the _UPLC_
 differs with each optimization level can be clearly documented with simple
 examples.
 
