@@ -1078,14 +1078,14 @@ In `PlutoCompiler.visit_Subscript()` in `compiler.py`, in the Pluthon code gener
 
 === Recommendation
 #v(5pt)
-Assign `transform_output_map(dict_typ.key_typ)(OVar("key"))` to a temporary variable and move it out of the loop.
+We recommend assigning `transform_output_map(dict_typ.key_typ)(OVar("key"))` to a temporary variable outside the loop to avoid redundant computations and improve efficiency.
 === Resolution
 #v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-204 `hex` and `oct` methods perform two loops
+== ID-P204 Double Iteration in `hex` and `oct` Methods
 #v(10pt)
 
 #table(
@@ -1113,66 +1113,12 @@ _UPLC_ loops have non-negligible overhead, and merging these two loops into a si
 Merge the two loops of the `hex` method of `ByteString`, and the `hex` and `oct` functions in `fun_impls.py`, into one loop.
 
 === Resolution
-Pending
-
-#pagebreak()
-#v(10pt)
-== ID-205 `int` method performs two loops when parsing strings
-#v(10pt)
-
-#table(
-  columns: (25pt, 10%, 20%, 20%),
-  align: center,
-  stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Status*],
-  table.cell(fill: rgb("ffff00"))[],
-  [2],
-  [Performance],
-  [Minor],
-  [Pending],
-)
-#v(10pt)
-=== Description
-#v(10pt)
-In `type_impls.py`, the `IntImpl` class generates _UPLC_ code that performs two loops. The first loop creates a range sequence, and the second loop uses the range from the first loop to iterate over the string being parsed.
-
-Due to _UPLC_ Loop overhead, merging these two loops into a single loop will give some performance benefit.
-
-=== Recommendation
 #v(5pt)
-=== Resolution
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-206 the `all` and `any` builtins always iterate to end of list
-#v(10pt)
-
-#table(
-  columns: (25pt, 10%, 20%, 20%),
-  align: center,
-  stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Status*],
-  table.cell(fill: rgb("ffff00"))[],
-  [2],
-  [Performance],
-  [Minor],
-  [Pending],
-)
-#v(10pt)
-=== Description
-#v(10pt)
-In `fun_impls.py`, the `all` builtin keeps iterating to the end of the boolean list, even if a `false` value has already been encountered. Similarly, the `any` builtin keeps iterating even if a `true` value has already been encountered.
-
-=== Recommendation
-#v(5pt)
-Use a variant of the Pluthon `FoldList` function to exit the iteration prematurely when `all` or `any` encounter a `false` or `true` value respectively.
-=== Resolution
-Pending
-
-#pagebreak()
-#v(10pt)
-== ID-207 Unnecessary identity function wrapping in annotated assignment when assigning data to data (i.e. `Anything` to `Anything`)
+== ID-P205 Double Loop in `int` Method for String Parsing
 #v(10pt)
 
 #table(
@@ -1189,7 +1135,65 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-In `PlutoCompiler.visit_AnnAssign()` in `compiler.py`, data values on the right-hand-side are implicitly converted primitive values. Subsequently primitive values are implicitly converted to data values depending on the left-hand-side type annotation.
+In `type_impls.py`, the `IntImpl` class generates _UPLC_ code that performs two loops. The first loop creates a range sequence, and the second loop uses the range from the first loop to iterate over the string being parsed.
+
+=== Recommendation
+#v(5pt)
+Due to _UPLC_  loop overhead, merging these two loops into a single loop will give some performance benefit.
+
+=== Resolution
+#v(5pt)
+Pending
+
+#pagebreak()
+#v(10pt)
+== ID-P206 No Short-Circuiting in `all` and `any` Builtins
+#v(10pt)
+
+#table(
+  columns: (25pt, 10%, 20%, 20%, 20%),
+  align: center,
+  stroke: none,
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
+  table.cell(fill: rgb("ffff00"))[],
+  [2],
+  [Performance],
+  [Minor],
+  [Pending],
+)
+#v(10pt)
+=== Description
+#v(10pt)
+In `fun_impls.py`, the `all` builtin keeps iterating to the end of the boolean list, even if a `false` value has already been encountered. Similarly, the `any` builtin keeps iterating even if a `true` value has already been encountered.
+
+=== Recommendation
+#v(5pt)
+Use a variant of the Pluthon `FoldList` function to exit the iteration prematurely when `all` or `any` encounter a `False` or `True` value respectively.
+
+=== Resolution
+#v(5pt)
+Pending
+
+#pagebreak()
+#v(10pt)
+== ID-P207 Unnecessary Double Conversion in Annotated Data Assignments
+#v(10pt)
+
+#table(
+  columns: (25pt, 10%, 20%, 20%, 20%),
+  align: center,
+  stroke: none,
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
+  table.cell(fill: rgb("ffff00"))[],
+  [2],
+  [Performance],
+  [Minor],
+  [Pending],
+)
+#v(10pt)
+=== Description
+#v(10pt)
+In `PlutoCompiler.visit_AnnAssign()` in `compiler.py`, data values on the right-hand-side are implicitly converted to primitive values. Subsequently primitive values are implicitly converted to data values depending on the left-hand-side type annotation.
 
 This potentially leads to a double conversion (data -> primitive -> data) if the left-hand-side type annotation is a data type.
 
@@ -1197,14 +1201,15 @@ The double conversion doesn't have much overhead as it results in two wrapped id
 
 === Recommendation
 #v(5pt)
-Don't perform any implicit conversions if both the right-hand-side and the left-hand-side are data values.
+We recommend skipping implicit conversions when both the right-hand side and the left-hand side are already data values.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-208 `POWS` always accessed in reverse order
+== ID-P208 `POWS` List Always Accessed in Reverse Order
 #v(10pt)
 
 #table(
@@ -1234,11 +1239,12 @@ The `POWS` can be reversed instead, allowing the elimination of the `(BYTE_SIZE 
 Reverse `POWS` during its assignment using the `reversed()` builtin, then remove the `(BYTE_SIZE - 1) -` operation wherever `POWS` is accessed.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-101 Optimization not showing the result of execution
+== ID-P101 Optimization Not Showing the Result of Execution
 #v(10pt)
 
 #table(
@@ -1271,26 +1277,28 @@ def validator(x: B) -> None:
 
 For this code, the _UPLC_ spits outs the compiled code of both the branches of the builtin function `ifThenElse`.
 
-`(lam 1x [(lam 1x (force [[[(force (builtin ifThenElse)) [[(builtin equalsData) 1x] [0p_AdHocPattern_6e5e35746e0db09c0956f182750126a838d5650add52b85f95f67e428d0912cc_ 1x]]] (delay (con unit ()))] (delay [(lam _ (error)) [[(force (builtin trace)) (con string "ValueError: datum integrity check failed")]]])]))])`.
+```UPLC
+(lam 1x [(lam 1x (force [[[(force (builtin ifThenElse)) [[(builtin equalsData) 1x] [0p_AdHocPattern_6e5e35746e0db09c0956f182750126a838d5650add52b85f95f67e428d0912cc_ 1x]]] (delay (con unit ()))] (delay [(lam _ (error)) [[(force (builtin trace)) (con string "ValueError: datum integrity check failed")]]])]))])```.
 
 
 === Recommendation
 #v(5pt)
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
 = Findings by Maintainability
-== ID-401 No Copies of Middle Expression
+== ID-M401 No Copies of Middle Expression
 #v(10pt)
 
 #table(
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("ff0000"))[],
   [4],
   [Maintainability],
@@ -1301,11 +1309,11 @@ Pending
 === Description
 #v(10pt)
 
-When rewriting chained comparisons to individual comparisons combined with `and`
-for e.g. `
-<expr-a> < <expr-b> < <expr-c> to (<expr-a> < <expr-b>) and (<expr-b> <
-<expr-c>)
-` in `rewrite/rewrite_comparison_chaining.py`, no copies of `<expr-b>` seem to
+When rewriting chained comparisons to individual comparisons combined with 
+`and` for e.g.
+```python
+<expr-a> < <expr-b> < <expr-c> to (<expr-a> < <expr-b>) and (<expr-b> < <expr-c>)``` 
+in `rewrite/rewrite_comparison_chaining.py`, no copies of `<expr-b>` seem to
 be created, leading to the same AST node instance appearing twice in the AST.
 
 The compiler steps frequently mutate the AST nodes instead of creating copies,
@@ -1321,18 +1329,19 @@ This approach avoids the issue described and also avoids the recalculation of
 the same expression (potentially expensive).
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-402 Compiler step 22 doesn't do anything
+== ID-M402 Compiler Step 22 Doesn't do Anything
 #v(10pt)
 
 #table(
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("ff0000"))[],
   [4],
   [Maintainability],
@@ -1342,24 +1351,25 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Compiler step 22 is supposed to inject `bool()`, `bytes()`, `int()`, and `str()` builtins as RawPlutExprs, but the internal types (i.e. `.constr_type()`) of those functions is inherently polymorphic (i.e. `PolymorphicFunctionType`), which is immediately skipped. This check is either redundant or may be intended for a future use case that hasn't been implemented yet. Currently, this step adds no value to the compilation process.
+Compiler step 22 is supposed to inject `bool()`, `bytes()`, `int()`, and `str()` builtins as `RawPlutExprs`, but the internal types (i.e. `.constr_type()`) of those functions is inherently polymorphic (i.e. `PolymorphicFunctionType`), which is immediately skipped. This check is either redundant or may be intended for a future use case that hasn't been implemented yet. Currently, this step adds no value to the compilation process.
 
 === Recommendation
 #v(5pt)
 Get rid of compiler step 22, thus getting rid of `rewrite/rewrite_inject_builtin_constr.py`.
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-403 Alias names for imports
+== ID-M403 Alias Names for Imports
 #v(10pt)
 
 #table(
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("ff0000"))[],
   [4],
   [Maintainability],
@@ -1369,9 +1379,9 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-In both `rewrite/rewrite_import_hashlib.py` and `rewrite/rewrite_import_integrity_check.py`, there is a potential issue with name conflicts when handling aliased imports.
+In both `rewrite_import_hashlib.py` and `rewrite_import_integrity_check.py`, there is a potential issue with name conflicts when handling aliased imports.
 
-*1. rewrite/rewrite_import_hashlib.py:*
+*1. rewrite_import_hashlib.py:*
 
 The transformer handles aliased imports but does not explicitly check for name conflicts with existing variables or functions in the scope.
 
@@ -1384,11 +1394,11 @@ from hashlib import sha256 as hsh
     hsh = b"opshin"
 ```
 
-*2. rewrite/rewrite_import_integrity_check.py:*
+*2. rewrite_import_integrity_check.py:*
 
-When an alias is used (e.g., import check_integrity as ci), the alias name (ci) is added to INITIAL_SCOPE as a new key-value pair.
+When an alias is used (e.g., import check_integrity as ci), the alias name (ci) is added to `INITIAL_SCOPE` as a new key-value pair.
 
-There is no explicit check to ensure that the alias does not conflict with existing names in INITIAL_SCOPE.
+There is no explicit check to ensure that the alias does not conflict with existing names in `INITIAL_SCOPE`.
 
 This could lead to unintended overwriting of existing variables, causing subtle bugs or unexpected behavior.
 
@@ -1401,18 +1411,19 @@ To address these issues, the following improvements are recommended:
 - If a conflict is detected, raise a clear and descriptive error indicating the name conflict and suggesting a resolution (e.g., using a different alias).
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-404 Unable to loop over Tuple
+== ID-M404 Unable to Loop Over Tuple
 #v(10pt)
 
 #table(
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("ff0000"))[],
   [4],
   [Maintainability],
@@ -1431,7 +1442,9 @@ def validator(_: None) -> None:
         pass
 ```
 
-Instead the compiler throw the following non user-friendly error: `'InstanceType' object has no attribute 'typs'`.
+Instead the compiler throws the following non user-friendly error:
+
+`'InstanceType' object has no attribute 'typs'`.
 
 === Recommendation
 #v(5pt)
@@ -1440,18 +1453,19 @@ The PlutoCompiler doesn't actually allow iterating over tuples using for loops.
 Either remove the tuple related type checks in `AggressiveTypeInferencer.visit_For()` and throw a more explicit error, or implement the necessary code generation that allows iterating over tuples in `PlutoCompiler.visit_For()`.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-405 Error-prone implementation of `scopes` and `wrapped` in AggressiveTypeInferencer
+== ID-M405 Fragile `scopes` and `wrapped` Handling in AggressiveTypeInferencer
 #v(10pt)
 
 #table(
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("ff0000"))[],
   [4],
   [Maintainability],
@@ -1461,24 +1475,26 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-The way `self.scopes` and `self.wrapped` are mutated/restored inside `AggressiveTypeInferencer` gives fragile and duplicate code.
+The way `self.scopes` and `self.wrapped` are mutated/restored inside AggressiveTypeInferencer gives fragile and duplicate code.
 
 === Recommendation
 #v(5pt)
 Pass a context object as a separate argument through all the `visit_<Node-type>()` methods. The context object contains the current scope and type assertion information like `wrapped`, and links to parent scopes.
+
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-406 Unnecessary Data Construction for Void Validators
+== ID-M406 Unnecessary Data Construction for Void Validators
 #v(10pt)
 
 #table(
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("ff0000"))[],
   [4],
   [Maintainability],
@@ -1494,19 +1510,20 @@ def validator(x:int):
     assert x == 1
 ```
 
-For a simple validator with no returns as shown above, the _UPLC_ constructs data for integer 0 in addition to nil data which isnt necessary and which does not go away even after optimisation.
+For a simple validator with no returns as shown above, the _UPLC_ constructs data for integer 0 in addition to nil data which isn't necessary and which does not go away even after optimisation.
 
 `[(lam v0 [(lam v1 [(lam v2 (lam v3 [(lam v4 [(lam v5 [(lam v6 [(lam v7 [(lam v8 [[(force v7) v6] (delay v8)]) [(builtin unIData) v3]]) (delay (lam v9 (lam v10 (force [[[(force (builtin ifThenElse)) [(lam v11 [v1 (delay v11)]) [[v2 (force v10)] (con integer 1)]]] (delay [[(builtin constrData) (con integer 0)] [(builtin mkNilData) (con unit ())]])] (delay [(lam v12 (error)) (con unit ())])]))))]) (delay [(lam v13 (error)) [[(force (builtin trace)) (con string "NameError: ~bool")] (con unit ())]])]) (delay [(lam v14 (error)) [[(force (builtin trace)) (con string "NameError: x")] (con unit ())]])]) (delay [(lam v15 (error)) [[(force (builtin trace)) (con string "NameError: validator")] (con unit ())]])])) (builtin equalsInteger)]) [(lam v0 (lam v16 [(lam v17 v17) (force v16)])) (builtin equalsInteger)]]) (builtin equalsInteger)]`.
 
 === Recommendation
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-201 Compiler version inconsistency
+== ID-M201 Compiler Version Inconsistency
 #v(10pt)
 
 #table(
@@ -1523,11 +1540,11 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-The compiler version is defined explicitly in both `pyproject.toml` and `opshin/__init__.py`, which can lead to accidently mismatch if the maintainers of OpShin forget to update either.
+The compiler version is defined explicitly in both `pyproject.toml` and `opshin/__init__.py`, which can lead to accidental mismatch if the maintainers of OpShin forget to update either.
 
 === Recommendation
 #v(5pt)
-According to [stackoverflow](https://stackoverflow.com/questions/67085041/how-to-specify-version-in-only-one-place-when-using-pyproject-toml), the following change to `__init__.py` might be enough:
+According to #link("https://stackoverflow.com/questions/67085041/how-to-specify-version-in-only-one-place-when-using-pyproject-toml", "StackOverflow"), the following change to `__init__.py` might be enough:
 
 ```python
 import importlib.metadata
@@ -1535,12 +1552,13 @@ __version__ = importlib.metadata.version("opshin")
 ```
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-202 Implicit import of plt in `compiler.py`
+== ID-M202 Implicit Import of `plt` in `compiler.py`
 #v(10pt)
 
 #table(
@@ -1558,7 +1576,7 @@ Pending
 === Description
 In `compiler.py`:
 
-- `plt` is made available by import all from `type_inference`
+- `plt` is made available by importing all from `type_inference`
 - and inside `type_inference.py` importing all from `typed_ast`
 - and inside `typed_ast.py` importing all from `type_impls`
 - and finally inside `type_impls.py` importing all from `util`.
@@ -1570,11 +1588,12 @@ At the same time `CompilingNodeTransformer` and `NoOp` are imported directly fro
 Consistently use named imports in whole compiler codebase.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-203 TypedModule Dependency Before Type Inference
+== ID-M203 TypedModule Dependency Before Type Inference
 #v(10pt)
 
 #table(
@@ -1595,13 +1614,14 @@ The `RewriteInjectBuiltins` transformer operates on `TypedModule` nodes, which a
 
 === Recommendation
 #v(5pt)
-Refactor the transformer to work with untyped or partially typed nodes until type inference is complete. Alternatively, ensure that this step is moved to a later stage in the compilation process, where TypedModule nodes are guaranteed to exist.
+Refactor the transformer to work with untyped or partially typed nodes until type inference is complete. Alternatively, ensure that this step is moved to a later stage in the compilation process, where `TypedModule` nodes are guaranteed to exist.
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-204 Inconsistent Handling of Polymorphic Functions
+== ID-M204 Inconsistent Handling of Polymorphic Functions
 #v(10pt)
 
 #table(
@@ -1620,14 +1640,14 @@ Pending
 #v(10pt)
 The code uses two different approaches to identify and skip polymorphic functions:
 
-Case 1: Checks if b.value is not an instance of plt.AST:
+Case 1: Checks if `b.value` is not an instance of `plt.AST`:
 
 ```python
 if not isinstance(b.value, plt.AST):
     continue
 ```
 
-Case 2: Checks if the type of the function is PolymorphicFunctionType:
+Case 2: Checks if the type of the function is `PolymorphicFunctionType`:
 
 ```python
 if isinstance(typ.typ, PolymorphicFunctionType):
@@ -1641,12 +1661,14 @@ This dual approach makes the code harder to understand. Additionally, polymorphi
 1. Unify the logic for identifying polymorphic functions.
 
 2. Since polymorphic functions can only be definitively identified after type checking, consider moving the logic of `rewrite/rewrite_inject_builtins.py` to a later stage in the compilation process, where type information is fully available.
+
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-205 Relative Imports Not Supported
+== ID-M205 Relative Imports Not Supported
 #v(10pt)
 
 #table(
@@ -1694,11 +1716,12 @@ def validator():
 2. Add documentation clarifying how to use relative imports.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-206 Annotated Variable Nodes Not Handled in `rewrite/rewrite_orig_name.py`
+== ID-M206 Missing Support for Annotated Variable Nodes in `rewrite_orig_name.py`
 #v(10pt)
 
 #table(
@@ -1721,12 +1744,14 @@ may also contain a pointer to the original name for good.
 === Recommendation
 #v(5pt)
 Extend the node-checking logic to include `AnnAssign`.
+
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-207 `PlutoCompiler` `visit_ListComp()` and `visit_DictComp()` are mostly the same
+== ID-M207 Similar Logic in `visit_ListComp()` and `visit_DictComp()`
 #v(10pt)
 
 #table(
@@ -1748,11 +1773,12 @@ In `PlutoCompiler` in `compiler.py`, the `visit_ListComp()` and `visit_DictComp(
 #v(5pt)
 Refactor and reuse the common functionality of `PlutoCompiler.visit_ListComp()` and `PlutoCompiler.visit_DictComp()`.
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-208 wrong type annotation in `Type.binop` and `Type._binop_bin_fun`
+== ID-M208 Incorrect Type Annotation in `Type.binop` and `Type._binop_bin_fun`
 #v(10pt)
 
 #table(
@@ -1776,11 +1802,12 @@ The type annotations of the `Type.binop` and `Type._binop_bin_fun` methods in `t
 Change the type annotation of the `other` argument in `Type.binop` and `Type._binop_bin_fun` from `AST` to `TypedAST`.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-209 `RecordType.cmp()` and `UnionType.cmp()` are almost exact copies of `AnyType.cmp()`
+== ID-M209 Similar Logic in `cmp()` Methods of `RecordType` and `UnionType` 
 #v(10pt)
 
 #table(
@@ -1804,11 +1831,12 @@ In `type_impls.py`, the implementations of `RecordType.cmp()` and `UnionType.cmp
 Refactor and reuse the logic of `AnyType.cmp()` for `RecordType.cmp()` and `UnionType.cmp()`.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-210 `super.binop_bin_fun()` not called
+== ID-M210 `super.binop_bin_fun()` Not Called
 #v(10pt)
 
 #table(
@@ -1831,11 +1859,12 @@ In `type_impls.py`, the `_binop_bin_fun()` method implementations don't fall thr
 #v(5pt)
 Fall through to calling `super._binop_bin_fun()`, so that the associated `“Not implemented”` error is thrown.
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 #v(10pt)
-== ID-211 `oct` builtin is almost the same as `hex`
+== ID-M211 Shared Logic in `oct` and `hex` Builtins
 #v(10pt)
 
 #table(
@@ -1859,12 +1888,13 @@ In `fun_impls.py`, the `oct` builtin uses exactly the same logic as `hex`, excep
 Refactor and reuse the code generation logic of `hex` for `oct`.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-212 Unable to use negative index subscripts
+== ID-M212 Unable to Use Negative Index Subscripts
 #v(10pt)
 
 #table(
@@ -1887,17 +1917,20 @@ Other parts of the codebase do however allow handling negative indices, but usin
 
 === Recommendation
 #v(5pt)
-Whenever checking that a subscript is `Constant`, ensure it isn’t negative (so that if future versions of the Python tokenizer treat literal negative numbers as `Constant`, this doesn’t break Opshin).
+Whenever checking that a subscript is `Constant`, ensure it isn’t negative (so that if future versions of the Python tokenizer treat literal negative numbers as `Constant`, this doesn’t break OpShin).
 
-Alternatively detect negative indexes correctly (also in `AggressiveTypeInferencer.visit_Subscript()` in `type_inference.py`).
+Alternatively detect negative indexes correctly in
+
+`AggressiveTypeInferencer.visit_Subscript()` in `type_inference.py`.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-101 Migrate some utility functions
+== ID-M101 Migrate Some Utility Functions
 #v(10pt)
 
 #table(
@@ -1914,7 +1947,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Some utility functions defined in the `opshin` library would make more sense as part of the _UPLC_ or _Pluthon_ packages.
+Some utility functions defined in the OpShin library would make more sense as part of the _UPLC_ or _Pluthon_ packages.
 
 - `rec_constant_map_data()` and `rec_constant_map()` (defined in `opshin/compiler.py`) can be moved to the _UPLC_ package.
 - `to_uplc_builtin()` and `to_python()` (defined in `opshin/bridge.py`) can also be moved to the _UPLC_ package.
@@ -1922,14 +1955,15 @@ Some utility functions defined in the `opshin` library would make more sense as 
 
 === Recommendation
 #v(5pt)
-
+We recommend reorganizing the codebase by moving utility functions to the packages where they logically belong.
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-102 PlutoCompiler.visit_Pass is redundant
+== ID-M102 `PlutoCompiler.visit_Pass` is Redundant
 #v(10pt)
 
 #table(
@@ -1952,12 +1986,13 @@ Compiler step 26 removes the Pass AST node, but step 27 (the _Pluthon_ code gene
 Remove the `visit_Pass` method. If step 26 fails to remove all Pass AST nodes, then the `PlutoCompiler` will throw a "Can not compile Pass" error, instead of masking the improper implementation of step 26.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-103 wrong return type annotation of some TypeCheckVisitor methods
+== ID-M103 Incorrect Return Type in some `TypeCheckVisitor`methods
 #v(10pt)
 
 #table(
@@ -1982,11 +2017,12 @@ Pending
 Change the return type of `visit_BoolOp()` and `visit_UnaryOp()` from `PairType` to `TypeMapPair`.
 
 === Resolution
+#v(5pt)
 Pending
 #pagebreak()
 
 #v(10pt)
-== ID-104 resetting of `self.wrapped` in AggressiveTypeInferencer can be refactored into a separate method and simplified
+== ID-M104 Refactor `self.wrapped` Reset in `AggressiveTypeInferencer`
 #v(10pt)
 
 #table(
@@ -2003,7 +2039,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-`visit_IfExp()` and `visit_If()` (and once finding 03 is resolved, `visit_While()`) contain the following (duplicate) lines of Python code:
+`visit_IfExp()` and `visit_If()` (and once finding S503 is resolved, `visit_While()`) contain the following (duplicate) lines of Python code:
 
 ```python
 self.wrapped = [x for x in self.wrapped if x not in prevtyps.keys()]
@@ -2013,14 +2049,15 @@ Besides being duplicate, the `x not in prevtyps.keys()` expression can be replac
 
 === Recommendation
 #v(5pt)
-Refactor the code the reverts `self.wrapped` into a new method of `AggressiveTypeInferencer`, and replace `prevtyps.keys()` by `prevtyps`.
+Extract the logic for resetting `self.wrapped` into a dedicated method in `AggressiveTypeInferencer` to avoid duplication, and replace `prevtyps.keys()` by `prevtyps`.
 
 === Resolution
+#v(5pt)
 Pending
 #pagebreak()
 
 #v(10pt)
-== ID-105 redundant code in AggressiveTypeInferencer
+== ID-M105 Redundant Code in `AggressiveTypeInferencer`
 #v(10pt)
 
 #table(
@@ -2043,11 +2080,12 @@ In `AggressiveTypeInferencer.visit_sequence()`, the `arg.annotation is None` tes
 #v(5pt)
 Remove the redundant check in the second assertion in `AggressiveTypeInferencer.visit_sequence()` in `type_inference.py`.
 === Resolution
+#v(5pt)
 Pending
 #pagebreak()
 
 #v(10pt)
-== ID-106 Rewrite of dunder override of `not in` AggressiveTypeInferencer is spread over multiple methods
+== ID-M106 Spread-Out `not in` Handling in AggressiveTypeInferencer
 #v(10pt)
 
 #table(
@@ -2073,6 +2111,7 @@ So logic that is inherently related to `dunder_override()` is spread over two ot
 Return the final AST node from `dunder_override()`, so the explicit wrapping with a `Not` AST node doesn't become the responsability of the callsite.
 
 === Resolution
+#v(5pt)
 Pending
 #pagebreak()
 
