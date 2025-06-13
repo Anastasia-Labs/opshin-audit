@@ -190,7 +190,7 @@ but not limited to:
 #pagebreak()
 
 #v(100pt)
-= Executive summary
+= Executive Summary
 #v(40pt)
 
 OpShin is a programming language for developing smart contracts on the Cardano
@@ -338,7 +338,7 @@ throughout the document to assess vulnerability and risk impact
     table.cell(fill: rgb("c00000"))[],
     [5],
     [Critical],
-    [11],
+    [9],
     table.cell(fill: rgb("ff0000"))[],
     [4],
     [Major],
@@ -434,7 +434,7 @@ def validator(a: Union[int, bytes]) -> None:
     assert isinstance(a, int) and a == 10
 ```
 === Recommendation
-
+#v(5pt)
 Reuse logic related to `self.wrapped` from `AggressiveTypeInferencer.visit_If()`.
 #v(5pt)
 
@@ -532,9 +532,9 @@ In `compiler.py`, refactor the `isinstance(typ, AnyType) or isinstance(typ, Unio
 #v(5pt)
 Pending
 #pagebreak()
-  #v(10pt)
+  #v(5pt)
 == ID-S505 Incorrect Data Conversion to items in `ListType.copy_only_attributes()`
-#v(10pt)
+#v(5pt)
 
 #table(
   columns: (25pt, 10%,20%, 20%, 20%),
@@ -548,10 +548,9 @@ Pending
   [Pending],
 )
 
-#v(10pt)
+#v(5pt)
 === Description
-#v(10pt)
-
+#v(3pt)
 In `ListType.copy_only_attributes()` in `type_impls.py`, items are converted to data before being copied, and then converted back to a regular value after being copied. This is wrong, as demonstrated by the following example validator, that compiles successfully, but throws an error when evaluated:
 
 ```python
@@ -567,11 +566,10 @@ def validator(d: int) -> None:
    check_integrity(a)
    pass
 ```
-
 Similarly, this compiles successfully for Dicts nested in Lists, but throws an error when evaluated.
 
 === Recommendation
-#v(5pt)
+#v(3pt)
 We recommend to remove the conversion to/from data in `ListType.copy_only_attributes()` (i.e. the `transform_ext_params_map(self.typ)(...)` and `transform_output_map(self.typ)(...)` calls).
 
 The `copy_only_attributes()` method of each type should be responsible for its own conversion to/from data. This means the `AtomicType`s (`IntegerType`, `BoolType` etc.) should implement `copy_only_attributes()` to perform the relevant checks, instead of returning the identity function.
@@ -579,7 +577,7 @@ The `copy_only_attributes()` method of each type should be responsible for its o
 This way the `copy_only_attributes()` implementations of `ListType`, `DictType` and `RecordType` don't have to perform explicit conversions of their content, improving maintainability of the codebase.
 
 === Resolution
-#v(5pt)
+#v(3pt)
 Pending
 #pagebreak()
 
@@ -1099,6 +1097,7 @@ Compiling this OpShin code using both the default optimiser and the aggressive o
 
 === Recommendation
 #v(5pt)
+Inspect if this coming from the _Pluthon_ conversion and try to avoid unnecessary builtins as part of optimization.
 === Resolution
 Pending
 
@@ -1330,6 +1329,7 @@ For this code, the _UPLC_ spits outs the compiled code of both the branches of t
 
 === Recommendation
 #v(5pt)
+If feasible, explore the possibility of implementing a Python-side equivalent of the `check_integrity` function to align Python evaluation behavior with on-chain execution.
 === Resolution
 #v(5pt)
 Pending
@@ -1398,7 +1398,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Compiler step 22 is supposed to inject `bool()`, `bytes()`, `int()`, and `str()` builtins as `RawPlutExprs`, but the internal types (i.e. `.constr_type()`) of those functions is inherently polymorphic (i.e. `PolymorphicFunctionType`), which is immediately skipped. This check is either redundant or may be intended for a future use case that hasn't been implemented yet. Currently, this step adds no value to the compilation process.
+Step 22 of compilation pipeline(as detailed in page 9) is supposed to inject `bool()`, `bytes()`, `int()`, and `str()` builtins as `RawPlutExprs`, but the internal types (i.e. `.constr_type()`) of those functions is inherently polymorphic (i.e. `PolymorphicFunctionType`), which is immediately skipped. This check is either redundant or may be intended for a future use case that hasn't been implemented yet. Currently, this step adds no value to the compilation process.
 
 === Recommendation
 #v(5pt)
@@ -1562,7 +1562,8 @@ For a simple validator with no returns as shown above, the _UPLC_ constructs dat
 `[(lam v0 [(lam v1 [(lam v2 (lam v3 [(lam v4 [(lam v5 [(lam v6 [(lam v7 [(lam v8 [[(force v7) v6] (delay v8)]) [(builtin unIData) v3]]) (delay (lam v9 (lam v10 (force [[[(force (builtin ifThenElse)) [(lam v11 [v1 (delay v11)]) [[v2 (force v10)] (con integer 1)]]] (delay [[(builtin constrData) (con integer 0)] [(builtin mkNilData) (con unit ())]])] (delay [(lam v12 (error)) (con unit ())])]))))]) (delay [(lam v13 (error)) [[(force (builtin trace)) (con string "NameError: ~bool")] (con unit ())]])]) (delay [(lam v14 (error)) [[(force (builtin trace)) (con string "NameError: x")] (con unit ())]])]) (delay [(lam v15 (error)) [[(force (builtin trace)) (con string "NameError: validator")] (con unit ())]])])) (builtin equalsInteger)]) [(lam v0 (lam v16 [(lam v17 v17) (force v16)])) (builtin equalsInteger)]]) (builtin equalsInteger)]`.
 
 === Recommendation
-
+#v(5pt)
+Optimize the codebase to avoid data construction for void valdiators.
 === Resolution
 #v(5pt)
 Pending
@@ -2096,7 +2097,9 @@ Besides being duplicate, the `x not in prevtyps.keys()` expression can be replac
 
 === Recommendation
 #v(5pt)
-Extract the logic for resetting `self.wrapped` into a dedicated method in `AggressiveTypeInferencer` to avoid duplication, and replace `prevtyps.keys()` by `prevtyps`.
+Extract the logic for resetting `self.wrapped` into a dedicated method in 
+
+`AggressiveTypeInferencer` to avoid duplication, and replace `prevtyps.keys()` by `prevtyps`.
 
 === Resolution
 #v(5pt)
@@ -2125,7 +2128,9 @@ In `AggressiveTypeInferencer.visit_sequence()`, the `arg.annotation is None` tes
 
 === Recommendation
 #v(5pt)
-Remove the redundant check in the second assertion in `AggressiveTypeInferencer.visit_sequence()` in `type_inference.py`.
+Remove the redundant check in the second assertion in 
+
+`AggressiveTypeInferencer.visit_sequence()` in `type_inference.py`.
 === Resolution
 #v(5pt)
 Pending
@@ -2381,7 +2386,7 @@ In `type_inference.py`, `TypedSubscript.slice.lower` and `TypedSubscript.slice.u
 #v(5pt)
 In `typed_ast.py`, 
 
-annotate that `TypedSubscript.slice.lower` and `TypedSubscript.slice..upper` can’t be `None`.
+annotate that `TypedSubscript.slice.lower` and `TypedSubscript.slice.upper` can’t be `None`.
 
 === Resolution
 #v(5pt)
@@ -2446,6 +2451,7 @@ In `BytesImpl` in
 Change the error message to `"Can only create bytes from instances"`.
 
 === Resolution
+#v(5pt)
 Pending
 #pagebreak()
 
@@ -2497,7 +2503,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Tuple unpacking (step 7) is currently being rewritten before the ATI (aggressive type inference) step. This allows writing unpacking assignments with a mismatched number of tuple entries.
+Tuple unpacking (Step 7 in compilation pipeline) is currently being rewritten before the ATI (aggressive type inference) step. This allows writing unpacking assignments with a mismatched number of tuple entries.
 
 If there there are more names on the left side this throws a non-user friendly `FreeVariableError`. If there are less, the rewritten code is valid, even though in Python it wouldn't be valid, thus violating the expected "strict subset of Python" behavior.
 
@@ -2631,7 +2637,7 @@ Only after if the fields of `C` are changed (e.g. changing the name of field `b`
 Changing the annotation in the example to `Union[A, B, C]` (while keeping the fields of `B` and `C` the same) gives the following compiler error:
 
 `Duplicate constr_ids for records in Union: {'A': 1, 'B': 2, 'C': 2}`.
-
+#pagebreak()
 Now consider the following modified validator using the same three classes:
 
 ```python
@@ -2645,7 +2651,7 @@ Compiling this example gives the following non user-friendly error:
 
 === Recommendation
 #v(5pt)
-Fix these error inconsistencies by detecting duplicate `CONSTR_ID`s after flattening the Union in `union_types()` in `type_inference.py`. Detect duplicates based on `CONSTR_ID` alone, and not based on data field equivalence.
+Fix these error inconsistencies by detecting duplicate `CONSTR_ID`s after flattening the `Union` in `union_types()` in `type_inference.py`. Detect duplicates based on `CONSTR_ID` alone, and not based on data field equivalence.
 
 === Resolution
 #v(5pt)
@@ -2737,7 +2743,7 @@ Pending
 #pagebreak()
 
 #v(10pt)
-== ID-U201 Fix Error Message in `AggressiveTypeInferencer.visit_comprehension`
+== ID-U201 Fix Error Message in `visit_comprehension`of ATI
 #v(10pt)
 
 #table(
@@ -2931,7 +2937,7 @@ Pending
 
 #v(10pt)
 == ID-U206 Inconsistent Treatment of Duplicate Entries in `Union`
-#v(10pt)
+#v(5pt)
 
 #table(
   columns: (25pt, 10%, 20%, 20%, 20%),
@@ -2944,7 +2950,7 @@ Pending
   [Minor],
   [Pending],
 )
-#v(10pt)
+#v(5pt)
 === Description
 #v(10pt)
 Duplicate entries in `Union`s give compiler errors, but duplicate entries in nested `Union`s don't.
