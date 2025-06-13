@@ -137,9 +137,9 @@ property-based testing of the contracts.
 #pagebreak()
 
 #v(100pt)
-= Assessment overview
+= Assessment Overview
 #v(50pt)
-From *-DATE-*, *-YEAR-* to *-DATE-*, *-YEAR-*, *-CUSTOMER-* engaged Anastasia
+From *October 21*, *2024* to *May 5*, *2025*, *OpShin* engaged Anastasia
 Labs to evaluate and conduct a security assessment of its *Opshin* codebase. All
 code revision was performed following industry best practices.
 
@@ -160,9 +160,9 @@ it easier for our audit team to manage and tackle each vulnerability.
 #pagebreak()
 
 #v(100pt)
-= Assessment components
+= Assessment Components
 #v(50pt)
-=== Manual revision
+=== Manual Revision
 Our manual code auditing is focused on a wide range of attack vectors, including
 but not limited to:
 
@@ -218,6 +218,53 @@ code. Notably, the *Pluto to UPLC* (Untyped Plutus Core) compilation process was
 explicitly *out of scope* for this audit.
 
 #pagebreak()
+#v(100pt)
+= Compilation Pipeline
+#v(30pt)
+
+Because Opshin syntax is a subset of valid Python syntax, Opshin uses the Python AST parsing function built into the Python `ast` standard library. This completely eliminates the need to implement the first two steps of the compilation pipeline: tokenization and AST building.
+
+Once an entrypoint is parsed into an AST, 27 distinct AST transformations are applied that weed out syntax and type errors, and gradually transform the AST into something that can easily be converted into _Pluthon_. The last transformation step performs the actual conversion to a _Pluthon_ AST. The conversion to the on-chain _UPLC_ format is handled by the _Pluthon_ library and is out of scope of this library.
+
+Each of the following steps is implemented using a recursive top-down visitor pattern, where each visit is responsible for continuing the recursion of child nodes. This is the same approach that is used in the Python internal codebase.
+
+1. Resolves `ImportFrom` statements respecting the `from <pkg> import *` format, mimicking the Python module resolution behavior to get the module file path, then calling the standard `parse()` method, and recursively resolving nested `from <pkg> import *` statements in the imported modules. This step ignores imports of builtin modules. The `from <pkg> import *` AST node is transformed into a list of statements, all sharing the same scope.
+2. Throws an error when detecting a `return` statement outside a function definition.
+3. (Optional) Subexpressions that can be evaluated to constant Python values are replaced by their `Constant(value)` equivalents.
+4. Removes a deprecated Python 3.8 AST node.
+5. Replaces augmented assignment by their simple assignment equivalents. Eg. `a += 1` is tranformed into `a = a + 1`.
+6. Replaces comparison chains by a series of binary operations. Eg. `a < b < c` is transformed into `(a < b) and (b < c)`.
+7. Replaces tuple unpacking expressions in assignments and for-loops, by multiple single assignments. Eg. `(a, b) = <tuple-expr>` is transformed into:
+
+   ```
+   <tmp-var> = <tuple-expr>
+   a = <tmp-var>[0]
+   b = <tmp-var>[1]
+   ```
+
+8. Detects `from opshin.std.integrity import check_integrity` and 
+`from opshin.std.integrity import check_integrity as <name>` statements and injects the `check_integrity` macro into the top-level scope.
+9. Ensures that all classes inherit `PlutusData` and that `PlutusData` is imported using `from pycardano import Datum as Anything, PlutusData`.
+10. Replaces hashlib functions (`sha256`, `sha3_256`, `blake2b`) imported using `from hashlib import <hash-fn> as <aname>` by raw _Pluthon_ lambda function definitions.
+11. Detects classes with methods, ensures that `Self` is imported using `from typing import Self`, and adds a class reference to the `Self` AST nodes. Also ensures `List`, `Dict` and `Union` are imported using `from typing import Dict, List, Union`.
+12. Throws an error if some of the builtin symbols are shadowed.
+13. Ensures that classes are decorated with `@dataclass` and that `@dataclass` is imported using `from dataclasses import dataclass`.
+14. Injects the _Pluthon_ implementations of a subset of Python builtins before the main module body.
+15. Explicitly casts anything that should be boolean (eg. if-then-else conditions, comparison bin ops) by injecting `bool()`.
+16. Sets the `orig_name` property of Name, FunctionDef and ClassDef AST nodes.
+17. Gives each variable a unique name by appending a scope id.
+18. Aggressive Type Inference: Visits each AST node to determine its type, setting its `.typ` property in the process.
+19. Turns empty lists into raw _Pluthon_ expressions.
+20. Turns empty dicts into raw _Pluthon_ expressions.
+21. Ensures that a function that is decorated with a single named decorator, is decorated with the `@wraps_builtin` decorator, which must be imported using `from opshin.bridge import wraps_builtin`. Such decorated functions are then converted into raw _Pluthon_ expressions.
+22. Injects the `bytes()`, `int()`, `bool()` and `str()` cast builtins.
+23. Removes assignments of types, classes and polymorphic functions (eg. `MyList = List[int]`).
+24. (Optional) Iteratively collects all used variables and removes the unused variables. The iteration is stopped if the set of remaining used variables remains unchanged.
+25. (Optional) Removes constant statements.
+26. Removes Pass AST nodes.
+27. Generates the _Pluthon_ AST.
+
+#pagebreak()
 
 #v(100pt)
 = Code base
@@ -240,7 +287,7 @@ d657a227f02670e6b6eed9cac77c0f8a25d51423
 
 - #text[*[M]-Maintainability*]: Maintainability evaluates the language implementation’s long-term viability, highlighting fragile AST transformations, dead code, or duplicated logic that complicate debugging or feature additions.
 
-- #text[*[U]-Usability*]: Usability targets developer experience gaps, from cryptic error messages to inconsistent behaviors in compiled output.
+- #text[*[U]-Usability*]: Usability targets user experience gaps, from cryptic error messages to inconsistent behaviors in compiled output.
 
 
 #pagebreak()
@@ -324,7 +371,7 @@ throughout the document to assess vulnerability and risk impact
   columns: (25pt, 10%,20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("c00000"))[],
   [5],
   [Security],
@@ -363,7 +410,7 @@ Pending
   columns: (25pt, 10%,20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("c00000"))[],
   [5],
   [Security],
@@ -403,7 +450,7 @@ Pending
   columns: (25pt, 10%,20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("c00000"))[],
   [5],
   [Security],
@@ -444,7 +491,7 @@ Pending
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("c00000"))[],
   [5],
   [Security],
@@ -493,7 +540,7 @@ Pending
   columns: (25pt, 10%,20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("c00000"))[],
   [5],
   [Security],
@@ -630,7 +677,7 @@ Pending
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("c00000"))[],
   [5],
   [Security],
@@ -675,7 +722,7 @@ Pending
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("c00000"))[],
   [5],
   [Security],
@@ -713,7 +760,7 @@ Pending
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("ff0000"))[],
   [4],
   [Security],
@@ -2116,7 +2163,7 @@ Pending
 #pagebreak()
 
 #v(10pt)
-== ID-107 list item that was just appended accessed immediately after
+== ID-M107 Immediate Access of Recently Appended List Item
 #v(10pt)
 
 #table(
@@ -2140,11 +2187,12 @@ In `AggressiveTypeInferencer.visit_BoolOp()`, child nodes visited and the return
 Assign the return typed AST nodes to a variable, and reference that variable in the subsequent line of code where the type checks are generated.
 
 === Resolution
+#v(5pt)
 Pending
 #pagebreak()
 
 #v(10pt)
-== ID-108 Inconsistent treatement of tuple slicing
+== ID-M108 Inconsistent Treatement of Tuple Slicing
 #v(10pt)
 
 #table(
@@ -2161,19 +2209,24 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Has `AggressiveTypeInferencer.visit_Subscript()` allows tuples to be sliced, but `PlutoComplier.visit_Subscript()` doesn't.
+`AggressiveTypeInferencer.visit_Subscript()` supports tuple slicing, but `PlutoComplier.visit_Subscript()` does not.
 
 === Recommendation
 #v(5pt)
-In the TupleType branch in `AggressiveTypeInferencer.visit_Subscript()`: remove the nested branch with the condition that reads: `all(ts.value.typ.typ.typs[0] == t for t in ts.value.typ.typ.typs)`.
+In the TupleType branch in 
+
+`AggressiveTypeInferencer.visit_Subscript()` 
+remove the nested branch with the condition that reads
+ `all(ts.value.typ.typ.typs[0] == t for t in ts.value.typ.typ.typs)`.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-109 RecordReader.extract() doesn't need to be static
+== ID-M109 `RecordReader.extract()` Doesn't Need to be Static
 #v(10pt)
 
 #table(
@@ -2197,11 +2250,12 @@ Pending
 Instantiate the `RecordReader` directly with an argument of `AggressiveTypeInferencer` type, and change `extract()` to be a regular method (internally changing `f` to `self`).
 
 === Resolution
+#v(5pt)
 Pending
 #pagebreak()
 
 #v(10pt)
-== ID-110 Assumption of *spec* for the Parent Module in rewrite/rewrite_import.py
+== ID-M110 Assumption of *spec* for the Parent Module in `rewrite_import.py`
 #v(10pt)
 
 #table(
@@ -2230,12 +2284,13 @@ Pending
 2. Wrap the call `spec.loader.exec_module(module)` in a try-catch block and log or raise an appropriate error message to help diagnose issues when module loading fails.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-111 Iterating Over `sys.modules` Safely
+== ID-M111 Iterating Over `sys.modules` Safely
 #v(10pt)
 
 #table(
@@ -2253,7 +2308,7 @@ Pending
 === Description
 #v(10pt)
 
-The code does not follow the Python documentation's recommendation to use sys.modules.copy() or tuple(sys.modules) when iterating over sys.modules. This can lead to exceptions if the size of `sys.modules` changes during iteration due to code execution or activity in other threads.
+The code does not follow the Python documentation's recommendation to use `sys.modules.copy()` or `tuple(sys.modules)` when iterating over `sys.modules`. This can lead to exceptions if the size of `sys.modules` changes during iteration due to code execution or activity in other threads.
 
 === Recommendation
 #v(5pt)
@@ -2262,11 +2317,12 @@ Replace any direct iteration over `sys.modules` with `sys.modules.copy()` or `tu
 Ensure that all iterations over `sys.modules` are thread-safe and do not cause side effects during execution.
 
 === Resolution
+#v(5pt)
 Pending
 #pagebreak()
 
 #v(10pt)
-== ID-112 `plt.ConstrData(plt.Integer(0), plt.EmptyDataList())` appears in several places
+== ID-M112 Replace Repeated `Unit` Definition with a New Variable
 #v(10pt)
 
 #table(
@@ -2295,11 +2351,12 @@ Pending
 Assign `plt.ConstrData(plt.Integer(0), plt.EmptyDataList())` to a new variable named `Void` (or another appropriate name), and reuse that instead.
 
 === Resolution
+#v(5pt)
 Pending
 #pagebreak()
 
 #v(10pt)
-== ID-113 `TypedSubscript.slice.lower` and `TypedSubscript.slice.upper` don't exclude `None`
+== ID-M113 Enforce Non-Null Slice Bounds in Typed AST
 #v(10pt)
 
 #table(
@@ -2322,15 +2379,18 @@ In `type_inference.py`, `TypedSubscript.slice.lower` and `TypedSubscript.slice.u
 
 === Recommendation
 #v(5pt)
-In `typed_ast.py`, annotate that `TypedSubscript.slice.lower` and `TypedSubscript.slice..upper` can’t be `None`.
+In `typed_ast.py`, 
+
+annotate that `TypedSubscript.slice.lower` and `TypedSubscript.slice..upper` can’t be `None`.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-114 inconsistent naming of temporary variable in `UnionType.stringify()`
+== ID-M114 Standardize Constructor Index Variable Name
 #v(10pt)
 
 #table(
@@ -2354,12 +2414,13 @@ In `UnionType.stringify()` in `type_impls.py`, `c` is used a temporary variable 
 Change `c` to `constr` so that `constr` is used consistently as the name of the Pluthon variable containing the constructor index.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-115 Typo in assertion message
+== ID-M115 Typo in Assertion Message
 #v(10pt)
 
 #table(
@@ -2376,7 +2437,9 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-In `BytesImpl` in `type_impls.py`, the second assertion reads `"Can only create bools from instances"`.
+In `BytesImpl` in 
+
+`type_impls.py`, the second assertion reads `"Can only create bools from instances"`.
 
 === Recommendation
 #v(5pt)
@@ -2387,7 +2450,7 @@ Pending
 #pagebreak()
 
 #v(10pt)
-== ID-116 It isn't clear when a Python `Constant` can be `PlutusData`
+== ID-M116 Unclear When a Python `Constant` can be `PlutusData`
 #v(10pt)
 
 #table(
@@ -2411,19 +2474,20 @@ In function `rec_constant_map()` in `compiler.py`, the value of the `Constant` A
 Add a comment to `rec_constant_map()` explaining where `PlutusData` comes from.
 
 === Resolution
+#v(5pt)
 Pending
 #pagebreak()
 
 #v(10pt)
 = Findings by Usability
-== ID-401 Type safe tuple unpacking
+== ID-U401 Type Safe Tuple Unpacking
 #v(10pt)
 
 #table(
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("ff0000"))[],
   [4],
   [Usability],
@@ -2435,7 +2499,7 @@ Pending
 #v(10pt)
 Tuple unpacking (step 7) is currently being rewritten before the ATI (aggressive type inference) step. This allows writing unpacking assignments with a mismatched number of tuple entries.
 
-If there there are more names on the left side this throws a non-user friendly FreeVariableError. If there are less the rewritten code is valid, even though in Python it wouldn't be valid, thus violating the expected "strict subset of Python" behavior.
+If there there are more names on the left side this throws a non-user friendly `FreeVariableError`. If there are less, the rewritten code is valid, even though in Python it wouldn't be valid, thus violating the expected "strict subset of Python" behavior.
 
 There might be other ways this can be abused to get inconsistent behavior.
 
@@ -2443,18 +2507,19 @@ There might be other ways this can be abused to get inconsistent behavior.
 #v(5pt)
 Perform this step after type inference. Check tuple types during type inference.
 === Resolution
+#v(5pt)
 Pending
 #pagebreak()
 
 #v(10pt)
-== ID-402 Non-friendly error message when using wrong import syntax
+== ID-U402 Non-friendly Error Message while Using Wrong Import Syntax
 #v(10pt)
 
 #table(
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("ff0000"))[],
   [4],
   [Usability],
@@ -2471,19 +2536,20 @@ Using `import <pkg>` or `import <pkg> as <aname>` isn’t supported and throws a
 Improve the error message to say that the syntax is wrong and hinting at the correct syntax.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-403 `bytes.fromhex()` doesn't work
+== ID-U403 `bytes.fromhex()` Does Not Work
 #v(10pt)
 
 #table(
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("ff0000"))[],
   [4],
   [Usability],
@@ -2493,7 +2559,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-The Opshin documentation mentions the existence of the `bytes.fromhex()` static method.
+The OpShin documentation mentions the existence of the `bytes.fromhex()` static method.
 
 The following snippet doesn't compile though:
 
@@ -2507,21 +2573,22 @@ The compiler throws the following error: `Can only access attributes of instance
 
 === Recommendation
 #v(5pt)
-Either ensure attributes of builtin types like `bytes` can actually be accessed, or remove `bytes.fromhex()` from the Opshin documentation.
+Either ensure attributes of builtin types like `bytes` can actually be accessed, or remove `bytes.fromhex()` from the OpShin documentation.
 
 === Resolution
+#v(5pt)
 Pending
 #pagebreak()
 
 #v(10pt)
-== ID-404 Unions can contain classes with same CONSTR_ID if their fields are also the same
+== ID-U404 Inconsistent Errors for Duplicate `CONSTR_ID` in `Union`s
 #v(10pt)
 
 #table(
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("ff0000"))[],
   [4],
   [Usability],
@@ -2557,9 +2624,13 @@ def validator(_: Union[Union[A, B], C]) -> None:
     pass
 ```
 
-Only after if the fields of `C` are changed (e.g. changing the name of field `b` to `c`), does the compiler throw the expected error: `Union must combine PlutusData classes with unique constructors`.
+Only after if the fields of `C` are changed (e.g. changing the name of field `b` to `c`), does the compiler throw the expected error: 
 
-Changing the annotation in the example to `Union[A, B, C]` (while keeping the fields of `B` and `C` the same) gives the following compiler error: `Duplicate constr_ids for records in Union: {'A': 1, 'B': 2, 'C': 2}`.
+`Union must combine PlutusData classes with unique constructors`.
+
+Changing the annotation in the example to `Union[A, B, C]` (while keeping the fields of `B` and `C` the same) gives the following compiler error:
+
+`Duplicate constr_ids for records in Union: {'A': 1, 'B': 2, 'C': 2}`.
 
 Now consider the following modified validator using the same three classes:
 
@@ -2568,26 +2639,29 @@ def validator(x: Union[Union[A, B], C]) -> None:
     assert isinstance(x, C)
 ```
 
-Compiling this example gives the following non user-friendly error: `Trying to cast an instance of Union type to non-instance of union type`.
+Compiling this example gives the following non user-friendly error: 
+
+`Trying to cast an instance of Union type to non-instance of union type`.
 
 === Recommendation
 #v(5pt)
-Fix these error inconsistencies by detecting duplicate CONSTR_IDs after flattening the Union in `union_types()` in `type_inference.py`. Detect duplicates based on CONSTR_ID alone, and not based on data field equivalence.
+Fix these error inconsistencies by detecting duplicate `CONSTR_ID`s after flattening the Union in `union_types()` in `type_inference.py`. Detect duplicates based on `CONSTR_ID` alone, and not based on data field equivalence.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-405 Calling `str()` on a Union gives a non user-friendly error
+== ID-U405 Non User-friendly Error while Calling `str()` on a `Union`
 #v(10pt)
 
 #table(
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("ff0000"))[],
   [4],
   [Usability],
@@ -2604,26 +2678,29 @@ def validator(a: Union[int, bytes]) -> None:
     assert str(a) == "0"
 ```
 
-Compiling this example gives the following error: `'IntegerType' object has no attribute 'record'`.
+Compiling this example gives the following error:
+
+ `'IntegerType' object has no attribute 'record'`.
 
 === Recommendation
 #v(5pt)
 Generalize the code generation in `UnionType.stringify()` in `type_impls.py`, so that it works for any combination of `int`, `bytes`, `List[Anything]` or `Dict[Anything, Anything]`.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-406 Inconsistent type inference of literal lists and dicts
+== ID-U406 Inconsistent Type Inference of Literal `lists` and `dicts`
 #v(10pt)
 
 #table(
   columns: (25pt, 10%, 20%, 20%, 20%),
   align: center,
   stroke: none,
-  table.header[][*Level*][*Category*][*Severity*][*Findings*],
+  table.header[][*Level*][*Category*][*Severity*][*Status*],
   table.cell(fill: rgb("ff0000"))[],
   [4],
   [Usability],
@@ -2651,15 +2728,16 @@ Similarly, `AggressiveTypeInferencer.visit_Dict()` will use the type of the firs
 
 === Recommendation
 #v(5pt)
-Find the most generic type contained in the list or dict, instead of using the first item type to determine the list or dict type.
+Find the most generic type contained in the `list` or `dict`, instead of using the first item type to determine the list or dict type.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-201 Non-friendly error message in AggressiveTypeInferencer.visit_comprehension
+== ID-U201 Fix Error Message in `AggressiveTypeInferencer.visit_comprehension`
 #v(10pt)
 
 #table(
@@ -2683,12 +2761,13 @@ Error message on line 1185 of `opshin/type_inference.py` claims "Type deconstruc
 Change error message to "Type deconstruction in comprehensions is not supported yet".
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-202 Incorrect hint when using Dict[int, int] inside `Union`
+== ID-U202 Incorrect Hint when Using `Dict[int, int]` inside `Union`
 #v(10pt)
 
 #table(
@@ -2713,15 +2792,16 @@ When using `List` in a similar way, a similarly incorrect hint is given.
 
 === Recommendation
 #v(5pt)
-Remove `Dict` and `List` from the hints. Also: improve the error message when using `Dict` and `List` inside `Union`.
+Remove `Dict` and `List` from the hints. Also, improve the error message when using `Dict` and `List` inside `Union`.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-203 Incorrect hints when using opshin eval incorrectly
+== ID-U203 Incorrect Hints when Using `opshin eval` incorrectly
 #v(10pt)
 
 #table(
@@ -2746,15 +2826,16 @@ When trying with `opshin eval lib -fno-remove-dead-code`, the following error is
 
 === Recommendation
 #v(5pt)
-Remove the "or eval using `opshin eval lib example.py`" part of the first hint.
+Remove the "or eval using opshin eval lib example.py" part of the first hint.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-204 using List or Dict directly as function argument types throws a non user-friendly error
+== ID-U204 Improve Error Message while Using List/Dict as function argument
 #v(10pt)
 
 #table(
@@ -2771,7 +2852,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Newcomers to Opshin might try the following syntax:
+Newcomers to OpShin might try the following syntax:
 
 ```python
 from opshin.prelude import *
@@ -2780,7 +2861,9 @@ def validator(_: List) -> None:
     pass
 ```
 
-This fails to compile, throwing the following error message: `Variable List not initialized at access`. This error message doesn't help the user resolve the issue (`List[Anything]` must be used instead of `List`).
+This fails to compile, throwing the following error message: 
+
+`Variable List not initialized at access`. This error message doesn't help the user resolve the issue (`List[Anything]` must be used instead of `List`).
 
 A similarly unhelpful error is thrown for `Dict`:
 
@@ -2796,12 +2879,13 @@ def validator(_: Dict) -> None:
 Either infer the types of `List` and `Dict` annotations as `List[Anything]` and `Dict[Anything, Anything]` respectively, or improve the error message by explaining the actual issue and providing a hint on how to resolve it.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-205 Non user-friendly error when using Union of single type
+== ID-U205 Non User-friendly Error when Using `Union` of single type
 #v(10pt)
 
 #table(
@@ -2831,19 +2915,22 @@ def validator(a: Union[A]) -> None:
     assert isinstance(a, A)
 ```
 
-An error is expected, but the compiler throws the following unrelated error message: `'Name' object has no attribute 'elts'`.
+An error is expected, but the compiler throws the following unrelated error message: 
+
+`'Name' object has no attribute 'elts'`.
 
 === Recommendation
 #v(5pt)
 The compiler should detect `Union`s containing only a single entry, and throw an explicit error.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-206 Inconsistent treatment of duplicate entries in Union
+== ID-U206 Inconsistent Treatment of Duplicate Entries in `Union`
 #v(10pt)
 
 #table(
@@ -2879,7 +2966,9 @@ def validator(a: Union[A, A, B]) -> None:
     assert isinstance(a, A)
 ```
 
-Expectedly, the compiler throws the following error: `Duplicate constr_ids for records in Union: {'A': 1, 'B': 2}`.
+Expectedly, the compiler throws the following error: 
+
+`Duplicate constr_ids for records in Union: {'A': 1, 'B': 2}`.
 
 But the following example validator compiles without errors:
 
@@ -2903,13 +2992,15 @@ def validator(a: Union[A, Union[A, B]]) -> None:
 Flatten `Union`s before detecting duplicate entries. This will make `Union`s more user-friendly, especially when type aliases in deep transient imports are being used, which might lead to unexpected duplicate entries in `Union`s.
 
 Optionally a compiler step can be added to detect duplication of unresolved names in a single level of a `Union`, which might point to the user having made a mistake.
+
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-207 can't use empty literal dicts in arbitrary expressions
+== ID-U207 Improve Documentation for Empty Literal `dicts`
 #v(10pt)
 
 #table(
@@ -2949,14 +3040,15 @@ def validator(_: None) -> None:
 ```
 === Recommendation
 #v(5pt)
-Add a note to the Opshin documentation that empty literal dicts must be assigned to a variable with type annotation before being usable (similar to the note already present about empty literal lists).
+Add a note to the OpShin documentation that empty literal dicts must be assigned to a variable with type annotation before being usable (similar to the note already present about empty literal lists).
 
 === Resolution
+#v(5pt)
 Pending
 #pagebreak()
 
 #v(10pt)
-== ID-208 `eval_uplc` doesn't handle errors in ComputationResult correctly
+== ID-U208 `eval_uplc` Fails to Handle ComputationResult Errors
 #v(10pt)
 
 #table(
@@ -2973,7 +3065,14 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Evaluating an Opshin validator script using the `eval_uplc` command doesn't display runtime errors correctly. For example, calling the `eval_uplc` command with the example validator from finding 01, gives the following output:
+Evaluating an OpShin validator script using the `eval_uplc` command doesn't display runtime errors correctly. For example, calling the `eval_uplc` command with the example validator 
+
+```python
+def validator(a: List[int]) -> None:
+    b = [x for x in a if x]
+    pass
+```
+gives the following output:
 
 ```
 Starting execution
@@ -2996,12 +3095,13 @@ AttributeError: 'AssertionError' object has no attribute 'dumps'
 In file `opshin/__main__.py`, in the last branch of `perform_command()`, test if `ret.result` is an error, and show an appropriate failure message in the case that it is.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-209 Dict with Union type key, can't be accessed with a Union type which has the same entries but in a different order
+== ID-U209 Fix Dict Access with Reordered `Union` Keys
 #v(10pt)
 
 #table(
@@ -3027,8 +3127,9 @@ def validator(d: Dict[Union[int, bytes], int]) -> int:
     key: Union[bytes, int] = 0
     return d[key]
 ```
+Compiling this example throws the following error:
 
-Compiling this example throws the following error: `Dict subscript must have dict key type InstanceType(typ=UnionType(typs=[IntegerType(), ByteStringType()])) but has type InstanceType(typ=UnionType(typs=[ByteStringType(), IntegerType()]))`.
+ ```Dict subscript must have dict key type InstanceType(typ=UnionType(typs=[IntegerType(), ByteStringType()])) but has type InstanceType(typ=UnionType(typs=[ByteStringType(), IntegerType()]))```
 
 === Recommendation
 #v(5pt)
@@ -3036,12 +3137,13 @@ Compiling this example throws the following error: `Dict subscript must have dic
 In `union_types()` in `type_inference.py`: sort Union entries in an unambiguous way.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-210 omitting class method return type gives non user-friendly error
+== ID-U210 Non User-friendly Error while Omitting Class Method Return Type 
 #v(10pt)
 
 #table(
@@ -3073,7 +3175,9 @@ def validator(_: None) -> None:
     c.my_method()
 ```
 
-Compiling this example gives the following error: `Invalid Python, class name is undefined at this stage`.
+Compiling this example gives the following error: 
+
+`Invalid Python, class name is undefined at this stage`.
 
 The error message doesn't help the user understand what is wrong with the code.
 
@@ -3086,7 +3190,7 @@ Pending
 #pagebreak()
 
 #v(10pt)
-== ID-211 `eval_uplc` ignores print()
+== ID-U211 `eval_uplc` Ignores `print()`
 #v(10pt)
 
 #table(
@@ -3117,7 +3221,7 @@ Pending
 #pagebreak()
 
 #v(10pt)
-== ID-212 Can't use empty literal lists in arbitrary expressions
+== ID-U212 Can't Use Empty Literal Lists in Arbitrary Expressions
 #v(10pt)
 
 #table(
@@ -3149,7 +3253,7 @@ def validator(x: List[int]) -> int:
 #v(5pt)
 - Improve Error Messaging:
 
-  - Replace the cryptic IndexError with a clear, actionable error.
+  - Replace the cryptic `IndexError` with a clear, actionable error.
   - If the variable has a prior type annotation, suggest: "Variable 'x' was previously annotated as 'List[int]'".
 
 - Leverage Prior Annotations in `visit_Assign`:
@@ -3158,11 +3262,12 @@ def validator(x: List[int]) -> int:
   - If the target has a known type (e.g., from a prior annotation or parameter type), use it to infer the type of value of the expression.
 
 === Resolution
+#v(5pt)
 Pending
 #pagebreak()
 
 #v(10pt)
-== ID-213 Improving Error Clarity
+== ID-U213 Improving Error Clarity
 #v(10pt)
 
 #table(
@@ -3183,15 +3288,8 @@ While the `opshin eval` command provides a valuable tool for evaluating scripts
 in Python, its error reporting can be enhanced to provide more user-friendly and
 informative feedback. Currently, when incorrect arguments or mismatched types
 are provided, the error messages may not clearly indicate the source or nature
-of the problem. We recommend implementing more specific error messages that
-pinpoint the problematic argument, indicate its position, and clearly state the
-expected type. Additionally, echoing the provided input, and suggesting
-corrections, for detailed debugging information could significantly improve the
-user experience and reduce troubleshooting time.
-
-=== Recommendation
-#v(5pt)
-```py
+of the problem. For example:
+```python
 def validator(datum: WithdrawDatum, redeemer: None, context: ScriptContext) -> None:
     sig_present = datum.pubkeyhash in context.tx_info.signatories
     assert (
@@ -3199,26 +3297,36 @@ def validator(datum: WithdrawDatum, redeemer: None, context: ScriptContext) -> N
     ), f"Required signature missing, expected {datum.pubkeyhash.hex()} but got {[s.hex() for s in context.tx_info.signatories]}"
 ```
 
-When this command is executed in the CLI
+When we try to evaluate the validator using the below inputs:
 
-        `opshin eval spending examples/smart_contracts/gift.py "{\"constructor\": 0,\"fields\":[
-        {\"bytes\": \"1e51fcdc14be9a148bb0aaec9197eb47c83776fb\"}]}" "None" d8799fd8799f9fd8799fd8799fd8799f582055d353acacaab6460b37ed0f0e3a1a0aabf056df4a7fa1e265d21149ccacc527ff01ffd8799fd8799fd87a9f581cdbe769758f26efb21f008dc097bb194cffc622acc37fcefc5372eee3ffd87a80ffa140a1401a00989680d87a9f5820dfab81872ce2bbe6ee5af9bbfee4047f91c1f57db5e30da727d5fef1e7f02f4dffd87a80ffffff809fd8799fd8799fd8799f581cdc315c289fee4484eda07038393f21dc4e572aff292d7926018725c2ffd87a80ffa140a14000d87980d87a80ffffa140a14000a140a1400080a0d8799fd8799fd87980d87a80ffd8799fd87b80d87a80ffff80a1d87a9fd8799fd8799f582055d353acacaab6460b37ed0f0e3a1a0aabf056df4a7fa1e265d21149ccacc527ff01ffffd87980a15820dfab81872ce2bbe6ee5af9bbfee4047f91c1f57db5e30da727d5fef1e7f02f4dd8799f581cdc315c289fee4484eda07038393f21dc4e572aff292d7926018725c2ffd8799f5820746957f0eb57f2b11119684e611a98f373afea93473fefbb7632d579af2f6259ffffd87a9fd8799fd8799f582055d353acacaab6460b37ed0f0e3a1a0aabf056df4a7fa1e265d21149ccacc527ff01ffffff`
+`opshin eval spending examples/smart_contracts/gift.py "{\"constructor\": 0,\"fields\":[
+{\"bytes\": \"1e51fcdc14be9a148bb0aaec9197eb47c83776fb\"}]}" "None" scriptcontext`
 
 Error Encountered:
 
-        `ValueError: Expected hexadecimal CBOR representation of plutus datum but could not transform hex string to bytes`.
+`ValueError: Expected hexadecimal CBOR representation of plutus datum but could not transform hex string to bytes`.
 
 The error is caused by the second argument, where "None" is passed instead of a
-valid Plutus data object for Nothing. The error message could be improved by
-providing a clear example of how to pass parameters correctly in JSON format.
+valid Plutus data object for Nothing.
+
+=== Recommendation
+#v(5pt)
+We recommend implementing more specific error messages that
+pinpoint the problematic argument, indicate its position, and clearly state the
+expected type. 
+
+Additionally, echoing the provided input, and suggesting
+corrections, for detailed debugging information could significantly improve the
+user experience and reduce troubleshooting time.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-214 Improve Documentation on optimization level
+== ID-U214 Improve Documentation on Optimization Levels
 #v(10pt)
 
 #table(
@@ -3249,12 +3357,13 @@ differs with each optimization level can be clearly documented with simple
 examples.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-215 Effect of optimization level on build output
+== ID-U215 Effect of Optimization Levels on Build Output
 #v(10pt)
 
 #table(
@@ -3276,7 +3385,7 @@ optimization level O1, where the conditions set are `constant_folding=False` and
 `remove_dead_code=True`.
 
 As a result, the output _UPLC_ contains more information
-than necessary, and therefore, the generated CBOR will also be larger.
+than necessary, and therefore, the generated _CBOR_ is also larger.
 This might increase the script size and makes debugging harder when used in off-chain
 transactions.
 
@@ -3288,12 +3397,13 @@ This would allow users to directly utilize the optimized code without needing to
 optimization levels during the build process.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-216 Out-of-range tuple index throws a non user-friendly error
+== ID-U216 Improve Error for Out-of-Range Tuple Index
 #v(10pt)
 
 #table(
@@ -3317,12 +3427,13 @@ In `PlutoCompiler.visit_Subscript()` in `compiler.py`, a non user-friendly error
 Check out-of-range tuple indexing in `PlutoCompiler.visit_Subscript()` in order to throw a user-friendly error, instead of relying on the error thrown by the Pluthon codebase.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-217 `opshin eval` command throws a misleading error message
+== ID-U217 Fix Misleading `opshin eval` Error Message
 #v(10pt)
 
 #table(
@@ -3350,9 +3461,11 @@ using the command:
 
 `opshin eval any opshin/type_check.py '{"int":1}'`
 
-the following error occurs `int() argument must be a string, a bytes-like object or a real number, not 'NoneType'`.
+the following error occurs:
 
-After passing the argument according to the documentation, it says it's a not NoneType which means it is None.This error misleads about `eval` and also do not perform the Python evaluation of the script which `eval` is supposed to do.
+ `int() argument must be a string, a bytes-like object or a real number, not 'NoneType'`.
+
+After passing the argument according to the documentation, it says it's a not `NoneType` which means it is `None`.This error misleads about `eval` and also do not perform the Python evaluation of the script which `eval` is supposed to do.
 
 === Recommendation
 #v(5pt)
@@ -3365,12 +3478,13 @@ In the first phase, the compiler should check whether the code is a subset of Py
 Also, the result of `eval` and `eval_uplc` can be compared to ensure the _UPLC_ program performs exactly as the developer intends.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-218 Inability to Assign to List Elements in Validator Functions
+== ID-U218 Inability to Assign to List Elements in Validator Functions
 #v(10pt)
 
 #table(
@@ -3387,7 +3501,11 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-In the provided code, the validator function attempts to modify an element of a list (x[0] += 1). However, the compiler raises an error: "Can only assign to variable names, no type deconstruction". This restriction prevents list element assignment, which is a common and valid operation in Python and can be useful for on-chain code logic.
+In the provided code, the validator function attempts to modify an element of a list (x[0] += 1). However, the compiler raises an error: 
+
+`Can only assign to variable names, no type deconstruction`.
+
+This restriction prevents list element assignment, which is a common and valid operation in Python and can be useful for on-chain code logic.
 
 ```python
 def validator(x:List[int]) -> int:
@@ -3407,7 +3525,7 @@ Pending
 #pagebreak()
 
 #v(10pt)
-== ID-101 Attaching file name to title in '.json' file
+== ID-U101 Attaching File Name to Title in '.json' file
 #v(10pt)
 
 #table(
@@ -3429,8 +3547,8 @@ At present, the `opshin build` command compiles the validator, creates a target
 name. The `blueprint.json` file is created, containing the compiled code, datum,
 and redeemer details. However, the field `title` in the blueprint.json file will
 always remain as "validator" as being assigned in the code. Suppose there is a
-function with name other than "validator", and when it is compiled using `opshin
-build lib` as expected by the OpShin language, the build artifacts will still
+function with name other than "validator", and when it is compiled using
+ `opshin build lib` as expected by the OpShin language, the build artifacts will still
 have the title as "Validator" instead of the function name.
 === Recommendation
 #v(5pt)
@@ -3438,13 +3556,15 @@ Although the file `blueprint.json` is primarily used for off-chain coding
 purposes, adding the validator's file name or function name along with the
 keyword 'Validator' as a title (e.g., Validator/assert_sum) would be helpful for
 debugging and referencing during off-chain validation.
+
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-102 Pretty Print generated _UPLC_ and _Pluthon_
+== ID-U102 Pretty Print Generated _UPLC_ and _Pluthon_
 #v(10pt)
 
 #table(
@@ -3463,28 +3583,27 @@ Pending
 #v(10pt)
 When the OpShin code is compiled to _UPLC_ using the `opshin eval_uplc` or
 `opshin compile` commands, the generated _UPLC_ code is not formatted in a
-'pretty-printed' form. Similarly, when compiled to _Pluthon_ using the `opshin
-compile_pluto` command, the resulting code is also not presented in a
+'pretty-printed' form. Similarly, when compiled to _Pluthon_ using the 
+`opshin compile_pluto` command, the resulting code is also not presented in a
 'pretty-printed' format. Instead, it is output directly to the terminal in a
 compact, unformatted style. This lack of formatting makes it more challenging to
 analyze or debug the resulting _UPLC_ code, as the structure and readability of
 the code are compromised, which can hinder examination.
 
-Also all builtins seem to be injected regardless of use. This makes inspecting the generated output more difficult without dead var elimination turned on. Dead var elimination might have however remove parts of code that the user actually expects to be present.
 === Recommendation
 #v(5pt)
 To improve the development experience, it would be beneficial to implement a
 method or tool that formats the _UPLC_ output and _Pluthon_ output and dumps it
 into a folder for each validator for easier interpretation and review.
 
-Variable names should be improved (e.g. the adhoc pattern can be made more compact smaller), and only the used builtins should be injected.
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-103 Determinisim of Constructor Ids
+== ID-U103 Determinisim of Constructor Ids
 #v(10pt)
 
 #table(
@@ -3517,13 +3636,15 @@ If `CONSTR_ID` values are not explicitly defined for PlutusData classes, they ar
 === Recommendation
 #v(5pt)
 The current behavior of throwing an assertion error for duplicate `CONSTR_ID` values could be expanded to include a warning if no `CONSTR_ID` is provided, to alert developers about relying on automatically generated IDs.
+
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-104 Function `to_cbor_hex()` not working
+== ID-U104 Method `to_cbor_hex()` Not Working
 #v(10pt)
 
 #table(
@@ -3559,14 +3680,16 @@ TypeInferenceError: Type Employee_0 does not have attribute to_cbor_hex
 ```
 === Recommendation
 #v(5pt)
+Inspect the code and include the method `to_cbor_hex()`.
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-105 Nested Lists Not Handled Correctly
+== ID-U105 Nested Lists Not Handled Correctly
 #v(10pt)
 
 #table(
@@ -3583,7 +3706,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-The following program throws an error:
+The following program:
 
 ```python
 from typing import Dict, List, Union
@@ -3593,7 +3716,7 @@ def validator()-> List[List[int]]:
     return empty_List
 ```
 
-Error:
+throws an error:
 
 `    empty_List : List[List[int]] = [[]]
                                    ^
@@ -3603,14 +3726,15 @@ Note that opshin errors may be overly restrictive as they aim to prevent code wi
 It fails for empty nested lists like [[]],[[],[]] likely due to issues with type inference or no support for handling of nested structures.
 === Recommendation
 #v(5pt)
-
+Update the type inference system to handle nested empty lists (e.g., [[]], [[], []]) in assignments and returns.
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-106 Error Messages Are Not Descriptive in Rewrite transformers
+== ID-U106 Error Messages Are Not Descriptive in Rewrite Transformers
 #v(10pt)
 
 #table(
@@ -3627,14 +3751,18 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-The error messages for assertions in most of the rewrite transformers are generic and do not provide enough context to help users understand the issue. For example, in the file `rewrite/rewrite_import_dataclasses.py` the error message "The program must contain one 'from dataclasses import dataclass`" is repeated for various cases, making it difficult to diagnose specific problems.
+In most of the rewrite transformers the error message for assertions are generic and do not provide enough context to help users understand the issue. For example, in the file 
+
+`rewrite/rewrite_import_dataclasses.py` the error message 
+
+`The program must contain one from dataclasses import dataclass` is repeated for various cases, making it difficult to diagnose specific problems.
 
 Example:
 
 ```python
 from pycardano import Datum as Anything, PlutusData
 from dataclasses import dataclass as dc
-\@dc
+@dc
 class MyClass(PlutusData):
     pass
 
@@ -3648,7 +3776,8 @@ The issue here is the use of an alias name. The error message below does not con
 from dataclasses import dataclass as dc
 AssertionError: The program must contain one 'from dataclasses import dataclass'
 Note that opshin errors may be overly restrictive as they aim to prevent code with unintended consequences.
-``
+```
+#pagebreak()
 === Recommendation
 #v(5pt)
 1. Improve error messages to be more specific. For example in this case if alias name is used, an error message could be something like this: "Aliasing 'dataclass' is not allowed. Use 'from dataclasses import dataclass' directly."
@@ -3659,12 +3788,13 @@ Note that opshin errors may be overly restrictive as they aim to prevent code wi
 - rewrite_import_typing.py
 
 === Resolution
+#v(5pt)
 Pending
 
 #pagebreak()
 
 #v(10pt)
-== ID-107 Unclear Error for Unimplemented Bitwise XOR
+== ID-U107 Unclear Error for Unimplemented Bitwise XOR
 #v(10pt)
 
 #table(
@@ -3697,4 +3827,5 @@ def validator():
 
 - Prioritize implementing commonly used missing operators or explicitly document unsupported ones.
 === Resolution
+#v(5pt)
 Pending
