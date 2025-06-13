@@ -670,15 +670,12 @@ to wrap the builtin?
 #v(20pt)
 = Milestone3 - Edge Cases Identification
 
-1. [SR] - test_builtins.py
-    Test case for len function not tested
-    `len(x: Union[bytes, List[Anything]]) -> int` - but available in opshin book
+1. [SR] - test_builtins.py Test case for len function not tested 
+   `len(x: Union[bytes, List[Anything]]) -> int` but available in opshin book.
 
 2. [SR] - test_hashlib.py - all cases tested
 
 3. [SR] - indexing and slicing not tested
-
-
 
 #table(
   columns: (2cm, 3cm, 4cm, 4cm, 3cm), // Custom column widths
@@ -699,7 +696,8 @@ to wrap the builtin?
   [is this sufficient],
   [],
   [interval],
-  [compare,compare extended helper,compare extended,get bool,compare upper bound,compare lower bound,contains,make range,make from,make to],
+  [compare,compare extended helper,compare extended,get bool,compare upper
+    bound,compare lower bound,contains,make range,make from,make to],
   [all],
   [],
   [std],
