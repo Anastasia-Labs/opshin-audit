@@ -3465,7 +3465,7 @@ the following error occurs:
 
  `int() argument must be a string, a bytes-like object or a real number, not 'NoneType'`.
 
-After passing the argument according to the documentation, it says it's a not `NoneType` which means it is `None`.This error misleads about `eval` and also do not perform the Python evaluation of the script which `eval` is supposed to do.
+After passing the argument according to the documentation, it says it is not `NoneType`, which means it is `None`. This error is misleading about `eval` and also does not perform the expected Python evaluation of the script which `eval` is supposed to do.
 
 === Recommendation
 #v(5pt)
