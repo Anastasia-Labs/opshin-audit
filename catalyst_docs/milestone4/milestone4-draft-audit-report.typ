@@ -3424,7 +3424,7 @@ In `PlutoCompiler.visit_Subscript()` in `compiler.py`, a non-user-friendly error
 
 === Recommendation
 #v(5pt)
-Check out-of-range tuple indexing in `PlutoCompiler.visit_Subscript()` in order to throw a user-friendly error, instead of relying on the error thrown by the Pluthon codebase.
+Check for out-of-range tuple indexing in `PlutoCompiler.visit_Subscript()` to throw a user-friendly error, instead of relying on the error thrown by the Pluthon codebase.
 
 === Resolution
 #v(5pt)
