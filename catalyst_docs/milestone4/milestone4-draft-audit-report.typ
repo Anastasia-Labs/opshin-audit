@@ -3729,7 +3729,7 @@ throws an error:
 IndexError: list index out of range
 Note that opshin errors may be overly restrictive as they aim to prevent code with unintended consequences.`
 
-It fails for empty nested lists like [[]],[[],[]] likely due to issues with type inference or no support for handling of nested structures.
+It fails for empty nested lists like `[[]]` or `[[], []]`, likely due to issues with type inference or lack of support for nested structures.
 === Recommendation
 #v(5pt)
 Update the type inference system to handle nested empty lists (e.g., [[]], [[], []]) in assignments and returns.
