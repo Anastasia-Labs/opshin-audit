@@ -1432,7 +1432,7 @@ In both `rewrite_import_hashlib.py` and `rewrite_import_integrity_check.py`, the
 
 The transformer handles aliased imports but does not explicitly check for name conflicts with existing variables or functions in the scope.
 
-Currently, if a conflict occurs like the code below, it throws a type inference error. It does not provide a clear or user-friendly error message about the name conflict.
+Currently, if a conflict occurs, as in the code below, it throws a type inference error. It does not provide a clear or user-friendly error message about the name conflict.
 
 ```python
 from hashlib import sha256 as hsh
