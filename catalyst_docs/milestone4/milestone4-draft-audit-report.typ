@@ -3023,7 +3023,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-The type of an empty literal dict is never inferred, and as a consequence can only be used on the right-hand-side of an annotated assignment.
+The type of an empty literal dict is never inferred and, as a consequence, it can only be used on the right-hand side of an annotated assignment.
 
 Consider the following example validator:
 
