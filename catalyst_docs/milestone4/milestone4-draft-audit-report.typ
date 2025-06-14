@@ -461,7 +461,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-In `AggressiveTypeInferencer.visit_While()`, type assertions performed in the `while` statement condition don't result in the addition of Pluthon AST nodes that convert _UPLC_ data types to primitive types.
+In `AggressiveTypeInferencer.visit_While()`, type assertions performed in the `while` statement condition do not result in the addition of Pluthon AST nodes that convert _UPLC_ data types to primitive types.
 
 This leads to unexpected runtime type errors, and can potentially lead to smart contract dead-locks if the compiled validator isn't sufficiently unit-tested.
 
