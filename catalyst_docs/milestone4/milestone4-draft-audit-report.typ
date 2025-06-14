@@ -3244,7 +3244,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-When a variable is first declared with a type annotation (e.g., def validator(x: List[int])) and later assigned to an empty value (e.g., x = []), the type checker fails to infer the type from the prior annotation and throws an unhelpful error `IndexError: list index out of range`. This occurs because the type checker treats annotated assignments (x: List[int] = []) and regular assignments (x = []) differently.
+When a variable is first declared with a type annotation (e.g., `def validator(x: List[int])`) and later assigned an empty value (e.g., `x = []`), the type checker fails to infer the type from the initial annotation and throws an unhelpful error `IndexError: list index out of range`. This occurs because the type checker treats annotated assignments (x: List[int] = []) and regular assignments (x = []) differently
 
 ```python
 
