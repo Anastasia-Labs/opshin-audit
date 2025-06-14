@@ -1093,7 +1093,7 @@ def validator(datum: bytes, redeemer: None, context: ScriptContext) -> None:
     assert datum[0] == 0, "Datum must start with null byte"
 ```
 
-Compiling this OpShin code using both the default optimiser and the aggressive optimiser (-O3 optimization flag) resulted in the same output. It includes built-in functions like `addInteger`, `lessThanInteger`, and `lengthOfByteString`, which seems irrelevant while the logic is to access the first byte of the datum( `ByteString` ) and to check if its equal to 0.
+Compiling this OpShin code using both the default optimiser and the aggressive optimiser (-O3 optimization flag) resulted in the same output. It includes built-in functions such as `addInteger`, `lessThanInteger`, and `lengthOfByteString`, which seem irrelevant for checking equality of the first byte of the datum (`ByteString`) with `0`.
 
 === Recommendation
 #v(5pt)
