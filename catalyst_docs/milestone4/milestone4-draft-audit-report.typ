@@ -2535,7 +2535,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Using `import <pkg>` or `import <pkg> as <aname>` isn’t supported and throws a non-user friendly error: "free variable '\<pkg-root\>' referenced before assignment in enclosing scope".
+Using `import <pkg>` or `import <pkg> as <aname>` isn’t supported and throws a non-user-friendly error: "free variable '\<pkg-root\>' referenced before assignment in enclosing scope."
 
 === Recommendation
 #v(5pt)
