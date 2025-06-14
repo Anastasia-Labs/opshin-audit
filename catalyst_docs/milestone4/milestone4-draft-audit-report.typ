@@ -2760,7 +2760,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Error message on line 1185 of `opshin/type_inference.py` claims "Type deconstruction in for loops is not supported yet". But such for-loop specific deconstructions should be ok as they were rewritten in compiler step 7.
+The error message on line 1185 of `opshin/type_inference.py` states "Type deconstruction in for loops is not supported yet." However, such for-loop-specific deconstructions should be acceptable as they were rewritten earlier in the pipeline.
 
 === Recommendation
 #v(5pt)
