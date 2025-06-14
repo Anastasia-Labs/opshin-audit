@@ -1787,7 +1787,7 @@ Pending
 === Description
 #v(10pt)
 The logic in `rewrite/rewrite_orig_name.py` currently checks for `Name`, `ClassDef`, and `FunctionDef` nodes but does not account for annotated variable assignments (e.g., x: int = 10). These nodes (`AnnAssign` in AST terms)
-may also contain a pointer to the original name for good.
+may also contain a pointer to the original name.
 
 === Recommendation
 #v(5pt)
