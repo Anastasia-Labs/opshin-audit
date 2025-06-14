@@ -2505,7 +2505,7 @@ Pending
 #v(10pt)
 Tuple unpacking (Step 7 in compilation pipeline) is currently being rewritten before the ATI (aggressive type inference) step. This allows writing unpacking assignments with a mismatched number of tuple entries.
 
-If there there are more names on the left side this throws a non-user friendly `FreeVariableError`. If there are less, the rewritten code is valid, even though in Python it wouldn't be valid, thus violating the expected "strict subset of Python" behavior.
+If there are more names on the left side, this throws a non-user-friendly `FreeVariableError`. If there are less, the rewritten code is valid, even though in Python it wouldn't be valid, thus violating the expected "strict subset of Python" behavior.
 
 There might be other ways this can be abused to get inconsistent behavior.
 
