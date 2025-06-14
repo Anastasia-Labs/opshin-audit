@@ -882,7 +882,7 @@ Pending
 #v(10pt)
 = Findings by Performance
 #v(5pt)
-== ID-P401 Redundant Bound External Variables Passing in  Function Calls
+== ID-P401 Redundant Bound External Variables Passing in Function Calls
 #v(10pt)
 
 #table(
