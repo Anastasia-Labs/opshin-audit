@@ -382,7 +382,7 @@ throughout the document to assess vulnerability and risk impact
 #v(10pt)
 === Description
 #v(10pt)
-The list comprehension type checks in `AggressiveTypeInferencer.list_comprehension()` doesn't check that the comprehension ifs filter expressions are of boolean type.
+The list comprehension type checks in `AggressiveTypeInferencer.list_comprehension()` don't check that the comprehension ifs filter expressions are of boolean type.
 
 If the user inadvertently uses a comprehension filter expression that doesn't evaluate to a bool, a runtime error will always be thrown if the comprehension generator returns a non-empty list. This can lead to a dead-lock of user funds if a validator hasn't been sufficiently tested.
 
