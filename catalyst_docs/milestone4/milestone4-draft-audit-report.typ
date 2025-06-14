@@ -961,7 +961,7 @@ Note the redundant passing around of `add_0` as the first argument of `validator
 
 === Recommendation
 #v(5pt)
-OpShin doesn't seem to support mutual recursion, so it might not even be necessary to pass all bound vars as arguments to the functions if the functions simply maintain their order in the final _UPLC_.
+OpShin does not seem to support mutual recursion, so it might not even be necessary to pass all bound vars as arguments to the functions if the functions simply maintain their order in the final _UPLC_.
 
 Alternatively, if the order of the functions changes in the final _UPLC_, filter out the bound vars that are naturally available as part of the outer scope of the function.
 
