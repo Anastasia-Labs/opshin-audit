@@ -873,7 +873,7 @@ The code checks for the presence of the `@dataclass` decorator and validates tha
 #v(5pt)
 1. To ensure that function names are also not overridden in addition to variable names, we recommend to extend the `RewriteForbiddenOverwrites` transformer to check for forbidden names in function definitions. This will ensure that function names do not conflict with reserved or forbidden names.
 
-2. Raise a descriptive warning if any custom definitions are detected, e.g., In this case "The dataclass function can't override the exisitng import".
+2. Raise a descriptive warning if any custom definitions are detected, e.g., In this case "The dataclass function can't override the existing import".
 
 === Resolution
 #v(5pt)
