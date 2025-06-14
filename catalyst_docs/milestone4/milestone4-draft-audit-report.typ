@@ -3609,7 +3609,7 @@ Pending
 #pagebreak()
 
 #v(10pt)
-== ID-U103 Determinisim of Constructor Ids
+== ID-U103 Determinism of Constructor IDs
 #v(10pt)
 
 #table(
