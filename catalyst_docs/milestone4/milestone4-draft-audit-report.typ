@@ -2444,7 +2444,7 @@ Pending
 #v(10pt)
 In `BytesImpl` in 
 
-`type_impls.py`, the second assertion reads `"Can only create bools from instances"`.
+`type_impls.py`, the second assertion reads "Can only create bools from instances."
 
 === Recommendation
 #v(5pt)
