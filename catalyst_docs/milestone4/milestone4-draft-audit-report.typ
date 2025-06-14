@@ -3149,7 +3149,7 @@ Pending
 #pagebreak()
 
 #v(10pt)
-== ID-U210 Non User-friendly Error while Omitting Class Method Return Type 
+== ID-U210 Non-User-Friendly Error When Omitting Class Method Return Type
 #v(10pt)
 
 #table(
