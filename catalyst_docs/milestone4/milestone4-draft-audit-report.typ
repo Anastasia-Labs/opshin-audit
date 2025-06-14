@@ -3817,7 +3817,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-When using unsupported operators (e.g., bitwise XOR ^) in operations, the evaluation throws a `RecursionError: maximum recursion depth exceeded` instead of a clear error indicating the operator is unimplemented. However this compiles when the optimization of constant expressions is turned on.
+When using unsupported operators (e.g., bitwise XOR ^) in operations, evaluation throws a `RecursionError: maximum recursion depth exceeded` instead of a clear error indicating that the operator is not supported. However this compiles when the optimization of constant expressions is turned on.
 
 ```python
 
