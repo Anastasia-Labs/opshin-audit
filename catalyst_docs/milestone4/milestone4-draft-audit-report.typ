@@ -3667,7 +3667,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Though `to_cbor_hex()` is defined in the file `serialisation.py`, usage of the same throws an `TypeInferenceError`.
+Although `to_cbor_hex()` is defined in the file `serialisation.py`, using it throws a `TypeInferenceError`.
 
 ```python
 @dataclass()
