@@ -830,7 +830,7 @@ An additional advantage of having multiple independent Module AST nodes is that 
 Pending
 #pagebreak()
   #v(10pt)
-== ID-S201 Custom Function Declarartions are Overridden
+== ID-S201 Custom Function Declarations are Overridden
 #v(10pt)
 
 #table(
