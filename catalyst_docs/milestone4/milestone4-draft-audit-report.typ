@@ -1053,7 +1053,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-The `RewriteConditions` transformer explicitly rewrites all conditions (e.g., in if, while, assert, etc.) to include an implicit cast to bool using a special variable `SPECIAL_BOOL`. However, this transformation is redundant when:
+The `RewriteConditions` transformer explicitly rewrites all conditions (e.g., in if, while, assert, etc.) to include an implicit cast to bool using a special variable, `SPECIAL_BOOL`. However, this is redundant in cases such as:
 
 1. The condition is already a boolean (e.g., if True or if x == y where the result is already a boolean).
 2. The condition is a constant node (e.g., if True or if False).
