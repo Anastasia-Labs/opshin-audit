@@ -867,7 +867,7 @@ def validator(a: int) -> None:
   return None
 ```
 
-The code checks for the presence of the `@dataclass` decorator and validates dataclass is imported from the package `dataclasses` but does not verify/report if the decorator is overridden by a custom dataclass function.
+The code checks for the presence of the `@dataclass` decorator and validates that `dataclass` is imported from the package `dataclasses`, but does not verify or report if the decorator is overridden by a custom function.
 
 === Recommendation
 #v(5pt)
