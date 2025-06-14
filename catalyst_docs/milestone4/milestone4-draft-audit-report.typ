@@ -643,7 +643,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-The `index` method, defined in `ListType.attribute()` in `type_impls.py`, uses the wrong builtin method to check item equality. The check is currently implemented as `EqualsInteger(x, HeadList(xs))`, which only works for lists of integers.
+The `index` method, defined in `ListType.attribute()` in `type_impls.py`, uses the wrong built-in method to check item equality. It is currently implemented as `EqualsInteger(x, HeadList(xs))`.
 
 The following example validator compiles successfully, but will always fail to run:
 
