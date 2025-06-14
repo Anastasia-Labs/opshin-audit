@@ -1321,7 +1321,7 @@ def validator(x: B) -> None:
     check_integrity(x)
 ```
 
-For this code, the _UPLC_ spits outs the compiled code of both the branches of the builtin function `ifThenElse`.
+For this code, the _UPLC_ outputs the compiled code for both branches of the builtin function `ifThenElse`.
 
 ```UPLC
 (lam 1x [(lam 1x (force [[[(force (builtin ifThenElse)) [[(builtin equalsData) 1x] [0p_AdHocPattern_6e5e35746e0db09c0956f182750126a838d5650add52b85f95f67e428d0912cc_ 1x]]] (delay (con unit ()))] (delay [(lam _ (error)) [[(force (builtin trace)) (con string "ValueError: datum integrity check failed")]]])]))])```.
