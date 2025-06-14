@@ -2953,7 +2953,7 @@ Pending
 #v(5pt)
 === Description
 #v(10pt)
-Duplicate entries in `Union`s give compiler errors, but duplicate entries in nested `Union`s don't.
+Duplicate entries in `Union`s cause compiler errors, but duplicate entries in nested `Union`s do not.
 
 Consider the following example validator:
 
