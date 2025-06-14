@@ -3265,7 +3265,7 @@ def validator(x: List[int]) -> int:
 - Leverage Prior Annotations in `visit_Assign`:
 
   - Modify the type checker to check for existing type annotations on the target variable during `visit_Assign`.
-  - If the target has a known type (e.g., from a prior annotation or parameter type), use it to infer the type of value of the expression.
+  - If the target has a known type (e.g., from a prior annotation or parameter type), use it to infer the type of the value in the expression.
 
 === Resolution
 #v(5pt)
