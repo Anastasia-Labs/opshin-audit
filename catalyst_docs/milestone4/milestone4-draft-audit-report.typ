@@ -2412,7 +2412,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-In `UnionType.stringify()` in `type_impls.py`, `c` is used a temporary variable for the constructor index, but in other places `constr` is used.
+In `UnionType.stringify()` in `type_impls.py`, `c` is used as a temporary variable for the constructor index, but in other places `constr` is used.
 
 === Recommendation
 #v(5pt)
