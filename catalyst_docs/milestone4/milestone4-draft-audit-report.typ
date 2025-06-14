@@ -3393,7 +3393,7 @@ This might increase the script size and make debugging harder when used in off-c
 #v(5pt)
 When building compiled code, OpShin could use the most aggressive optimizer,
 O3, as the default optimization configuration.
-This would allow users to directly utilize the optimized code without needing to specify any
+This would allow users to directly utilize the optimized code without needing to specify
 optimization levels during the build process.
 
 === Resolution
