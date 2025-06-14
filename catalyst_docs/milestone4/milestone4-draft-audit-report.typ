@@ -3473,7 +3473,7 @@ From the documentation and the CLI-help, it is unclear how `eval` should be invo
 
 The developer experience can be improved by removing the ability to call `eval` directly, and instead merging it with `eval_uplc`. `eval_uplc` would then perform a two-phase validation process.
 
-In the first phase, the compiler should check whether the code is a subset of Python by running `eval`. If this phase fails, it should throw an error indicating that the code is not a valid subset. If it succeeds, the second phase can proceed by running `eval_uplc`, which converts the arguments into PlutusData and performs the validation.
+In the first phase, the compiler should check whether the code is a subset of Python by running `eval`. If this phase fails, it should throw an error indicating that the code is not a valid subset of Python. If it succeeds, the second phase can proceed by running `eval_uplc`, which converts the arguments into PlutusData and performs the validation.
 
 Also, the result of `eval` and `eval_uplc` can be compared to ensure the _UPLC_ program performs exactly as the developer intends.
 
