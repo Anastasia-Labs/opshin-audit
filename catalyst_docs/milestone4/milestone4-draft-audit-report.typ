@@ -3140,7 +3140,7 @@ Compiling this example throws the following error:
 === Recommendation
 #v(5pt)
 
-In `union_types()` in `type_inference.py`: sort Union entries in an unambiguous way.
+In `union_types()` in `type_inference.py`, sort `Union` entries in an unambiguous way.
 
 === Resolution
 #v(5pt)
