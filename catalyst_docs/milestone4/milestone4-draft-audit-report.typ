@@ -1278,7 +1278,7 @@ In `std/bitmap.py`, the `POWS` list is always accessed in reverse order:
 POWS[(BYTE_SIZE - 1) - (i % BYTE_SIZE)]
 ```
 
-The `POWS` can be reversed instead, allowing the elimination of the `(BYTE_SIZE - 1) -` operation.
+The `POWS` list can be reversed instead, allowing the elimination of the `(BYTE_SIZE - 1) -` operation.
 
 === Recommendation
 #v(5pt)
