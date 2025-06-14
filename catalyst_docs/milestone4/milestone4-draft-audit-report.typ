@@ -3420,7 +3420,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-In `PlutoCompiler.visit_Subscript()` in `compiler.py`, a non user-friendly error is thrown if an out-of-range literal index used when accessing elements of a tuple.
+In `PlutoCompiler.visit_Subscript()` in `compiler.py`, a non-user-friendly error is thrown if an out-of-range literal index is used when accessing elements of a tuple.
 
 === Recommendation
 #v(5pt)
