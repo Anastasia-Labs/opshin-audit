@@ -2197,7 +2197,7 @@ Pending
 #pagebreak()
 
 #v(10pt)
-== ID-M108 Inconsistent Treatement of Tuple Slicing
+== ID-M108 Inconsistent Treatment of Tuple Slicing
 #v(10pt)
 
 #table(
