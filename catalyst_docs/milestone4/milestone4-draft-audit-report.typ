@@ -3046,7 +3046,7 @@ def validator(_: None) -> None:
 ```
 === Recommendation
 #v(5pt)
-Add a note to the OpShin documentation that empty literal dicts must be assigned to a variable with type annotation before being usable (similar to the note already present about empty literal lists).
+Add a note to the OpShin documentation that empty literal dicts must be assigned to a variable with a type annotation before being usable (similar to the note already present about empty literal lists).
 
 === Resolution
 #v(5pt)
