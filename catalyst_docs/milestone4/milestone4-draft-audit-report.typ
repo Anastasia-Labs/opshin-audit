@@ -798,7 +798,7 @@ class Employee(PlutusData):
 ```
 
 This code defines a custom class named `Address`, which shadows the built-in Address type from the Cardano ecosystem.
-It throws a type inference error. However, it should show a warning indicating that the name is shadowed.
+It throws a type inference error. However, it should instead show a warning indicating that the name is shadowed.
 
 === Recommendation
 #v(5pt)
