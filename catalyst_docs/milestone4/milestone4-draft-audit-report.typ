@@ -3751,11 +3751,11 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-In most of the rewrite transformers the error message for assertions are generic and do not provide enough context to help users understand the issue. For example, in the file 
+In most rewrite transformers, the error messages for assertions are generic and do not provide enough context to help users understand the issue. For example, in the file `rewrite/rewrite_import_dataclasses.py`, the error message:
 
-`rewrite/rewrite_import_dataclasses.py` the error message 
+`The program must contain one from dataclasses import dataclass`
 
-`The program must contain one from dataclasses import dataclass` is repeated for various cases, making it difficult to diagnose specific problems.
+is repeated for various cases, making it difficult to diagnose specific problems.
 
 Example:
 
