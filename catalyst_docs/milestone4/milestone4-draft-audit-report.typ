@@ -3213,7 +3213,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Messages printed when evaluating a validator using `eval_uplc` aren't displayed.
+Messages printed when evaluating a validator using `eval_uplc` are not displayed.
 
 Optimization level doesn't seem to have any impact on this.
 
