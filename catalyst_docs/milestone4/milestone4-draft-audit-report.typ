@@ -3215,7 +3215,7 @@ Pending
 #v(10pt)
 Messages printed when evaluating a validator using `eval_uplc` are not displayed.
 
-Optimization level doesn't seem to have any impact on this.
+The optimization level does not seem to have any impact on this.
 
 === Recommendation
 #v(5pt)
