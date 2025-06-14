@@ -3517,7 +3517,7 @@ def validator(x:List[int]) -> int:
 === Recommendation
 #v(5pt)
 1. Extend the compiler to support assignments to list elements.
-2. If supporting list element assignment is not feasible,enhance the error message to explain the limitation and suggest possible workarounds.
+2. If supporting list element assignment is not feasible, enhance the error message to explain the limitation and suggest possible workarounds.
 
 === Resolution
 Pending
