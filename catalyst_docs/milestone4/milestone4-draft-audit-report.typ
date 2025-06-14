@@ -3189,7 +3189,7 @@ The error message doesn't help the user understand what is wrong with the code.
 
 === Recommendation
 #v(5pt)
-Detect class methods missing return types and throw an explicit error.
+Detect class methods that are missing return types and throw an explicit error.
 
 === Resolution
 Pending
