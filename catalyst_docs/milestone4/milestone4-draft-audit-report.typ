@@ -303,7 +303,7 @@ d657a227f02670e6b6eed9cac77c0f8a25d51423
 
 - #text(rgb("ff0000"))[*Major*]: Can lead to damage to the user or protocol,
   although the impact may be restricted to specific functionalities or temporal
-  control. Attackers exploiting major vulnerabilities may cause harmor disrupt
+  control. Attackers exploiting major vulnerabilities may cause harm or disrupt
   certain aspects of the protocol.
 
 - #text(rgb("ffc000"))[*Medium*]: May not directly result in financial losses, but
