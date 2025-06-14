@@ -1025,7 +1025,7 @@ During the code generation step, in `PlutoCompiler.visit_Module()` in `compiler.
 
 The benefit of these `NameError` expressions is that runtime debugging is easier in the case a variable is referenced that doesn't actually exist. But the compiler should be able to detect such situations beforehand anyway, thus this should never actually occur during runtime.
 
-The OpShin _Pluthon_->_UPLC_ compilation step isn't able to eliminate these `NameError` expressions, even at optimization level 3.
+The OpShin _Pluthon_ → _UPLC_ compilation step isn't able to eliminate these `NameError` expressions, even at optimization level 3.
 
 === Recommendation
 #v(5pt)
