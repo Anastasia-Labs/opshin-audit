@@ -202,7 +202,7 @@ It uses valid Python syntax, so developers who know Python can quickly get start
     address Python's dynamic typing limitations. Types are inferred, ensuring
     consistency across variable scopes.
   - *Compilation Pipeline:* OpShin uses Python's built-in ast library for parsing,
-    eliminating the need for tokenization and AST building.The compilation process
+    eliminating the need for tokenization and AST building. The compilation process
     involves distinct AST transformations, and the final output is translated into
     Pluto, an intermediate language, and then compiled into UPLC for on-chain
     execution.
