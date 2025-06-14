@@ -3037,7 +3037,7 @@ def validator(_: None) -> None:
     assert my_len_fn({}) == 0
 ```
 
-Compiling this example throws the following non user-friendly error: `list index out of range`. The same error is thrown when empty literal dicts are used in other expressions, for example in annotation-less assignments:
+Compiling this example throws the following non-user-friendly error: `list index out of range`. The same error is thrown when empty literal dicts are used in other expressions, for example in annotation-less assignments:
 
 ```python
 def validator(_: None) -> None:
