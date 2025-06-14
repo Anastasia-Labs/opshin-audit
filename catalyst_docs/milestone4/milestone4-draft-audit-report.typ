@@ -1557,7 +1557,7 @@ def validator(x:int):
     assert x == 1
 ```
 
-For a simple validator with no returns as shown above, the _UPLC_ constructs data for integer 0 in addition to nil data which isn't necessary and which does not go away even after optimisation.
+For a simple validator with no return value, as shown above, the _UPLC_ constructs data for integer 0 in addition to nil data, which isn't necessary and does not go away even after optimization.
 
 `[(lam v0 [(lam v1 [(lam v2 (lam v3 [(lam v4 [(lam v5 [(lam v6 [(lam v7 [(lam v8 [[(force v7) v6] (delay v8)]) [(builtin unIData) v3]]) (delay (lam v9 (lam v10 (force [[[(force (builtin ifThenElse)) [(lam v11 [v1 (delay v11)]) [[v2 (force v10)] (con integer 1)]]] (delay [[(builtin constrData) (con integer 0)] [(builtin mkNilData) (con unit ())]])] (delay [(lam v12 (error)) (con unit ())])]))))]) (delay [(lam v13 (error)) [[(force (builtin trace)) (con string "NameError: ~bool")] (con unit ())]])]) (delay [(lam v14 (error)) [[(force (builtin trace)) (con string "NameError: x")] (con unit ())]])]) (delay [(lam v15 (error)) [[(force (builtin trace)) (con string "NameError: validator")] (con unit ())]])])) (builtin equalsInteger)]) [(lam v0 (lam v16 [(lam v17 v17) (force v16)])) (builtin equalsInteger)]]) (builtin equalsInteger)]`.
 
