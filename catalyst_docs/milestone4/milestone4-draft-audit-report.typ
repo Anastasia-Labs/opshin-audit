@@ -2214,7 +2214,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-`AggressiveTypeInferencer.visit_Subscript()` supports tuple slicing, but `PlutoComplier.visit_Subscript()` does not.
+`AggressiveTypeInferencer.visit_Subscript()` supports tuple slicing, but `PlutoCompiler.visit_Subscript()` does not.
 
 === Recommendation
 #v(5pt)
