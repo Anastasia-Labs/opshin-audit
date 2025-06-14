@@ -423,7 +423,7 @@ Pending
 #v(10pt)
 In `AggressiveTypeInferencer.visit_BoolOp()`, type assertions performed on the left-hand-side don't result in Pluthon AST nodes that convert _UPLC_ data types to primitive types.
 
-This leads to unexpected runtime type errors, and can potentially lead to smart contract dead-locks if the compiled validator isn't sufficiently unit-tested.
+This leads to unexpected runtime type errors and can potentially result in locked funds at smart contract if the compiled validator isn't sufficiently unit-tested.
 
 The following validator is an example of valid OpShin that will produce _UPLC_ that will always fail if the left-hand-side of the and expression is true:
 
