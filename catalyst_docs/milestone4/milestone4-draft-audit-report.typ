@@ -2160,7 +2160,7 @@ So logic that is inherently related to `dunder_override()` is spread over two ot
 
 === Recommendation
 #v(5pt)
-Return the final AST node from `dunder_override()`, so the explicit wrapping with a `Not` AST node doesn't become the responsability of the callsite.
+Return the final AST node from `dunder_override()`, so the explicit wrapping with a `Not` AST node doesn't become the responsibility of the call site.
 
 === Resolution
 #v(5pt)
