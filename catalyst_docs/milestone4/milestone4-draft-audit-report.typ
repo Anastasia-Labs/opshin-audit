@@ -3071,7 +3071,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Evaluating an OpShin validator script using the `eval_uplc` command doesn't display runtime errors correctly. For example, calling the `eval_uplc` command with the example validator 
+Evaluating an OpShin validator script using the `eval_uplc` command does not display runtime errors correctly. For example, calling the `eval_uplc` command with the example validator:
 
 ```python
 def validator(a: List[int]) -> None:
