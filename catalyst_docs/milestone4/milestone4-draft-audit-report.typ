@@ -3509,7 +3509,7 @@ This restriction prevents list element assignment, which is a common and valid o
 
 ```python
 def validator(x:List[int]) -> int:
-    x =[1,2,3,4]
+    x =[1, 2, 3, 4]
     x[0] += 1
     return x
 ```
