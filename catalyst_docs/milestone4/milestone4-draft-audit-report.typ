@@ -2248,7 +2248,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-`RecordReader.extract()`, in `type_inference.py`, is static has the `@classmethod`. This leads to unnecessary indirection when this method is called.
+`RecordReader.extract()`, in `type_inference.py`, is a static method using the `@classmethod` decorator. This leads to unnecessary indirection when this method is called.
 
 === Recommendation
 #v(5pt)
