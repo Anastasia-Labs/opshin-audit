@@ -1307,7 +1307,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-As there is no equivalent for the `check_integrity` function in Python,the optimizer isn't able to perform it and just gives out the result of compilation.
+As there is no equivalent for the `check_integrity` function in Python, the optimizer isn't able to perform it and instead just outputs the result of compilation.
 
 ```python
 @dataclass()
