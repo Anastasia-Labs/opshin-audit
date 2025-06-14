@@ -1243,7 +1243,7 @@ In `PlutoCompiler.visit_AnnAssign()` in `compiler.py`, data values on the right-
 
 This potentially leads to a double conversion (data -> primitive -> data) if the left-hand-side type annotation is a data type.
 
-The double conversion doesn't have much overhead as it results in two wrapped identity functions during the code generation, but it is still unnecessary.
+The double conversion does not introduce significant overhead, as it results in two wrapped identity functions during code generation; however, it is still unnecessary.
 
 === Recommendation
 #v(5pt)
