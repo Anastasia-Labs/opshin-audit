@@ -232,7 +232,7 @@ Each of the following steps is implemented using a recursive top-down visitor pa
 2. Throws an error when detecting a `return` statement outside a function definition.
 3. (Optional) Subexpressions that can be evaluated to constant Python values are replaced by their `Constant(value)` equivalents.
 4. Removes a deprecated Python 3.8 AST node.
-5. Replaces augmented assignment by their simple assignment equivalents. Eg. `a += 1` is transformed into `a = a + 1`.
+5. Replaces augmented assignment by their simple assignment equivalents. Eg. `a += 1` is tranformed into `a = a + 1`.
 6. Replaces comparison chains by a series of binary operations. Eg. `a < b < c` is transformed into `(a < b) and (b < c)`.
 7. Replaces tuple unpacking expressions in assignments and for-loops, by multiple single assignments. Eg. `(a, b) = <tuple-expr>` is transformed into:
 
@@ -382,9 +382,9 @@ throughout the document to assess vulnerability and risk impact
 #v(10pt)
 === Description
 #v(10pt)
-The list comprehension type checks in `AggressiveTypeInferencer.list_comprehension()` don't check that the comprehension ifs filter expressions are of boolean type.
+The list comprehension type checks in `AggressiveTypeInferencer.list_comprehension()` doesn't check that the comprehension ifs filter expressions are of boolean type.
 
-If the user inadvertently uses a comprehension filter expression that doesn't evaluate to a bool, a runtime error will always occur if the comprehension generator returns a non-empty list. This can lead to bricked user funds if a validator hasn't been sufficiently tested.
+If the user inadvertently uses a comprehension filter expression that doesn't evaluate to a bool, a runtime error will always be thrown if the comprehension generator returns a non-empty list. This can lead to a dead-lock of user funds if a validator hasn't been sufficiently tested.
 
 As an example, the following validator will compile without errors, but will always throw a runtime error when the argument is a non-empty list:
 
@@ -423,7 +423,7 @@ Pending
 #v(10pt)
 In `AggressiveTypeInferencer.visit_BoolOp()`, type assertions performed on the left-hand-side don't result in Pluthon AST nodes that convert _UPLC_ data types to primitive types.
 
-This leads to unexpected runtime type errors and can potentially result in locked funds at smart contract if the compiled validator isn't sufficiently unit-tested.
+This leads to unexpected runtime type errors, and can potentially lead to smart contract dead-locks if the compiled validator isn't sufficiently unit-tested.
 
 The following validator is an example of valid OpShin that will produce _UPLC_ that will always fail if the left-hand-side of the and expression is true:
 
@@ -461,7 +461,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-In `AggressiveTypeInferencer.visit_While()`, type assertions performed in the `while` statement condition do not result in the addition of Pluthon AST nodes that convert _UPLC_ data types to primitive types.
+In `AggressiveTypeInferencer.visit_While()`, type assertions performed in the `while` statement condition don't result in the addition of Pluthon AST nodes that convert _UPLC_ data types to primitive types.
 
 This leads to unexpected runtime type errors, and can potentially lead to smart contract dead-locks if the compiled validator isn't sufficiently unit-tested.
 
@@ -687,7 +687,7 @@ Pending
 === Description
 #v(10pt)
 The following is valid OpShin, but is conceptually strange as it isn't consistent with how attributes are exposed of regular `Union`s (they must exist on each subtype), and can lead to unexpected runtime errors:
-Both these validators compile successfully, but will always fail to run.
+Both these validators compiles successfully, but will always fail to run.
 
 ```python
 from opshin.prelude import *
@@ -798,7 +798,7 @@ class Employee(PlutusData):
 ```
 
 This code defines a custom class named `Address`, which shadows the built-in Address type from the Cardano ecosystem.
-It throws a type inference error. However, it should instead show a warning indicating that the name is shadowed.
+It throws a type inference error. However, it should show a warning indicating that the name is shadowed.
 
 === Recommendation
 #v(5pt)
@@ -830,7 +830,7 @@ An additional advantage of having multiple independent Module AST nodes is that 
 Pending
 #pagebreak()
   #v(10pt)
-== ID-S201 Custom Function Declarations are Overridden
+== ID-S201 Custom Function Declarartions are Overridden
 #v(10pt)
 
 #table(
@@ -867,13 +867,13 @@ def validator(a: int) -> None:
   return None
 ```
 
-The code checks for the presence of the `@dataclass` decorator and validates that `dataclass` is imported from the package `dataclasses`, but does not verify or report if the decorator is overridden by a custom function.
+The code checks for the presence of the `@dataclass` decorator and validates dataclass is imported from the package `dataclasses` but does not verify/report if the decorator is overridden by a custom dataclass function.
 
 === Recommendation
 #v(5pt)
 1. To ensure that function names are also not overridden in addition to variable names, we recommend to extend the `RewriteForbiddenOverwrites` transformer to check for forbidden names in function definitions. This will ensure that function names do not conflict with reserved or forbidden names.
 
-2. Raise a descriptive warning if any custom definitions are detected, e.g., In this case "The dataclass function can't override the existing import".
+2. Raise a descriptive warning if any custom definitions are detected, e.g., In this case "The dataclass function can't override the exisitng import".
 
 === Resolution
 #v(5pt)
@@ -882,7 +882,7 @@ Pending
 #v(10pt)
 = Findings by Performance
 #v(5pt)
-== ID-P401 Redundant Bound External Variables Passing in Function Calls
+== ID-P401 Redundant Bound External Variables Passing in  Function Calls
 #v(10pt)
 
 #table(
@@ -961,7 +961,7 @@ Note the redundant passing around of `add_0` as the first argument of `validator
 
 === Recommendation
 #v(5pt)
-OpShin does not seem to support mutual recursion, so it might not even be necessary to pass all bound vars as arguments to the functions if the functions simply maintain their order in the final _UPLC_.
+OpShin doesn't seem to support mutual recursion, so it might not even be necessary to pass all bound vars as arguments to the functions if the functions simply maintain their order in the final _UPLC_.
 
 Alternatively, if the order of the functions changes in the final _UPLC_, filter out the bound vars that are naturally available as part of the outer scope of the function.
 
@@ -1025,7 +1025,7 @@ During the code generation step, in `PlutoCompiler.visit_Module()` in `compiler.
 
 The benefit of these `NameError` expressions is that runtime debugging is easier in the case a variable is referenced that doesn't actually exist. But the compiler should be able to detect such situations beforehand anyway, thus this should never actually occur during runtime.
 
-The OpShin _Pluthon_ → _UPLC_ compilation step isn't able to eliminate these `NameError` expressions, even at optimization level 3.
+The OpShin _Pluthon_->_UPLC_ compilation step isn't able to eliminate these `NameError` expressions, even at optimization level 3.
 
 === Recommendation
 #v(5pt)
@@ -1053,7 +1053,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-The `RewriteConditions` transformer explicitly rewrites all conditions (e.g., in if, while, assert, etc.) to include an implicit cast to bool using a special variable, `SPECIAL_BOOL`. However, this is redundant in cases such as:
+The `RewriteConditions` transformer explicitly rewrites all conditions (e.g., in if, while, assert, etc.) to include an implicit cast to bool using a special variable `SPECIAL_BOOL`. However, this transformation is redundant when:
 
 1. The condition is already a boolean (e.g., if True or if x == y where the result is already a boolean).
 2. The condition is a constant node (e.g., if True or if False).
@@ -1093,7 +1093,7 @@ def validator(datum: bytes, redeemer: None, context: ScriptContext) -> None:
     assert datum[0] == 0, "Datum must start with null byte"
 ```
 
-Compiling this OpShin code using both the default optimiser and the aggressive optimiser (-O3 optimization flag) resulted in the same output. It includes built-in functions such as `addInteger`, `lessThanInteger`, and `lengthOfByteString`, which seem irrelevant for checking equality of the first byte of the datum (`ByteString`) with `0`.
+Compiling this OpShin code using both the default optimiser and the aggressive optimiser (-O3 optimization flag) resulted in the same output. It includes built-in functions like `addInteger`, `lessThanInteger`, and `lengthOfByteString`, which seems irrelevant while the logic is to access the first byte of the datum( `ByteString` ) and to check if its equal to 0.
 
 === Recommendation
 #v(5pt)
@@ -1185,7 +1185,7 @@ In `type_impls.py`, the `IntImpl` class generates _UPLC_ code that performs two 
 
 === Recommendation
 #v(5pt)
-Due to _UPLC_ loop overhead, merging these two loops into a single loop will provide a performance benefit.
+Due to _UPLC_  loop overhead, merging these two loops into a single loop will give some performance benefit.
 
 === Resolution
 #v(5pt)
@@ -1243,7 +1243,7 @@ In `PlutoCompiler.visit_AnnAssign()` in `compiler.py`, data values on the right-
 
 This potentially leads to a double conversion (data -> primitive -> data) if the left-hand-side type annotation is a data type.
 
-The double conversion does not introduce significant overhead, as it results in two wrapped identity functions during code generation; however, it is still unnecessary.
+The double conversion doesn't have much overhead as it results in two wrapped identity functions during the code generation, but it is still unnecessary.
 
 === Recommendation
 #v(5pt)
@@ -1278,7 +1278,7 @@ In `std/bitmap.py`, the `POWS` list is always accessed in reverse order:
 POWS[(BYTE_SIZE - 1) - (i % BYTE_SIZE)]
 ```
 
-The `POWS` list can be reversed instead, allowing the elimination of the `(BYTE_SIZE - 1) -` operation.
+The `POWS` can be reversed instead, allowing the elimination of the `(BYTE_SIZE - 1) -` operation.
 
 === Recommendation
 #v(5pt)
@@ -1307,7 +1307,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-As there is no equivalent for the `check_integrity` function in Python, the optimizer isn't able to perform it and instead just outputs the result of compilation.
+As there is no equivalent for the `check_integrity` function in Python,the optimizer isn't able to perform it and just gives out the result of compilation.
 
 ```python
 @dataclass()
@@ -1321,7 +1321,7 @@ def validator(x: B) -> None:
     check_integrity(x)
 ```
 
-For this code, the _UPLC_ outputs the compiled code for both branches of the builtin function `ifThenElse`.
+For this code, the _UPLC_ spits outs the compiled code of both the branches of the builtin function `ifThenElse`.
 
 ```UPLC
 (lam 1x [(lam 1x (force [[[(force (builtin ifThenElse)) [[(builtin equalsData) 1x] [0p_AdHocPattern_6e5e35746e0db09c0956f182750126a838d5650add52b85f95f67e428d0912cc_ 1x]]] (delay (con unit ()))] (delay [(lam _ (error)) [[(force (builtin trace)) (con string "ValueError: datum integrity check failed")]]])]))])```.
@@ -1364,7 +1364,7 @@ in `rewrite/rewrite_comparison_chaining.py`, no copies of `<expr-b>` seem to
 be created, leading to the same AST node instance appearing twice in the AST.
 
 The compiler steps frequently mutate the AST nodes instead of creating copies,
-which can make debugging issues more difficult in this case.
+which can lead to difficulty to debug issues in this case.
 
 === Recommendation
 #v(5pt)
@@ -1432,7 +1432,7 @@ In both `rewrite_import_hashlib.py` and `rewrite_import_integrity_check.py`, the
 
 The transformer handles aliased imports but does not explicitly check for name conflicts with existing variables or functions in the scope.
 
-Currently, if a conflict occurs, as in the code below, it throws a type inference error. It does not provide a clear or user-friendly error message about the name conflict.
+Currently, if a conflict occurs like the code below, it throws a type inference error. It does not provide a clear or user-friendly error message about the name conflict.
 
 ```python
 from hashlib import sha256 as hsh
@@ -3023,7 +3023,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-The type of an empty literal dict is never inferred and, as a consequence, it can only be used on the right-hand side of an annotated assignment.
+The type of an empty literal dict is never inferred, and as a consequence can only be used on the right-hand-side of an annotated assignment.
 
 Consider the following example validator:
 
@@ -3037,7 +3037,7 @@ def validator(_: None) -> None:
     assert my_len_fn({}) == 0
 ```
 
-Compiling this example throws the following non-user-friendly error: `list index out of range`. The same error is thrown when empty literal dicts are used in other expressions, for example in annotation-less assignments:
+Compiling this example throws the following non user-friendly error: `list index out of range`. The same error is thrown when empty literal dicts are used in other expressions, for example in annotation-less assignments:
 
 ```python
 def validator(_: None) -> None:
@@ -3046,7 +3046,7 @@ def validator(_: None) -> None:
 ```
 === Recommendation
 #v(5pt)
-Add a note to the OpShin documentation that empty literal dicts must be assigned to a variable with a type annotation before being usable (similar to the note already present about empty literal lists).
+Add a note to the OpShin documentation that empty literal dicts must be assigned to a variable with type annotation before being usable (similar to the note already present about empty literal lists).
 
 === Resolution
 #v(5pt)
@@ -3071,7 +3071,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Evaluating an OpShin validator script using the `eval_uplc` command does not display runtime errors correctly. For example, calling the `eval_uplc` command with the example validator:
+Evaluating an OpShin validator script using the `eval_uplc` command doesn't display runtime errors correctly. For example, calling the `eval_uplc` command with the example validator 
 
 ```python
 def validator(a: List[int]) -> None:
@@ -3140,7 +3140,7 @@ Compiling this example throws the following error:
 === Recommendation
 #v(5pt)
 
-In `union_types()` in `type_inference.py`, sort `Union` entries in an unambiguous way.
+In `union_types()` in `type_inference.py`: sort Union entries in an unambiguous way.
 
 === Resolution
 #v(5pt)
@@ -3149,7 +3149,7 @@ Pending
 #pagebreak()
 
 #v(10pt)
-== ID-U210 Non-User-Friendly Error When Omitting Class Method Return Type
+== ID-U210 Non User-friendly Error while Omitting Class Method Return Type 
 #v(10pt)
 
 #table(
@@ -3189,7 +3189,7 @@ The error message doesn't help the user understand what is wrong with the code.
 
 === Recommendation
 #v(5pt)
-Detect class methods that are missing return types and throw an explicit error.
+Detect class methods missing return types and throw an explicit error.
 
 === Resolution
 Pending
@@ -3213,9 +3213,9 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Messages printed when evaluating a validator using `eval_uplc` are not displayed.
+Messages printed when evaluating a validator using `eval_uplc` aren't displayed.
 
-The optimization level does not seem to have any impact on this.
+Optimization level doesn't seem to have any impact on this.
 
 === Recommendation
 #v(5pt)
@@ -3244,7 +3244,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-When a variable is first declared with a type annotation (e.g., `def validator(x: List[int])`) and later assigned an empty value (e.g., `x = []`), the type checker fails to infer the type from the initial annotation and throws an unhelpful error `IndexError: list index out of range`. This occurs because the type checker treats annotated assignments (x: List[int] = []) and regular assignments (x = []) differently
+When a variable is first declared with a type annotation (e.g., `def validator(x: List[int])`) and later assigned an empty value (e.g., `x = []`), the type checker fails to infer the type from the initial annotation and throws an unhelpful error `IndexError: list index out of range`. This occurs because the type checker treats annotated assignments (`x: List[int] = []`) and regular assignments (`x = []`) differently
 
 ```python
 
@@ -3265,7 +3265,7 @@ def validator(x: List[int]) -> int:
 - Leverage Prior Annotations in `visit_Assign`:
 
   - Modify the type checker to check for existing type annotations on the target variable during `visit_Assign`.
-  - If the target has a known type (e.g., from a prior annotation or parameter type), use it to infer the type of the value in the expression.
+  - If the target has a known type (e.g., from a prior annotation or parameter type), use it to infer the type of value of the expression.
 
 === Resolution
 #v(5pt)
@@ -3349,13 +3349,18 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Currently, there is no clear documentation detailing the different optimization levels and the specific constraints enabled at each level.
-Providing this information would benefit OpShin users, as it would give them a better understanding of which optimization configuration to choose based on their requirements.
+Currently, there is no clear documentation detailing the different optimization
+levels and the specific constraints that are enabled with each level.  
+Providing
+this information would benefit users of OpShin, as it would give them a better
+understanding of which optimization configuration to choose based on their
+requirement.
 
 === Recommendation
 #v(5pt)
-The concept behind different optimization levels (O1, O2, O3) and how the _UPLC_
-differs with each level can be clearly documented with simple examples.
+The idea behind different Optimization levels(O1,O2,O3) and how the _UPLC_
+differs with each optimization level can be clearly documented with simple
+examples.
 
 === Resolution
 #v(5pt)
@@ -3387,13 +3392,14 @@ optimization level O1, where the conditions set are `constant_folding=False` and
 
 As a result, the output _UPLC_ contains more information
 than necessary, and therefore, the generated _CBOR_ is also larger.
-This might increase the script size and make debugging harder when used in off-chain transactions.
+This might increase the script size and makes debugging harder when used in off-chain
+transactions.
 
 === Recommendation
 #v(5pt)
 When building compiled code, OpShin could use the most aggressive optimizer,
 O3, as the default optimization configuration.
-This would allow users to directly utilize the optimized code without needing to specify
+This would allow users to directly utilize the optimized code without needing to specify any
 optimization levels during the build process.
 
 === Resolution
@@ -3420,11 +3426,11 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-In `PlutoCompiler.visit_Subscript()` in `compiler.py`, a non-user-friendly error is thrown if an out-of-range literal index is used when accessing elements of a tuple.
+In `PlutoCompiler.visit_Subscript()` in `compiler.py`, a non user-friendly error is thrown if an out-of-range literal index used when accessing elements of a tuple.
 
 === Recommendation
 #v(5pt)
-Check for out-of-range tuple indexing in `PlutoCompiler.visit_Subscript()` to throw a user-friendly error, instead of relying on the error thrown by the Pluthon codebase.
+Check out-of-range tuple indexing in `PlutoCompiler.visit_Subscript()` in order to throw a user-friendly error, instead of relying on the error thrown by the Pluthon codebase.
 
 === Resolution
 #v(5pt)
@@ -3465,7 +3471,7 @@ the following error occurs:
 
  `int() argument must be a string, a bytes-like object or a real number, not 'NoneType'`.
 
-After passing the argument according to the documentation, it says it is not `NoneType`, which means it is `None`. This error is misleading about `eval` and also does not perform the expected Python evaluation of the script which `eval` is supposed to do.
+After passing the argument according to the documentation, it says it's a not `NoneType` which means it is `None`.This error misleads about `eval` and also do not perform the Python evaluation of the script which `eval` is supposed to do.
 
 === Recommendation
 #v(5pt)
@@ -3473,7 +3479,7 @@ From the documentation and the CLI-help, it is unclear how `eval` should be invo
 
 The developer experience can be improved by removing the ability to call `eval` directly, and instead merging it with `eval_uplc`. `eval_uplc` would then perform a two-phase validation process.
 
-In the first phase, the compiler should check whether the code is a subset of Python by running `eval`. If this phase fails, it should throw an error indicating that the code is not a valid subset of Python. If it succeeds, the second phase can proceed by running `eval_uplc`, which converts the arguments into PlutusData and performs the validation.
+In the first phase, the compiler should check whether the code is a subset of Python by running `eval`. If this phase fails, it should throw an error indicating that the code is not a valid subset. If it succeeds, the second phase can proceed by running `eval_uplc`, which converts the arguments into PlutusData and performs the validation.
 
 Also, the result of `eval` and `eval_uplc` can be compared to ensure the _UPLC_ program performs exactly as the developer intends.
 
@@ -3509,7 +3515,7 @@ This restriction prevents list element assignment, which is a common and valid o
 
 ```python
 def validator(x:List[int]) -> int:
-    x =[1, 2, 3, 4]
+    x =[1,2,3,4]
     x[0] += 1
     return x
 ```
@@ -3517,7 +3523,7 @@ def validator(x:List[int]) -> int:
 === Recommendation
 #v(5pt)
 1. Extend the compiler to support assignments to list elements.
-2. If supporting list element assignment is not feasible, enhance the error message to explain the limitation and suggest possible workarounds.
+2. If supporting list element assignment is not feasible,enhance the error message to explain the limitation and suggest possible workarounds.
 
 === Resolution
 Pending
@@ -3603,7 +3609,7 @@ Pending
 #pagebreak()
 
 #v(10pt)
-== ID-U103 Determinism of Constructor IDs
+== ID-U103 Determinisim of Constructor Ids
 #v(10pt)
 
 #table(
@@ -3661,7 +3667,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Although `to_cbor_hex()` is defined in the file `serialisation.py`, using it throws a `TypeInferenceError`.
+Though `to_cbor_hex()` is defined in the file `serialisation.py`, usage of the same throws an `TypeInferenceError`.
 
 ```python
 @dataclass()
@@ -3723,7 +3729,7 @@ throws an error:
 IndexError: list index out of range
 Note that opshin errors may be overly restrictive as they aim to prevent code with unintended consequences.`
 
-It fails for empty nested lists like `[[]]` or `[[], []]`, likely due to issues with type inference or lack of support for nested structures.
+It fails for empty nested lists like [[]],[[],[]] likely due to issues with type inference or no support for handling of nested structures.
 === Recommendation
 #v(5pt)
 Update the type inference system to handle nested empty lists (e.g., [[]], [[], []]) in assignments and returns.
@@ -3751,11 +3757,11 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-In most rewrite transformers, the error messages for assertions are generic and do not provide enough context to help users understand the issue. For example, in the file `rewrite/rewrite_import_dataclasses.py`, the error message:
+In most of the rewrite transformers the error message for assertions are generic and do not provide enough context to help users understand the issue. For example, in the file 
 
-`The program must contain one from dataclasses import dataclass`
+`rewrite/rewrite_import_dataclasses.py` the error message 
 
-is repeated for various cases, making it difficult to diagnose specific problems.
+`The program must contain one from dataclasses import dataclass` is repeated for various cases, making it difficult to diagnose specific problems.
 
 Example:
 
@@ -3811,7 +3817,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-When using unsupported operators (e.g., bitwise XOR ^) in operations, evaluation throws a `RecursionError: maximum recursion depth exceeded` instead of a clear error indicating that the operator is not supported. However this compiles when the optimization of constant expressions is turned on.
+When using unsupported operators (e.g., bitwise XOR ^) in operations, the evaluation throws a `RecursionError: maximum recursion depth exceeded` instead of a clear error indicating the operator is unimplemented. However this compiles when the optimization of constant expressions is turned on.
 
 ```python
 
