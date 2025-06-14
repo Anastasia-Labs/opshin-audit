@@ -2908,7 +2908,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-In the following example validator, an argument is annoted with a `Union` of a single type:
+In the following example validator, an argument is annotated with a `Union` of a single type:
 
 ```python
 from opshin.prelude import *
