@@ -1563,7 +1563,7 @@ For a simple validator with no return value, as shown above, the _UPLC_ construc
 
 === Recommendation
 #v(5pt)
-Optimize the codebase to avoid data construction for void valdiators.
+Optimize the codebase to avoid data construction for void validators.
 === Resolution
 #v(5pt)
 Pending
