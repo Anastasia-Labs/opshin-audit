@@ -232,7 +232,7 @@ Each of the following steps is implemented using a recursive top-down visitor pa
 2. Throws an error when detecting a `return` statement outside a function definition.
 3. (Optional) Subexpressions that can be evaluated to constant Python values are replaced by their `Constant(value)` equivalents.
 4. Removes a deprecated Python 3.8 AST node.
-5. Replaces augmented assignment by their simple assignment equivalents. Eg. `a += 1` is tranformed into `a = a + 1`.
+5. Replaces augmented assignment by their simple assignment equivalents. Eg. `a += 1` is transformed into `a = a + 1`.
 6. Replaces comparison chains by a series of binary operations. Eg. `a < b < c` is transformed into `(a < b) and (b < c)`.
 7. Replaces tuple unpacking expressions in assignments and for-loops, by multiple single assignments. Eg. `(a, b) = <tuple-expr>` is transformed into:
 
