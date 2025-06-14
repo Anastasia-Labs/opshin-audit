@@ -687,7 +687,7 @@ Pending
 === Description
 #v(10pt)
 The following is valid OpShin, but is conceptually strange as it isn't consistent with how attributes are exposed of regular `Union`s (they must exist on each subtype), and can lead to unexpected runtime errors:
-Both these validators compiles successfully, but will always fail to run.
+Both these validators compile successfully, but will always fail to run.
 
 ```python
 from opshin.prelude import *
