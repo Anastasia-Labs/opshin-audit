@@ -308,7 +308,7 @@ d657a227f02670e6b6eed9cac77c0f8a25d51423
 
 - #text(rgb("ffc000"))[*Medium*]: May not directly result in financial losses, but
   they can temporarily impair the protocol’s functionality. Examples include
-  susceptibility to front-running attacks,which can undermine the integrity of
+  susceptibility to front-running attacks, which can undermine the integrity of
   transactions.
 
 - #text(rgb("ffff00"))[*Minor*]: Minor vulnerabilities do not typically result in
