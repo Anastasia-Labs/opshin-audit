@@ -3354,9 +3354,8 @@ Providing this information would benefit OpShin users, as it would give them a b
 
 === Recommendation
 #v(5pt)
-The idea behind different Optimization levels(O1,O2,O3) and how the _UPLC_
-differs with each optimization level can be clearly documented with simple
-examples.
+The concept behind different optimization levels (O1, O2, O3) and how the _UPLC_
+differs with each level can be clearly documented with simple examples.
 
 === Resolution
 #v(5pt)
