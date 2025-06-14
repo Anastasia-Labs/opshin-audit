@@ -3387,8 +3387,7 @@ optimization level O1, where the conditions set are `constant_folding=False` and
 
 As a result, the output _UPLC_ contains more information
 than necessary, and therefore, the generated _CBOR_ is also larger.
-This might increase the script size and makes debugging harder when used in off-chain
-transactions.
+This might increase the script size and make debugging harder when used in off-chain transactions.
 
 === Recommendation
 #v(5pt)
