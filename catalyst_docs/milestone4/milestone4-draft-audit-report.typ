@@ -1364,7 +1364,7 @@ in `rewrite/rewrite_comparison_chaining.py`, no copies of `<expr-b>` seem to
 be created, leading to the same AST node instance appearing twice in the AST.
 
 The compiler steps frequently mutate the AST nodes instead of creating copies,
-which can lead to difficulty to debug issues in this case.
+which can make debugging issues more difficult in this case.
 
 === Recommendation
 #v(5pt)
