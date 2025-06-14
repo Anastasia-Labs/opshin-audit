@@ -3349,12 +3349,8 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Currently, there is no clear documentation detailing the different optimization
-levels and the specific constraints that are enabled with each level.  
-Providing
-this information would benefit users of OpShin, as it would give them a better
-understanding of which optimization configuration to choose based on their
-requirement.
+Currently, there is no clear documentation detailing the different optimization levels and the specific constraints enabled at each level.
+Providing this information would benefit OpShin users, as it would give them a better understanding of which optimization configuration to choose based on their requirements.
 
 === Recommendation
 #v(5pt)
