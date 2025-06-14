@@ -1185,7 +1185,7 @@ In `type_impls.py`, the `IntImpl` class generates _UPLC_ code that performs two 
 
 === Recommendation
 #v(5pt)
-Due to _UPLC_  loop overhead, merging these two loops into a single loop will give some performance benefit.
+Due to _UPLC_ loop overhead, merging these two loops into a single loop will provide a performance benefit.
 
 === Resolution
 #v(5pt)
