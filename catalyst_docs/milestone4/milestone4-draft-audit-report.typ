@@ -1023,7 +1023,7 @@ Pending
 #v(10pt)
 During the code generation step, in `PlutoCompiler.visit_Module()` in `compiler.py`, a `NameError` expression is added for each loaded variable. This set of variables potentially includes each and every variable defined in the program, and thus significantly bloats the generated code. The optimizations built into OpShin don't seem to be able to eliminate this bloat.
 
-The benefit of these `NameError` expressions is that runtime debugging is easier in the case a variable is referenced that doesn't actually exist. But the compiler should be able to detect such situations beforehand anyway, thus this should never actually occur during runtime.
+The benefit of these `NameError` expressions is that runtime debugging is easier if a variable is referenced that doesn't actually exist. However, the compiler should be able to detect such situations at compile time and avoid generating dead code.
 
 The OpShin _Pluthon_->_UPLC_ compilation step isn't able to eliminate these `NameError` expressions, even at optimization level 3.
 
