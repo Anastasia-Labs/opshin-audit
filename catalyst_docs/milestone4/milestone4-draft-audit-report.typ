@@ -3839,3 +3839,22 @@ def validator():
 === Resolution
 #v(5pt)
 Pending
+#pagebreak()
+
+#v(10pt)
+= General Recommendations
+#v(10pt)
+1. Currently, there are several optimizations levels and optimization-related flags.
+   We suggest reducing this to a single optimization flag, which would make builds much easier to reproduce.
+   If you want to keep the various options for debugging reasons, then we suggest an additional
+   `-optimize` flag which acts as a sane default for optimization.
+
+2. A build output that contains both unoptimized and optimized _UPLC_ CBOR is much more useful when debugging production contracts.
+   Though there is currently no standard format for such an output, and developers can simply generate both by running the build command twice,
+   a single high-level command that creates a Python or TS/JS artifacts directly could improve the developer experience a lot as that is what most developers will want.
+
+3. The conversion process to Pluthon/Untyped Plutus Core (_UPLC_) is a complex and crucial step that could potentially contain vulnerabilities.
+   Given its significance in the overall system, we strongly recommend prioritizing a comprehensive audit of this specific conversion process.
+   This proactive measure would provide an additional layer of assurance.
+
+4. Add static code analyzer (generalization of static type checker) to build process. For example: `mypy`.
