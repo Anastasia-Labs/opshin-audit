@@ -2997,7 +2997,7 @@ def validator(a: Union[A, Union[A, B]]) -> None:
 #v(5pt)
 Flatten `Union`s before detecting duplicate entries. This will make `Union`s more user-friendly, especially when type aliases in deep transient imports are used, which might lead to unexpected duplication.
 
-Optionally a compiler step can be added to detect duplication of unresolved names in a single level of a `Union`, which might point to the user having made a mistake.
+Optionally, a compiler step can be added to detect duplication of unresolved names at a single level within a `Union`, which might indicate a user mistake.
 
 === Resolution
 #v(5pt)
