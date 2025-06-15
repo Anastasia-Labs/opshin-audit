@@ -232,7 +232,7 @@ Each of the following steps is implemented using a recursive top-down visitor pa
 2. Throws an error when detecting a `return` statement outside a function definition.
 3. (Optional) Subexpressions that can be evaluated to constant Python values are replaced by their `Constant(value)` equivalents.
 4. Removes a deprecated Python 3.8 AST node.
-5. Replaces augmented assignment by their simple assignment equivalents. Eg. `a += 1` is tranformed into `a = a + 1`.
+5. Replaces augmented assignment by their simple assignment equivalents. Eg. `a += 1` is transformed into `a = a + 1`.
 6. Replaces comparison chains by a series of binary operations. Eg. `a < b < c` is transformed into `(a < b) and (b < c)`.
 7. Replaces tuple unpacking expressions in assignments and for-loops, by multiple single assignments. Eg. `(a, b) = <tuple-expr>` is transformed into:
 
@@ -382,9 +382,9 @@ throughout the document to assess vulnerability and risk impact
 #v(10pt)
 === Description
 #v(10pt)
-The list comprehension type checks in `AggressiveTypeInferencer.list_comprehension()` doesn't check that the comprehension ifs filter expressions are of boolean type.
+The list comprehension type checks in `AggressiveTypeInferencer.list_comprehension()` does not check that the comprehension ifs filter expressions are of boolean type.
 
-If the user inadvertently uses a comprehension filter expression that doesn't evaluate to a bool, a runtime error will always be thrown if the comprehension generator returns a non-empty list. This can lead to a dead-lock of user funds if a validator hasn't been sufficiently tested.
+If the user inadvertently uses a comprehension filter expression that doesn't evaluate to a bool, a runtime error will always occur if the comprehension generator returns a non-empty list. This can lead to bricked user funds if a validator hasn't been sufficiently tested.
 
 As an example, the following validator will compile without errors, but will always throw a runtime error when the argument is a non-empty list:
 
@@ -423,7 +423,7 @@ Pending
 #v(10pt)
 In `AggressiveTypeInferencer.visit_BoolOp()`, type assertions performed on the left-hand-side don't result in Pluthon AST nodes that convert _UPLC_ data types to primitive types.
 
-This leads to unexpected runtime type errors, and can potentially lead to smart contract dead-locks if the compiled validator isn't sufficiently unit-tested.
+This leads to unexpected runtime type errors and can potentially result in locked funds at smart contract if the compiled validator isn't sufficiently unit-tested.
 
 The following validator is an example of valid OpShin that will produce _UPLC_ that will always fail if the left-hand-side of the and expression is true:
 
@@ -461,7 +461,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-In `AggressiveTypeInferencer.visit_While()`, type assertions performed in the `while` statement condition don't result in the addition of Pluthon AST nodes that convert _UPLC_ data types to primitive types.
+In `AggressiveTypeInferencer.visit_While()`, type assertions performed in the `while` statement condition do not result in the addition of Pluthon AST nodes that convert _UPLC_ data types to primitive types.
 
 This leads to unexpected runtime type errors, and can potentially lead to smart contract dead-locks if the compiled validator isn't sufficiently unit-tested.
 
@@ -483,9 +483,9 @@ Reuse logic related to `self.wrapped` from `AggressiveTypeInferencer.visit_If()`
 #v(5pt)
 Pending
 #pagebreak()
-  #v(10pt)
+  #v(5pt)
 == ID-S504 `UnionType` Not Implicitly Converted 
-#v(10pt)
+#v(5pt)
 
 #table(
   columns: (25pt, 10%, 20%, 20%, 20%),
@@ -499,9 +499,9 @@ Pending
   [Pending],
 )
 
-#v(10pt)
+#v(5pt)
 === Description
-#v(10pt)
+#v(5pt)
 In `PlutoCompiler.visit_Return()` in `compiler.py`, implicit conversion from primitive value to data value is done if the return type is `Any` (i.e. `PlutusData`). This implicit conversion is however not performed when the return type is `Union`.
 
 The type checked AST assumes that functions returning `Union`, always return something correctly converted into `PlutusData`. But that isn't currently being done, leading to a critical bug where the following validator compiles without errors but will always fail during evaluation:
@@ -522,7 +522,9 @@ def validator(a: Union[int, bytes]) -> Union[int, bytes]:
 
     return a
 ```
-Similarly, these implicit conversions of `Union` values is missing in `PlutoCompiler.visit_AnnAssign()`.
+Similarly, these implicit conversions of `Union` values is missing in 
+
+`PlutoCompiler.visit_AnnAssign()`.
 
 === Recommendation
 #v(5pt)
@@ -687,7 +689,7 @@ Pending
 === Description
 #v(10pt)
 The following is valid OpShin, but is conceptually strange as it isn't consistent with how attributes are exposed of regular `Union`s (they must exist on each subtype), and can lead to unexpected runtime errors:
-Both these validators compiles successfully, but will always fail to run.
+Both these validators compile successfully, but will always fail to run.
 
 ```python
 from opshin.prelude import *
@@ -798,7 +800,7 @@ class Employee(PlutusData):
 ```
 
 This code defines a custom class named `Address`, which shadows the built-in Address type from the Cardano ecosystem.
-It throws a type inference error. However, it should show a warning indicating that the name is shadowed.
+It throws a type inference error. However, it should instead show a warning indicating that the name is shadowed.
 
 === Recommendation
 #v(5pt)
@@ -830,7 +832,7 @@ An additional advantage of having multiple independent Module AST nodes is that 
 Pending
 #pagebreak()
   #v(10pt)
-== ID-S201 Custom Function Declarartions are Overridden
+== ID-S201 Custom Function Declarations are Overridden
 #v(10pt)
 
 #table(
@@ -867,13 +869,13 @@ def validator(a: int) -> None:
   return None
 ```
 
-The code checks for the presence of the `@dataclass` decorator and validates dataclass is imported from the package `dataclasses` but does not verify/report if the decorator is overridden by a custom dataclass function.
+The code checks for the presence of the `@dataclass` decorator and validates that `dataclass` is imported from the package `dataclasses`, but does not verify or report if the decorator is overridden by a custom function.
 
 === Recommendation
 #v(5pt)
 1. To ensure that function names are also not overridden in addition to variable names, we recommend to extend the `RewriteForbiddenOverwrites` transformer to check for forbidden names in function definitions. This will ensure that function names do not conflict with reserved or forbidden names.
 
-2. Raise a descriptive warning if any custom definitions are detected, e.g., In this case "The dataclass function can't override the exisitng import".
+2. Raise a descriptive warning if any custom definitions are detected, e.g., In this case "The dataclass function can't override the existing import".
 
 === Resolution
 #v(5pt)
@@ -882,7 +884,7 @@ Pending
 #v(10pt)
 = Findings by Performance
 #v(5pt)
-== ID-P401 Redundant Bound External Variables Passing in  Function Calls
+== ID-P401 Redundant Bound External Variables Passing in Function Calls
 #v(10pt)
 
 #table(
@@ -961,7 +963,7 @@ Note the redundant passing around of `add_0` as the first argument of `validator
 
 === Recommendation
 #v(5pt)
-OpShin doesn't seem to support mutual recursion, so it might not even be necessary to pass all bound vars as arguments to the functions if the functions simply maintain their order in the final _UPLC_.
+OpShin does not seem to support mutual recursion, so it might not even be necessary to pass all bound vars as arguments to the functions if the functions simply maintain their order in the final _UPLC_.
 
 Alternatively, if the order of the functions changes in the final _UPLC_, filter out the bound vars that are naturally available as part of the outer scope of the function.
 
@@ -1025,7 +1027,7 @@ During the code generation step, in `PlutoCompiler.visit_Module()` in `compiler.
 
 The benefit of these `NameError` expressions is that runtime debugging is easier if a variable is referenced that doesn't actually exist. However, the compiler should be able to detect such situations at compile time and avoid generating dead code.
 
-The OpShin _Pluthon_->_UPLC_ compilation step isn't able to eliminate these `NameError` expressions, even at optimization level 3.
+The OpShin _Pluthon_ → _UPLC_ compilation step isn't able to eliminate these `NameError` expressions, even at optimization level 3.
 
 === Recommendation
 #v(5pt)
@@ -1053,7 +1055,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-The `RewriteConditions` transformer explicitly rewrites all conditions (e.g., in if, while, assert, etc.) to include an implicit cast to bool using a special variable `SPECIAL_BOOL`. However, this transformation is redundant when:
+The `RewriteConditions` transformer explicitly rewrites all conditions (e.g., in if, while, assert, etc.) to include an implicit cast to bool using a special variable, `SPECIAL_BOOL`. However, this is redundant in cases such as:
 
 1. The condition is already a boolean (e.g., if True or if x == y where the result is already a boolean).
 2. The condition is a constant node (e.g., if True or if False).
@@ -1093,7 +1095,7 @@ def validator(datum: bytes, redeemer: None, context: ScriptContext) -> None:
     assert datum[0] == 0, "Datum must start with null byte"
 ```
 
-Compiling this OpShin code using both the default optimiser and the aggressive optimiser (-O3 optimization flag) resulted in the same output. It includes built-in functions like `addInteger`, `lessThanInteger`, and `lengthOfByteString`, which seems irrelevant while the logic is to access the first byte of the datum( `ByteString` ) and to check if its equal to 0.
+Compiling this OpShin code using both the default optimiser and the aggressive optimiser (-O3 optimization flag) resulted in the same output. It includes built-in functions such as `addInteger`, `lessThanInteger`, and `lengthOfByteString`, which seem irrelevant for checking equality of the first byte of the datum (`ByteString`) with `0`.
 
 === Recommendation
 #v(5pt)
@@ -1148,7 +1150,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-In `type_impls.py`, the `hex` method of `ByteStringType` performs two loops. The first loop converts the bytestring to a list of integers, and the second loop converts this list to a list of hexadecimal characters.
+In `type_impls.py`, the `hex` method of `ByteStringType` performs two loops. The first loop converts the bytestring to a list of integers, and the second loop converts this list to a list of ASCII characters.
 
 Similarly in `fun_impls.py`, the `hex` and `oct` functions perform two loops.
 
@@ -1185,7 +1187,7 @@ In `type_impls.py`, the `IntImpl` class generates _UPLC_ code that performs two 
 
 === Recommendation
 #v(5pt)
-Due to _UPLC_  loop overhead, merging these two loops into a single loop will give some performance benefit.
+Due to _UPLC_ loop overhead, merging these two loops into a single loop will provide a performance benefit.
 
 === Resolution
 #v(5pt)
@@ -1243,7 +1245,7 @@ In `PlutoCompiler.visit_AnnAssign()` in `compiler.py`, data values on the right-
 
 This potentially leads to a double conversion (data -> primitive -> data) if the left-hand-side type annotation is a data type.
 
-The double conversion doesn't have much overhead as it results in two wrapped identity functions during the code generation, but it is still unnecessary.
+The double conversion does not introduce significant overhead, as it results in two wrapped identity functions during code generation; however, it is still unnecessary.
 
 === Recommendation
 #v(5pt)
@@ -1278,7 +1280,7 @@ In `std/bitmap.py`, the `POWS` list is always accessed in reverse order:
 POWS[(BYTE_SIZE - 1) - (i % BYTE_SIZE)]
 ```
 
-The `POWS` can be reversed instead, allowing the elimination of the `(BYTE_SIZE - 1) -` operation.
+The `POWS` list can be reversed instead, allowing the elimination of the `(BYTE_SIZE - 1) -` operation.
 
 === Recommendation
 #v(5pt)
@@ -1307,7 +1309,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-As there is no equivalent for the `check_integrity` function in Python,the optimizer isn't able to perform it and just gives out the result of compilation.
+As there is no equivalent for the `check_integrity` function in Python, the optimizer isn't able to perform it and  and instead just outputs the result of compilation.
 
 ```python
 @dataclass()
@@ -1321,7 +1323,7 @@ def validator(x: B) -> None:
     check_integrity(x)
 ```
 
-For this code, the _UPLC_ spits outs the compiled code of both the branches of the builtin function `ifThenElse`.
+For this code, the _UPLC_ outputs the compiled code for both branches of the builtin function `ifThenElse`.
 
 ```UPLC
 (lam 1x [(lam 1x (force [[[(force (builtin ifThenElse)) [[(builtin equalsData) 1x] [0p_AdHocPattern_6e5e35746e0db09c0956f182750126a838d5650add52b85f95f67e428d0912cc_ 1x]]] (delay (con unit ()))] (delay [(lam _ (error)) [[(force (builtin trace)) (con string "ValueError: datum integrity check failed")]]])]))])```.
@@ -1364,7 +1366,7 @@ in `rewrite/rewrite_comparison_chaining.py`, no copies of `<expr-b>` seem to
 be created, leading to the same AST node instance appearing twice in the AST.
 
 The compiler steps frequently mutate the AST nodes instead of creating copies,
-which can lead to difficulty to debug issues in this case.
+which can make debugging issues more difficult in this case.
 
 === Recommendation
 #v(5pt)
@@ -1398,7 +1400,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-Step 22 of compilation pipeline(as detailed in page 9) is supposed to inject `bool()`, `bytes()`, `int()`, and `str()` builtins as `RawPlutExprs`, but the internal types (i.e. `.constr_type()`) of those functions is inherently polymorphic (i.e. `PolymorphicFunctionType`), which is immediately skipped. This check is either redundant or may be intended for a future use case that hasn't been implemented yet. Currently, this step adds no value to the compilation process.
+Step 22 of the compilation pipeline (as detailed on page 9) is designed to inject builtins like `bool()`, `bytes()`, `int()`, and `str()` as `RawPlutExprs`. However, the internal types (i.e., .constr_type()) of these builtins are inherently polymorphic (`PolymorphicFunctionType`), causing them to be skipped immediately.  This check is either redundant or may be intended for a future use case that hasn't been implemented yet. Currently, this step adds no value to the compilation process.
 
 === Recommendation
 #v(5pt)
@@ -1432,7 +1434,7 @@ In both `rewrite_import_hashlib.py` and `rewrite_import_integrity_check.py`, the
 
 The transformer handles aliased imports but does not explicitly check for name conflicts with existing variables or functions in the scope.
 
-Currently, if a conflict occurs like the code below, it throws a type inference error. It does not provide a clear or user-friendly error message about the name conflict.
+Currently, if a conflict occurs, as in the code below, it throws a type inference error. It does not provide a clear or user-friendly error message about the name conflict.
 
 ```python
 from hashlib import sha256 as hsh
@@ -2214,7 +2216,9 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-`AggressiveTypeInferencer.visit_Subscript()` supports tuple slicing, but `PlutoCompiler.visit_Subscript()` does not.
+`AggressiveTypeInferencer.visit_Subscript()` supports tuple slicing, but
+
+ `PlutoCompiler.visit_Subscript()` does not.
 
 === Recommendation
 #v(5pt)
