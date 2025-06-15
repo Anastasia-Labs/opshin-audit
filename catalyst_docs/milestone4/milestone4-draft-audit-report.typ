@@ -1148,7 +1148,7 @@ Pending
 #v(10pt)
 === Description
 #v(10pt)
-In `type_impls.py`, the `hex` method of `ByteStringType` performs two loops. The first loop converts the bytestring to a list of integers, and the second loop converts the list of integers to a list of ASCII characters.
+In `type_impls.py`, the `hex` method of `ByteStringType` performs two loops. The first loop converts the bytestring to a list of integers, and the second loop converts this list to a list of hexadecimal characters.
 
 Similarly in `fun_impls.py`, the `hex` and `oct` functions perform two loops.
 
