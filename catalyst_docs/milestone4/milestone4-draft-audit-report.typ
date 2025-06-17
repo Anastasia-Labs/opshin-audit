@@ -376,7 +376,7 @@ throughout the document to assess vulnerability and risk impact
   [5],
   [Security],
   [Critical],
-  [Pending],
+  [Resolved],
 )
 
 #v(10pt)
@@ -400,7 +400,7 @@ We recommend to wrap list comprehension ifs with `Bool` casts in `rewrite_cast_c
 
 === Resolution
 #v(5pt)
-Pending
+Resolved in commit b8b08371a1dd108aeefbd3d52a0694e8e3269e5c.
 #pagebreak()
   #v(10pt)
 == ID-S502 Type Assertion Wrappers Not Applied on the RHS of BoolOp
@@ -415,7 +415,7 @@ Pending
   [5],
   [Security],
   [Critical],
-  [Pending],
+  [Acknowledged],
 )
 
 #v(10pt)
@@ -440,7 +440,7 @@ Reuse logic related to `self.wrapped` from `AggressiveTypeInferencer.visit_If()`
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
 #v(10pt)
 == ID-S503 Type Assertion Wrappers Not Applied in `while` Statement Bodies
@@ -455,7 +455,7 @@ Pending
   [5],
   [Security],
   [Critical],
-  [Pending],
+  [Acknowledged],
 )
 
 #v(10pt)
@@ -481,7 +481,7 @@ Reuse logic related to `self.wrapped` from `AggressiveTypeInferencer.visit_If()`
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
   #v(5pt)
 == ID-S504 `UnionType` Not Implicitly Converted 
@@ -496,7 +496,7 @@ Pending
   [5],
   [Security],
   [Critical],
-  [Pending],
+  [Acknowledged],
 )
 
 #v(5pt)
@@ -532,7 +532,7 @@ In `compiler.py`, refactor the `isinstance(typ, AnyType) or isinstance(typ, Unio
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
   #v(5pt)
 == ID-S505 Incorrect Data Conversion to items in `ListType.copy_only_attributes()`
@@ -547,7 +547,7 @@ Pending
   [5],
   [Security],
   [Critical],
-  [Pending],
+  [Acknowledged],
 )
 
 #v(5pt)
@@ -580,7 +580,7 @@ This way the `copy_only_attributes()` implementations of `ListType`, `DictType` 
 
 === Resolution
 #v(3pt)
-Pending
+Acknowledged
 #pagebreak()
 
   #v(10pt)
@@ -596,7 +596,7 @@ Pending
   [5],
   [Security],
   [Critical],
-  [Pending],
+  [Resolved],
 )
 
 #v(10pt)
@@ -624,7 +624,7 @@ Ensure the lengths of the `TupleType`s are the same when comparing them in `Tupl
 
 === Resolution
 #v(5pt)
-Pending
+Resolved in commit a580034cd7cfff89fb70164ed50c54ebda0920bb.
 #pagebreak()
   #v(10pt)
 == ID-S507 Incorrect implementation of `index` method of `ListType`
@@ -639,7 +639,7 @@ Pending
   [5],
   [Security],
   [Critical],
-  [Pending],
+  [Resolved],
 )
 
 #v(10pt)
@@ -666,7 +666,7 @@ We recommend to change the check to
 
 === Resolution
 #v(5pt)
-Pending
+Resolved in commit 03905684589b24eab91bd03a0603d2900454feb7.
 
 #pagebreak()
   #v(10pt)
@@ -682,7 +682,7 @@ Pending
   [5],
   [Security],
   [Critical],
-  [Pending],
+  [Acknowledged],
 )
 
 #v(10pt)
@@ -712,7 +712,7 @@ def validator(u: Union[int, bytes]) -> int:
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
   #v(10pt)
 == ID-S509 `FalseData` and `TrueData` uses the wrong `CONSTR_ID`
@@ -727,7 +727,7 @@ Pending
   [5],
   [Security],
   [Critical],
-  [Pending],
+  [Resolved],
 )
 
 #v(10pt)
@@ -749,7 +749,7 @@ Change the `CONSTR_ID` of `FalseData` to 0, and change the `CONSTR_ID` of `TrueD
 
 === Resolution
 #v(5pt)
-Pending
+Resolved in commit c8ade3b8deaba3fa845c01dca338b8a64d7ed600.
 #pagebreak()
 
 #v(10pt)
@@ -765,7 +765,7 @@ Pending
   [4],
   [Security],
   [Major],
-  [Pending],
+  [Acknowledged],
 )
 
 #v(10pt)
@@ -829,7 +829,7 @@ An additional advantage of having multiple independent Module AST nodes is that 
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
   #v(10pt)
 == ID-S201 Custom Function Declarations are Overridden
@@ -844,7 +844,7 @@ Pending
   [2],
   [Security],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 
 #v(10pt)
@@ -879,7 +879,7 @@ The code checks for the presence of the `@dataclass` decorator and validates tha
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
 #v(10pt)
 = Findings by Performance
@@ -896,7 +896,7 @@ Pending
   [4],
   [Performance],
   [Major],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -969,7 +969,7 @@ Alternatively, if the order of the functions changes in the final _UPLC_, filter
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -985,7 +985,7 @@ Pending
   [4],
   [Performance],
   [Major],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1001,7 +1001,7 @@ We recommend updating the compiler to automatically detect when user-defined var
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -1018,7 +1018,7 @@ Pending
   [4],
   [Performance],
   [Major],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1034,7 +1034,7 @@ The OpShin _Pluthon_ → _UPLC_ compilation step isn't able to eliminate these `
 Add a compiler flag so that these `NameError` expressions aren't added to the generated _UPLC_ code.
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1050,7 +1050,7 @@ Pending
   [2],
   [Performance],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1068,7 +1068,7 @@ Modify the `RewriteConditions` transformer in `rewrite/rewrite_cast_condition.py
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -1085,7 +1085,7 @@ Pending
   [2],
   [Performance],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1101,7 +1101,7 @@ Compiling this OpShin code using both the default optimiser and the aggressive o
 #v(5pt)
 Inspect if this coming from the _Pluthon_ conversion and try to avoid unnecessary builtins as part of optimization.
 === Resolution
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1117,7 +1117,7 @@ Pending
   [2],
   [Performance],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1129,7 +1129,7 @@ In `PlutoCompiler.visit_Subscript()` in `compiler.py`, in the Pluthon code gener
 We recommend assigning `transform_output_map(dict_typ.key_typ)(OVar("key"))` to a temporary variable outside the loop to avoid redundant computations and improve efficiency.
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1145,7 +1145,7 @@ Pending
   [2],
   [Performance],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1162,7 +1162,7 @@ Merge the two loops of the `hex` method of `ByteString`, and the `hex` and `oct`
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1178,7 +1178,7 @@ Pending
   [2],
   [Performance],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1191,7 +1191,7 @@ Due to _UPLC_ loop overhead, merging these two loops into a single loop will pro
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1207,7 +1207,7 @@ Pending
   [2],
   [Performance],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1220,7 +1220,7 @@ Use a variant of the Pluthon `FoldList` function to exit the iteration premature
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1236,7 +1236,7 @@ Pending
   [2],
   [Performance],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1253,7 +1253,7 @@ We recommend skipping implicit conversions when both the right-hand side and the
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1269,7 +1269,7 @@ Pending
   [2],
   [Performance],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1288,7 +1288,7 @@ Reverse `POWS` during its assignment using the `reversed()` builtin, then remove
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1304,7 +1304,7 @@ Pending
   [1],
   [Performance],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1334,7 +1334,7 @@ For this code, the _UPLC_ outputs the compiled code for both branches of the bui
 If feasible, explore the possibility of implementing a Python-side equivalent of the `check_integrity` function to align Python evaluation behavior with on-chain execution.
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -1352,7 +1352,7 @@ Pending
   [4],
   [Maintainability],
   [Major],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1379,7 +1379,7 @@ the same expression (potentially expensive).
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1395,7 +1395,7 @@ Pending
   [4],
   [Maintainability],
   [Major],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1407,7 +1407,7 @@ Step 22 of the compilation pipeline (as detailed on page 9) is designed to injec
 Get rid of compiler step 22, thus getting rid of `rewrite/rewrite_inject_builtin_constr.py`.
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1423,7 +1423,7 @@ Pending
   [4],
   [Maintainability],
   [Major],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1461,7 +1461,7 @@ To address these issues, the following improvements are recommended:
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1477,7 +1477,7 @@ Pending
   [4],
   [Maintainability],
   [Major],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1503,7 +1503,7 @@ Either remove the tuple related type checks in `AggressiveTypeInferencer.visit_F
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1519,7 +1519,7 @@ Pending
   [4],
   [Maintainability],
   [Major],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1532,7 +1532,7 @@ Pass a context object as a separate argument through all the `visit_<Node-type>(
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1548,7 +1548,7 @@ Pending
   [4],
   [Maintainability],
   [Major],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1568,7 +1568,7 @@ For a simple validator with no return value, as shown above, the _UPLC_ construc
 Optimize the codebase to avoid data construction for void validators.
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -1585,7 +1585,7 @@ Pending
   [2],
   [Maintainability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1603,7 +1603,7 @@ __version__ = importlib.metadata.version("opshin")
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -1620,7 +1620,7 @@ Pending
   [2],
   [Maintainability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1639,7 +1639,7 @@ Consistently use named imports in whole compiler codebase.
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1655,7 +1655,7 @@ Pending
   [2],
   [Maintainability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1667,7 +1667,7 @@ The `RewriteInjectBuiltins` transformer operates on `TypedModule` nodes, which a
 Refactor the transformer to work with untyped or partially typed nodes until type inference is complete. Alternatively, ensure that this step is moved to a later stage in the compilation process, where `TypedModule` nodes are guaranteed to exist.
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1683,7 +1683,7 @@ Pending
   [2],
   [Maintainability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1714,7 +1714,7 @@ This dual approach makes the code harder to understand. Additionally, polymorphi
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1730,7 +1730,7 @@ Pending
   [2],
   [Maintainability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1767,7 +1767,7 @@ def validator():
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1783,7 +1783,7 @@ Pending
   [2],
   [Maintainability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1797,7 +1797,7 @@ Extend the node-checking logic to include `AnnAssign`.
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1813,7 +1813,7 @@ Pending
   [2],
   [Maintainability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1824,7 +1824,7 @@ In `PlutoCompiler` in `compiler.py`, the `visit_ListComp()` and `visit_DictComp(
 Refactor and reuse the common functionality of `PlutoCompiler.visit_ListComp()` and `PlutoCompiler.visit_DictComp()`.
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1840,7 +1840,7 @@ Pending
   [2],
   [Maintainability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1853,7 +1853,7 @@ Change the type annotation of the `other` argument in `Type.binop` and `Type._bi
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1869,7 +1869,7 @@ Pending
   [2],
   [Maintainability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1882,7 +1882,7 @@ Refactor and reuse the logic of `AnyType.cmp()` for `RecordType.cmp()` and `Unio
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1898,7 +1898,7 @@ Pending
   [2],
   [Maintainability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1910,7 +1910,7 @@ In `type_impls.py`, the `_binop_bin_fun()` method implementations don't fall thr
 Fall through to calling `super._binop_bin_fun()`, so that the associated `“Not implemented”` error is thrown.
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 #v(10pt)
@@ -1926,7 +1926,7 @@ Pending
   [2],
   [Maintainability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1939,7 +1939,7 @@ Refactor and reuse the code generation logic of `hex` for `oct`.
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -1956,7 +1956,7 @@ Pending
   [2],
   [Maintainability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -1975,7 +1975,7 @@ Alternatively detect negative indexes correctly in
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -1992,7 +1992,7 @@ Pending
   [1],
   [Maintainability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2008,7 +2008,7 @@ Some utility functions defined in the OpShin library would make more sense as pa
 We recommend reorganizing the codebase by moving utility functions to the packages where they logically belong.
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -2025,7 +2025,7 @@ Pending
   [1],
   [Maintainability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2037,7 +2037,7 @@ Remove the `visit_Pass` method. If step 26 fails to remove all Pass AST nodes, t
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -2054,7 +2054,7 @@ Pending
   [1],
   [Maintainability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2068,7 +2068,7 @@ Change the return type of `visit_BoolOp()` and `visit_UnaryOp()` from `PairType`
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
 
 #v(10pt)
@@ -2084,7 +2084,7 @@ Pending
   [1],
   [Maintainability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2105,7 +2105,7 @@ Extract the logic for resetting `self.wrapped` into a dedicated method in
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
 
 #v(10pt)
@@ -2121,7 +2121,7 @@ Pending
   [1],
   [Maintainability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2135,7 +2135,7 @@ Remove the redundant check in the second assertion in
 `AggressiveTypeInferencer.visit_sequence()` in `type_inference.py`.
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
 
 #v(10pt)
@@ -2151,7 +2151,7 @@ Pending
   [1],
   [Maintainability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2166,7 +2166,7 @@ Return the final AST node from `dunder_override()`, so the explicit wrapping wit
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
 
 #v(10pt)
@@ -2182,7 +2182,7 @@ Pending
   [1],
   [Maintainability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2195,7 +2195,7 @@ Assign the return typed AST nodes to a variable, and reference that variable in 
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
 
 #v(10pt)
@@ -2211,7 +2211,7 @@ Pending
   [1],
   [Maintainability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2230,7 +2230,7 @@ remove the nested branch with the condition that reads
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -2247,7 +2247,7 @@ Pending
   [1],
   [Maintainability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2260,7 +2260,7 @@ Instantiate the `RecordReader` directly with an argument of `AggressiveTypeInfer
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
 
 #v(10pt)
@@ -2276,7 +2276,7 @@ Pending
   [1],
   [Maintainability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2294,7 +2294,7 @@ Pending
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -2311,7 +2311,7 @@ Pending
   [1],
   [Maintainability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2327,7 +2327,7 @@ Ensure that all iterations over `sys.modules` are thread-safe and do not cause s
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
 
 #v(10pt)
@@ -2343,7 +2343,7 @@ Pending
   [1],
   [Maintainability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2361,7 +2361,7 @@ Assign `plt.ConstrData(plt.Integer(0), plt.EmptyDataList())` to a new variable n
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
 
 #v(10pt)
@@ -2377,7 +2377,7 @@ Pending
   [1],
   [Maintainability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2394,7 +2394,7 @@ annotate that `TypedSubscript.slice.lower` and `TypedSubscript.slice.upper` can�
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -2411,7 +2411,7 @@ Pending
   [1],
   [Maintainability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2424,7 +2424,7 @@ Change `c` to `constr` so that `constr` is used consistently as the name of the 
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -2441,7 +2441,7 @@ Pending
   [1],
   [Maintainability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2456,7 +2456,7 @@ Change the error message to `"Can only create bytes from instances"`.
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
 
 #v(10pt)
@@ -2472,7 +2472,7 @@ Pending
   [1],
   [Maintainability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2485,7 +2485,7 @@ Add a comment to `rec_constant_map()` explaining where `PlutusData` comes from.
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
 
 #v(10pt)
@@ -2502,7 +2502,7 @@ Pending
   [4],
   [Usability],
   [Major],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2518,7 +2518,7 @@ There might be other ways this can be abused to get inconsistent behavior.
 Perform this step after type inference. Check tuple types during type inference.
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
 
 #v(10pt)
@@ -2534,7 +2534,7 @@ Pending
   [4],
   [Usability],
   [Major],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2547,7 +2547,7 @@ Improve the error message to say that the syntax is wrong and hinting at the cor
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -2564,7 +2564,7 @@ Pending
   [4],
   [Usability],
   [Major],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2587,7 +2587,7 @@ Either ensure attributes of builtin types like `bytes` can actually be accessed,
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
 
 #v(10pt)
@@ -2603,7 +2603,7 @@ Pending
   [4],
   [Usability],
   [Major],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2659,7 +2659,7 @@ Fix these error inconsistencies by detecting duplicate `CONSTR_ID`s after flatte
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -2676,7 +2676,7 @@ Pending
   [4],
   [Usability],
   [Major],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2698,7 +2698,7 @@ Generalize the code generation in `UnionType.stringify()` in `type_impls.py`, so
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -2715,7 +2715,7 @@ Pending
   [4],
   [Usability],
   [Major],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2742,7 +2742,7 @@ Find the most generic type contained in the `list` or `dict`, instead of using t
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -2759,7 +2759,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2772,7 +2772,7 @@ Change error message to "Type deconstruction in comprehensions is not supported 
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -2789,7 +2789,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2806,7 +2806,7 @@ Remove `Dict` and `List` from the hints. Also, improve the error message when us
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -2823,7 +2823,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2840,7 +2840,7 @@ Remove the "or eval using opshin eval lib example.py" part of the first hint.
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -2857,7 +2857,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2890,7 +2890,7 @@ Either infer the types of `List` and `Dict` annotations as `List[Anything]` and 
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -2907,7 +2907,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -2935,7 +2935,7 @@ The compiler should detect `Union`s containing only a single entry, and throw an
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -2952,7 +2952,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(5pt)
 === Description
@@ -3005,7 +3005,7 @@ Optionally, a compiler step can be added to detect duplication of unresolved nam
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -3022,7 +3022,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3054,7 +3054,7 @@ Add a note to the OpShin documentation that empty literal dicts must be assigned
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
 
 #v(10pt)
@@ -3070,7 +3070,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3106,7 +3106,7 @@ In file `opshin/__main__.py`, in the last branch of `perform_command()`, test if
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -3123,7 +3123,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3148,7 +3148,7 @@ In `union_types()` in `type_inference.py`: sort Union entries in an unambiguous 
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -3165,7 +3165,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3196,7 +3196,7 @@ The error message doesn't help the user understand what is wrong with the code.
 Detect class methods missing return types and throw an explicit error.
 
 === Resolution
-Pending
+Acknowledged
 #pagebreak()
 
 #v(10pt)
@@ -3212,7 +3212,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3226,7 +3226,7 @@ Optimization level doesn't seem to have any impact on this.
 Show messages from `print()` calls when evaluating a validator.
 
 === Resolution
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -3243,7 +3243,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3273,7 +3273,7 @@ def validator(x: List[int]) -> int:
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
 
 #v(10pt)
@@ -3289,7 +3289,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3331,7 +3331,7 @@ user experience and reduce troubleshooting time.
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -3348,7 +3348,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3368,7 +3368,7 @@ examples.
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -3385,7 +3385,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3408,7 +3408,7 @@ optimization levels during the build process.
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -3425,7 +3425,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3438,7 +3438,7 @@ Check out-of-range tuple indexing in `PlutoCompiler.visit_Subscript()` in order 
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -3455,7 +3455,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3489,7 +3489,7 @@ Also, the result of `eval` and `eval_uplc` can be compared to ensure the _UPLC_ 
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -3506,7 +3506,7 @@ Pending
   [2],
   [Usability],
   [Minor],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3530,7 +3530,7 @@ def validator(x:List[int]) -> int:
 2. If supporting list element assignment is not feasible,enhance the error message to explain the limitation and suggest possible workarounds.
 
 === Resolution
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -3547,7 +3547,7 @@ Pending
   [1],
   [Usability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3569,7 +3569,7 @@ debugging and referencing during off-chain validation.
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -3586,7 +3586,7 @@ Pending
   [1],
   [Usability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3608,7 +3608,7 @@ into a folder for each validator for easier interpretation and review.
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -3625,7 +3625,7 @@ Pending
   [1],
   [Usability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3649,7 +3649,7 @@ The current behavior of throwing an assertion error for duplicate `CONSTR_ID` va
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -3666,7 +3666,7 @@ Pending
   [1],
   [Usability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3694,7 +3694,7 @@ Inspect the code and include the method `to_cbor_hex()`.
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -3711,7 +3711,7 @@ Pending
   [1],
   [Usability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3739,7 +3739,7 @@ It fails for empty nested lists like [[]],[[],[]] likely due to issues with type
 Update the type inference system to handle nested empty lists (e.g., [[]], [[], []]) in assignments and returns.
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -3756,7 +3756,7 @@ Pending
   [1],
   [Usability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3799,7 +3799,7 @@ Note that opshin errors may be overly restrictive as they aim to prevent code wi
 
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 
 #pagebreak()
 
@@ -3816,7 +3816,7 @@ Pending
   [1],
   [Usability],
   [Informational],
-  [Pending],
+  [Acknowledged],
 )
 #v(10pt)
 === Description
@@ -3838,7 +3838,7 @@ def validator():
 - Prioritize implementing commonly used missing operators or explicitly document unsupported ones.
 === Resolution
 #v(5pt)
-Pending
+Acknowledged
 #pagebreak()
 
 #v(10pt)
