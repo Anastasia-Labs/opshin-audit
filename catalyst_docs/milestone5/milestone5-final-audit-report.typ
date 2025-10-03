@@ -6,7 +6,7 @@
   paper: "a4",
   margin: (left: 20mm, right: 20mm, top: 40mm, bottom: 30mm),
 )
-#set text(22pt, font: "Montserrat")
+#set text(22pt, font: "Libertinus Serif")
 #set par(justify: true)
 #v(3cm)
 #align(
@@ -50,7 +50,7 @@
 #outline(depth: 2, indent: 1em)
 #pagebreak()
 #set page(
-  footer: [#set text(11pt)
+  footer:context[#set text(11pt)
     #line(length: 100%)
     #align(
       center,
@@ -844,7 +844,7 @@ Acknowledged
   [2],
   [Security],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 
 #v(10pt)
@@ -879,7 +879,7 @@ The code checks for the presence of the `@dataclass` decorator and validates tha
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 633016da936bf43c58830e9fcb78e95053113587
 #pagebreak()
 #v(10pt)
 = Findings by Performance
@@ -1050,7 +1050,7 @@ Acknowledged
   [2],
   [Performance],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -1068,7 +1068,7 @@ Modify the `RewriteConditions` transformer in `rewrite/rewrite_cast_condition.py
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 6ee3bcfb2a441ccffa09ffcc0b80c4b9d8900545.
 
 #pagebreak()
 
@@ -1085,7 +1085,7 @@ Acknowledged
   [2],
   [Performance],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -1101,7 +1101,7 @@ Compiling this OpShin code using both the default optimiser and the aggressive o
 #v(5pt)
 Inspect if this coming from the _Pluthon_ conversion and try to avoid unnecessary builtins as part of optimization.
 === Resolution
-Acknowledged
+Resolved in commit 722404c6317214e4afe00b00c585bf3b8ac62580.
 
 #pagebreak()
 #v(10pt)
@@ -1117,7 +1117,7 @@ Acknowledged
   [2],
   [Performance],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -1129,7 +1129,7 @@ In `PlutoCompiler.visit_Subscript()` in `compiler.py`, in the Pluthon code gener
 We recommend assigning `transform_output_map(dict_typ.key_typ)(OVar("key"))` to a temporary variable outside the loop to avoid redundant computations and improve efficiency.
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 0ef1398f39920ecf27612636275f10a4341285d2
 
 #pagebreak()
 #v(10pt)
@@ -1207,7 +1207,7 @@ Acknowledged
   [2],
   [Performance],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -1220,7 +1220,7 @@ Use a variant of the Pluthon `FoldList` function to exit the iteration premature
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit a14e7423cb894d4d5a537e731d3d5c429427793d.
 
 #pagebreak()
 #v(10pt)
@@ -1269,7 +1269,7 @@ Acknowledged
   [2],
   [Performance],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -1288,7 +1288,7 @@ Reverse `POWS` during its assignment using the `reversed()` builtin, then remove
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 4a2f6bb5077ef0194f65e975143c9ab8428511c6.
 
 #pagebreak()
 #v(10pt)
@@ -1304,7 +1304,7 @@ Acknowledged
   [1],
   [Performance],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -1334,7 +1334,7 @@ For this code, the _UPLC_ outputs the compiled code for both branches of the bui
 If feasible, explore the possibility of implementing a Python-side equivalent of the `check_integrity` function to align Python evaluation behavior with on-chain execution.
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 6f7309f5060146830bd677e2c156b7807ad53e13.
 
 #pagebreak()
 
@@ -1584,7 +1584,7 @@ Acknowledged
   [2],
   [Maintainability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -1602,7 +1602,7 @@ __version__ = importlib.metadata.version("opshin")
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 1c54c7c0a463aec990d4dcb9af1693aa8b43e6b7.
 
 #pagebreak()
 
@@ -1619,7 +1619,7 @@ Acknowledged
   [2],
   [Maintainability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -1638,7 +1638,7 @@ Consistently use named imports in whole compiler codebase.
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit e860700402f1b56e277481f96f9df9046b535655.
 
 #pagebreak()
 #v(10pt)
@@ -1839,7 +1839,7 @@ Acknowledged
   [2],
   [Maintainability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -1852,7 +1852,7 @@ Change the type annotation of the `other` argument in `Type.binop` and `Type._bi
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit c8897d0ca4389814692ee093841f5fe5a8d724ae
 
 #pagebreak()
 #v(10pt)
@@ -1897,7 +1897,7 @@ Acknowledged
   [2],
   [Maintainability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -1909,7 +1909,7 @@ In `type_impls.py`, the `_binop_bin_fun()` method implementations don't fall thr
 Fall through to calling `super._binop_bin_fun()`, so that the associated `“Not implemented”` error is thrown.
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 9ca7ba6858a2a1f05f4b96d591d3d3386025ef91.
 
 #pagebreak()
 #v(10pt)
@@ -1925,7 +1925,7 @@ Acknowledged
   [2],
   [Maintainability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -1938,7 +1938,7 @@ Refactor and reuse the code generation logic of `hex` for `oct`.
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 47ec9216c0b16dbba9605806ec1265e15754d0cc
 
 #pagebreak()
 
@@ -1955,7 +1955,7 @@ Acknowledged
   [2],
   [Maintainability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -1974,7 +1974,7 @@ Alternatively detect negative indexes correctly in
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 9e5158e9db085dccb084994210248544099ab316.
 
 #pagebreak()
 
@@ -2024,7 +2024,7 @@ Acknowledged
   [1],
   [Maintainability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2036,7 +2036,7 @@ Remove the `visit_Pass` method. If step 26 fails to remove all Pass AST nodes, t
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 9a9f53ae902fad749d97e7b5497c7012886921d9.
 
 #pagebreak()
 
@@ -2053,7 +2053,7 @@ Acknowledged
   [1],
   [Maintainability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2067,7 +2067,7 @@ Change the return type of `visit_BoolOp()` and `visit_UnaryOp()` from `PairType`
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit ae1fa6d5b84018a3cec625c5f78cdc2197fbe373.
 #pagebreak()
 
 #v(10pt)
@@ -2120,7 +2120,7 @@ Acknowledged
   [1],
   [Maintainability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2134,7 +2134,7 @@ Remove the redundant check in the second assertion in
 `AggressiveTypeInferencer.visit_sequence()` in `type_inference.py`.
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit ef8a8d20c16067aa49d67e0429d5f670b65a2485.
 #pagebreak()
 
 #v(10pt)
@@ -2150,7 +2150,7 @@ Acknowledged
   [1],
   [Maintainability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2165,7 +2165,7 @@ Return the final AST node from `dunder_override()`, so the explicit wrapping wit
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 97a14775ac2ce4594a4c2411c3e8a55637058616.
 #pagebreak()
 
 #v(10pt)
@@ -2181,7 +2181,7 @@ Acknowledged
   [1],
   [Maintainability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2194,7 +2194,7 @@ Assign the return typed AST nodes to a variable, and reference that variable in 
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 80af19c6b4da796254c38d81c305285230b02214.
 #pagebreak()
 
 #v(10pt)
@@ -2210,7 +2210,7 @@ Acknowledged
   [1],
   [Maintainability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2229,7 +2229,7 @@ remove the nested branch with the condition that reads
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 9852da7dbdaa6bef58498f6412a7cca321f0eaaf.
 
 #pagebreak()
 
@@ -2246,7 +2246,7 @@ Acknowledged
   [1],
   [Maintainability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2259,7 +2259,7 @@ Instantiate the `RecordReader` directly with an argument of `AggressiveTypeInfer
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 8db3d57f62fd0058be87defeef5638810b095bcb.
 #pagebreak()
 
 #v(10pt)
@@ -2275,7 +2275,7 @@ Acknowledged
   [1],
   [Maintainability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2293,7 +2293,7 @@ Acknowledged
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit e3c013fab7a6132be02293d0a79c342c6da5fb90.
 
 #pagebreak()
 
@@ -2342,7 +2342,7 @@ Acknowledged
   [1],
   [Maintainability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2360,7 +2360,7 @@ Assign `plt.ConstrData(plt.Integer(0), plt.EmptyDataList())` to a new variable n
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 31662a07e471b079bd0cd8e5866803aef70ed934.
 #pagebreak()
 
 #v(10pt)
@@ -2376,7 +2376,7 @@ Acknowledged
   [1],
   [Maintainability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2393,7 +2393,7 @@ annotate that `TypedSubscript.slice.lower` and `TypedSubscript.slice.upper` can�
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 2286998fe07aa2af3a761c5e8edc68b59786d49f.
 
 #pagebreak()
 
@@ -2410,7 +2410,7 @@ Acknowledged
   [1],
   [Maintainability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2423,7 +2423,7 @@ Change `c` to `constr` so that `constr` is used consistently as the name of the 
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit b718c9b7d428d453ab90f54b0e198f3da9043b8b.
 
 #pagebreak()
 
@@ -2440,7 +2440,7 @@ Acknowledged
   [1],
   [Maintainability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2455,7 +2455,7 @@ Change the error message to `"Can only create bytes from instances"`.
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 89db85300df01f15428bd1c9d026879a0407fadf
 #pagebreak()
 
 #v(10pt)
@@ -2471,7 +2471,7 @@ Acknowledged
   [1],
   [Maintainability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2484,7 +2484,7 @@ Add a comment to `rec_constant_map()` explaining where `PlutusData` comes from.
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 99839c4ee24a51c77c1558780595f77efa176f3e
 #pagebreak()
 
 #v(10pt)
@@ -2758,7 +2758,7 @@ Resolved in commit c1ef5423fed7f68671120036ad2dce3016845b59.
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2771,7 +2771,7 @@ Change error message to "Type deconstruction in comprehensions is not supported 
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 060863ae0d81215a84d570cd5fd5c95dd358ea59.
 
 #pagebreak()
 
@@ -2788,7 +2788,7 @@ Acknowledged
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2805,7 +2805,7 @@ Remove `Dict` and `List` from the hints. Also, improve the error message when us
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 7a5ca5c654c69a5196b1e19205c5fc39b9f2e9cf.
 
 #pagebreak()
 
@@ -2822,7 +2822,7 @@ Acknowledged
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2839,7 +2839,7 @@ Remove the "or eval using opshin eval lib example.py" part of the first hint.
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 3d3170030cf26fcf7dff5b968501d258e2314d31.
 
 #pagebreak()
 
@@ -2856,7 +2856,7 @@ Acknowledged
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2889,7 +2889,7 @@ Either infer the types of `List` and `Dict` annotations as `List[Anything]` and 
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 2672759f38b0599fa8f09a855b9a54fe32b15fa8.
 
 #pagebreak()
 
@@ -2906,7 +2906,7 @@ Acknowledged
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -2934,7 +2934,7 @@ The compiler should detect `Union`s containing only a single entry, and throw an
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 018174e9ad5025786b213463c4dfa354c1250a96.
 
 #pagebreak()
 
@@ -2951,7 +2951,7 @@ Acknowledged
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(5pt)
 === Description
@@ -3004,7 +3004,7 @@ Optionally, a compiler step can be added to detect duplication of unresolved nam
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 018174e9ad5025786b213463c4dfa354c1250a96.
 
 #pagebreak()
 
@@ -3021,7 +3021,7 @@ Acknowledged
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -3053,7 +3053,9 @@ Add a note to the OpShin documentation that empty literal dicts must be assigned
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 9e6e77a5ac7c1060bf641d2663f63a31545319fd
+
+and b69a8d8e401bfe223ec8ae005de44d055466dc33.
 #pagebreak()
 
 #v(10pt)
@@ -3069,7 +3071,7 @@ Acknowledged
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -3105,7 +3107,7 @@ In file `opshin/__main__.py`, in the last branch of `perform_command()`, test if
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit ecf5ca9188d4a053cca5bf6cf1f59aed252be6e0.
 
 #pagebreak()
 
@@ -3122,7 +3124,7 @@ Acknowledged
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -3147,7 +3149,7 @@ In `union_types()` in `type_inference.py`: sort Union entries in an unambiguous 
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 7fbd6109f683a0ec99234946b651219824b212ab.
 
 #pagebreak()
 
@@ -3164,7 +3166,7 @@ Acknowledged
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -3195,7 +3197,8 @@ The error message doesn't help the user understand what is wrong with the code.
 Detect class methods missing return types and throw an explicit error.
 
 === Resolution
-Acknowledged
+#v(5pt)
+Resolved in commit facc7e2728fb041b4925c6fd69f38f32db3af23f.
 #pagebreak()
 
 #v(10pt)
@@ -3211,7 +3214,7 @@ Acknowledged
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -3225,7 +3228,8 @@ Optimization level doesn't seem to have any impact on this.
 Show messages from `print()` calls when evaluating a validator.
 
 === Resolution
-Acknowledged
+#v(5pt)
+Resolved in commit e37d424bdbe4251f50ee7d93fc9d2ad8b2d354b2.
 
 #pagebreak()
 
@@ -3242,7 +3246,7 @@ Acknowledged
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -3272,7 +3276,7 @@ def validator(x: List[int]) -> int:
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 2034c1894999d1a9b20161fb916a226c81f64819.
 #pagebreak()
 
 #v(10pt)
@@ -3288,7 +3292,7 @@ Acknowledged
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -3330,7 +3334,7 @@ user experience and reduce troubleshooting time.
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved partly in UPLC v1.0.13 and opshin.
 
 #pagebreak()
 
@@ -3347,7 +3351,7 @@ Acknowledged
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -3367,7 +3371,7 @@ examples.
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit a90a61150e1852052e4d4c9f59c343cd12189ff9.
 
 #pagebreak()
 
@@ -3384,7 +3388,7 @@ Acknowledged
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -3407,7 +3411,7 @@ optimization levels during the build process.
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 9b503c0be78cc80b3dde4fe714e50e9b3cc5a0c0.
 
 #pagebreak()
 
@@ -3424,7 +3428,7 @@ Acknowledged
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -3437,7 +3441,7 @@ Check out-of-range tuple indexing in `PlutoCompiler.visit_Subscript()` in order 
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 9b503c0be78cc80b3dde4fe714e50e9b3cc5a0c0.
 
 #pagebreak()
 
@@ -3454,7 +3458,7 @@ Acknowledged
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -3488,7 +3492,7 @@ Also, the result of `eval` and `eval_uplc` can be compared to ensure the _UPLC_ 
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit d5d82e6d94c78c7022439f6f2fdeeed45eb85d56
 
 #pagebreak()
 
@@ -3505,7 +3509,7 @@ Acknowledged
   [2],
   [Usability],
   [Minor],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -3529,7 +3533,8 @@ def validator(x:List[int]) -> int:
 2. If supporting list element assignment is not feasible,enhance the error message to explain the limitation and suggest possible workarounds.
 
 === Resolution
-Acknowledged
+#v(5pt)
+Resolved in commit 9ec150a048098f96a5b3ca240a462676191719fe.
 
 #pagebreak()
 
@@ -3546,7 +3551,7 @@ Acknowledged
   [1],
   [Usability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -3568,7 +3573,7 @@ debugging and referencing during off-chain validation.
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit f7374807fb90d7987da0e49b12e5ce41c3761350.
 
 #pagebreak()
 
@@ -3665,7 +3670,7 @@ Acknowledged
   [1],
   [Usability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -3693,7 +3698,7 @@ Inspect the code and include the method `to_cbor_hex()`.
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit d5d82e6d94c78c7022439f6f2fdeeed45eb85d56.
 
 #pagebreak()
 
@@ -3710,7 +3715,7 @@ Acknowledged
   [1],
   [Usability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -3738,7 +3743,7 @@ It fails for empty nested lists like [[]],[[],[]] likely due to issues with type
 Update the type inference system to handle nested empty lists (e.g., [[]], [[], []]) in assignments and returns.
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 3fd4adc394ce865d6cdf49decbf17d9fa7c8b5e5.
 
 #pagebreak()
 
@@ -3755,7 +3760,7 @@ Acknowledged
   [1],
   [Usability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -3798,7 +3803,7 @@ Note that opshin errors may be overly restrictive as they aim to prevent code wi
 
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved
 
 #pagebreak()
 
@@ -3815,7 +3820,7 @@ Acknowledged
   [1],
   [Usability],
   [Informational],
-  [Acknowledged],
+  [Resolved],
 )
 #v(10pt)
 === Description
@@ -3837,7 +3842,7 @@ def validator():
 - Prioritize implementing commonly used missing operators or explicitly document unsupported ones.
 === Resolution
 #v(5pt)
-Acknowledged
+Resolved in commit 3fd4adc394ce865d6cdf49decbf17d9fa7c8b5e5.
 #pagebreak()
 
 #v(10pt)
